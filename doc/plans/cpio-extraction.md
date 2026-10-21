@@ -1,8 +1,7 @@
 # CPIO extraction
 
-Status: Implemented and locally validated on 2026-10-21.
-The final Ada MCP refresh is unavailable; the compiler/source fallback is
-recorded explicitly in the change record.
+Status: Implemented and locally validated on 2026-10-21; the final Ada MCP
+pass completed on 2026-10-22 through the restarted server's stdio protocol.
 
 ## Scope and decisions
 
@@ -37,5 +36,6 @@ CPIO is first; TAR and Abuild integration remain separate steps.
 
 Implementation and tests are present on `codex/cpio-extraction`. The copy
 algorithm is preserved. Fresh-image checks, predecessor parity, coverage,
-real-container wrapper tests and author review pass. Results and the Ada MCP
-limitation are maintained in the [change record](../change-records/cpio-extraction.md).
+real-container wrapper tests and author review pass. The fresh Ada MCP pass
+also confirms complete project and symbol views and empty file diagnostics.
+Results are maintained in the [change record](../change-records/cpio-extraction.md).

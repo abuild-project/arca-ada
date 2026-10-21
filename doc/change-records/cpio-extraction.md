@@ -87,12 +87,19 @@ the explicit root exception. All three real-container input and TTY tests
 also pass against the built image. CI invokes the same wrappers; no hosted
 CI result is claimed before this branch is published.
 
-Ada MCP provided complete project and symbol views and no body diagnostics
-before the Docker interruption. Its tools are currently unavailable in this
-session, so a fresh semantic pass could not run. This limitation was reported;
-the labelled fallback is source comparison plus the fresh reference-container
-compiler and runtime checks. Earlier MCP results are not presented as a
-current semantic pass. No throughput or Abuild integration result is claimed.
+The final Ada MCP pass completed on 2026-10-22 after restarting the maintained
+launcher. Its runtime checkout was fast-forwarded to the accepted source
+revision; the existing image matches the committed adapter patchset. Direct
+MCP protocol queries returned complete exact project views and anchored,
+untruncated symbol results for the library, test project and example client.
+File-scoped diagnostics were complete and empty for all eleven Ada sources.
+Definition navigation from the test driver and example client resolved
+`CPIO_Create` to its public declaration. These fresh results supersede the
+earlier Docker interruption and compiler/source fallback. Native Ada tools
+were unavailable in the chat, so queries used the running server's stdio
+protocol directly. Semantic navigation confirmed project boundaries
+without additional broad source searches. No throughput or Abuild integration
+result is claimed.
 
 Final author self-review checked the complete change and enclosing code,
 successful-output compatibility, deliberate lifecycle differences, test
