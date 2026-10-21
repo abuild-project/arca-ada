@@ -55,7 +55,13 @@ make install PREFIX=/absolute/path/to/prefix
 `check` builds the library and client, installs into a temporary prefix, and
 builds and runs a copied client in isolation against the installed project.
 It also verifies that hiding the installed project makes discovery fail.
+Preflight regression checks cover selected and missing build-tool overrides.
 These are packaging checks, not format-conformance tests.
+
+Select alternative GPR executables with the Make variables `GPRBUILD`,
+`GPRINSTALL` and `GPRCLEAN`. Each value is one executable name or path. The
+preflight checks those selected executables; unset variables use the standard
+names.
 
 Consumers import `arca.gpr` with `with "arca";` and add the installed
 `<prefix>/share/gpr` directory to their GPR search path. The root Ada package

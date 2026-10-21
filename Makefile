@@ -12,6 +12,7 @@ all: preflight
 	$(GPRBUILD) -p -P arca.gpr -j$(NUM_CPUS)
 
 check: all
+	+MAKE="$(MAKE)" ./tests/check-preflight.sh
 	$(GPRBUILD) -p -P examples/client/client.gpr -aP. -j$(NUM_CPUS)
 	./examples/client/bin/arca_client
 	GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
@@ -25,4 +26,5 @@ clean:
 	$(GPRCLEAN) -P arca.gpr
 
 preflight:
-	./scripts/check-tools.sh
+	GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
+		GPRCLEAN="$(GPRCLEAN)" ./scripts/check-tools.sh

@@ -50,4 +50,4 @@ format and licensing boundaries while correcting the launcher and preflight.
 | Item | Status | Evidence |
 | --- | --- | --- |
 | Default shell input and TTY | Implemented | Real-container tests reject the old launcher for pipe and terminal input; the explicit batch case already passes |
-| Selected preflight tools | Pending | Check selected GPR tool overrides instead of fixed executable names |
+| Selected preflight tools | Implemented | Restricted-PATH tests reject the old preflight's handling of valid and missing selections; Makefile and command-line values now pass through explicitly |

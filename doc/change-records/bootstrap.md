@@ -10,6 +10,10 @@ when invoked from a terminal. Explicit commands retain batch-mode input and
 terminal behavior. Host-side regression tests exercise both shell modes and
 the explicit-command case with real containers.
 
+Build-tool preflight checks the GPR executables selected by Make, including
+values assigned in a Makefile. Restricted-PATH regression checks cover valid
+overrides, fallback names and missing overrides masked by available defaults.
+
 The bootstrap contains no archive or filesystem writer. Existing Abuild
 behavior, dependencies and documentation remain unchanged. The new files use
 BSD-3-Clause; importing the existing GPL-covered writers requires the separate
@@ -52,6 +56,12 @@ input and terminal input, while its explicit-command test passes. With the
 launcher correction, all three cases pass in the supported Trixie image.
 CI runs the same cases against its freshly built development image.
 
+The preflight regressions reject the original implementation: it rejects
+valid command-line and Makefile tool selections, and accepts missing selected
+tools when default names exist. The corrected implementation passes these
+cases and retains default-name fallback. The complete parallel `make check`
+target includes these regressions and the library installation checks.
+
 ## Review lessons
 
 - Claims are scoped to project packaging; no format, performance or coverage
@@ -66,5 +76,8 @@ CI runs the same cases against its freshly built development image.
 - Launcher checks verify actual stdin and terminal behavior. The TTY sentinel
   cannot be satisfied by echoed test input, and explicit commands remain a
   positive control for the existing CI mode.
+- Preflight fixtures prove that default GPR names are absent in override
+  cases. The missing-selection case keeps defaults available and asserts the
+  complete diagnostic line, excluding a success caused by checking defaults.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
