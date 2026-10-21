@@ -1,6 +1,6 @@
 # Repository bootstrap
 
-Status: In progress. Authorized on 2026-10-21.
+Status: Implemented on 2026-10-21. Authorized on 2026-10-21.
 
 ## Accepted decisions
 
@@ -30,14 +30,14 @@ register an Alire crate or change repository visibility in this step.
 
 ## Progress
 
-The private repository has been created. The local Trixie build, clean
+The private repository has been created and the bootstrap is published on
+`codex/bootstrap` for review against `main`. The local Trixie build, clean
 rebuild, installed-consumer check and missing-install negative control pass.
 Ada MCP loads both projects completely and reports no diagnostics for either
-Ada source. Final remote initialization and CI verification remain pending.
+Ada source.
 
-The prepared source is committed locally on `codex/bootstrap`. The GitHub
-default branch currently contains only the generated README and licence.
-The session permits a host-side `git fetch`, but not a host-side `git push`;
-the sandboxed push cannot resolve GitHub. The API upload also requires the
-missing OAuth `workflow` scope because it includes a new Actions file.
-Resume through an authorized host push or after the appropriate API grant.
+The [GitHub bootstrap workflow](https://github.com/mweidle73/arca-ada/actions/runs/39592187985)
+also passes. Its job status and logs confirm the fresh checkout, construction
+of the repository's Trixie image, warning-free build, installed-consumer check
+and negative control. No format source has been imported, no Abuild dependency
+has been changed and no release or public publication has been made.

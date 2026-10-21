@@ -17,11 +17,10 @@ contracts, and the changelog records only the infrastructure introduced here.
 ## Validation
 
 Local validation used an identical source snapshot in Abuild's supported
-Trixie development container because the session only permits that existing
-container launcher. The library and client compile without warnings. The
-installed consumer passes, and hiding the installed GPR project produces the
-expected missing-import diagnostic. A clean followed by the parallel check
-target also passes.
+Trixie development container. The library and client compile without
+warnings. The installed consumer passes, and hiding the installed GPR project
+produces the expected missing-import diagnostic. A clean followed by the
+parallel check target also passes.
 
 Ada MCP reports complete project views for the library and client, complete
 anchored symbol results and no file-scoped diagnostics for either Ada source.
@@ -36,10 +35,12 @@ state. No production format behavior or performance claim needs validation
 in this bootstrap. The source inventory contains no production bodies, so
 there is no body-coverage omission to add.
 
-Remote upload and CI verification remain pending. The private repository
-exists, but the host push is not available to this session and the API token
-lacks the `workflow` scope required to add the prepared Actions file. The
-locally committed source and executable modes are ready for upload.
+The bootstrap is uploaded to the private repository. The
+[GitHub workflow](https://github.com/mweidle73/arca-ada/actions/runs/39592187985)
+passes from a fresh checkout, builds the repository's own Trixie image and
+runs the same consumer and installation checks. The job status and relevant
+build logs have been read. Follow-up documentation changes do not modify the
+validated build or test implementation.
 
 ## Review lessons
 
