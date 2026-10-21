@@ -9,7 +9,12 @@ scratch=$(mktemp -d "$repo_root/build/install-check.XXXXXXXX")
 trap 'rm -rf -- "$scratch"' EXIT
 trap 'exit 1' HUP INT TERM
 
-gprbuild_command=${GPRBUILD:-gprbuild}
+# Freeze the caller's executable lookup before entering the isolated client.
+gprbuild_command=$(command -v "${GPRBUILD:-gprbuild}")
+case "$gprbuild_command" in
+    /*) ;;
+    *) gprbuild_command="$(pwd -P)/$gprbuild_command" ;;
+esac
 gprinstall_command=${GPRINSTALL:-gprinstall}
 num_cpus=${NUM_CPUS:-8}
 

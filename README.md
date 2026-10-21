@@ -56,6 +56,8 @@ make install PREFIX=/absolute/path/to/prefix
 builds and runs a copied client in isolation against the installed project.
 It also verifies that hiding the installed project makes discovery fail.
 Preflight regression checks cover selected and missing build-tool overrides.
+Installation regressions cover relative builder paths and relative PATH
+entries across the isolated client's directory change.
 These are packaging checks, not format-conformance tests.
 
 Select alternative GPR executables with the Make variables `GPRBUILD`,

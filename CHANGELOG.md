@@ -8,3 +8,4 @@
 - Forward input and provide a terminal for the default development shell,
   while preserving noninteractive explicit commands.
 - Check selected GPR executable overrides during build-tool preflight.
+- Preserve relative builder selections when checking the installed client.

@@ -50,6 +50,11 @@ documented constraints and independent tests.
 check copies this client into a private scratch directory, removes inherited
 Ada/GPR search paths, and discovers Arca only through the installed prefix.
 It cleans that scratch directory on success, failure and handled signals.
+The selected builder is resolved to an absolute executable path in the
+caller's initial directory before entering the copied client. This preserves
+both explicit relative overrides and tool names found through relative PATH
+entries. Installation-tool regressions verify both variants and record that
+the selected executable actually runs in the copied client's directory.
 After the successful build, hiding the installed project must produce the
 specific missing-import diagnostic. This negative control verifies that
 the consumer cannot silently fall back to the original source project.

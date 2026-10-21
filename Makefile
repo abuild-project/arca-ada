@@ -17,6 +17,8 @@ check: all
 	./examples/client/bin/arca_client
 	GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
 		NUM_CPUS="$(NUM_CPUS)" ./tests/check-install.sh
+	GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
+		NUM_CPUS="$(NUM_CPUS)" ./tests/check-install-tools.sh
 
 install: all
 	$(GPRINSTALL) -p -P arca.gpr --prefix="$(PREFIX)"
