@@ -3,8 +3,13 @@
 /build/
 /examples/client/obj/
 /examples/client/bin/
+/tests/obj/
+/tests/bin/
+/tests/obj-coverage/
+/tests/bin-coverage/
 *.ali
 *.o
 *.a
 *.gcda
 *.gcno
+__pycache__/

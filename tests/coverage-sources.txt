@@ -1,0 +1,3 @@
+# Every production body must be represented; there are no omitted bodies.
+src/arca-binary_io.adb
+src/arca-cpio.adb

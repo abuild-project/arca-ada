@@ -4,3 +4,8 @@ lib
 build
 examples/client/obj
 examples/client/bin
+tests/obj
+tests/bin
+tests/obj-coverage
+tests/bin-coverage
+**/__pycache__

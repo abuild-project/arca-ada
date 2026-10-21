@@ -1,7 +1,7 @@
 # Writer extraction
 
 Status: Accepted direction as discussed on 2026-10-21. The source inventory
-and additional LGPL grant are recorded; writer imports remain pending.
+and additional LGPL grant are recorded; CPIO is implemented locally.
 
 ## Scope and order
 
@@ -64,8 +64,15 @@ No extraction or Abuild backend switch has been performed by this bootstrap.
 
 ## Progress
 
-On 2026-10-22, the owner authorized LGPL-2.1-or-later for Arca and granted
-additional LGPL licensing for the identified CPIO/TAR material. The
-[provenance record](../provenance/cpio-tar.md) pins the accepted revision,
-file scope, fixture boundaries and direct writer/transformation test split.
-This prerequisite is prepared separately before writer imports.
+On 2026-10-22, the owner confirmed authority and granted additional
+LGPL-2.1-or-later licensing for the inventoried CPIO/TAR material. The
+[provenance record](../provenance/cpio-tar.md) pins the accepted source
+revision, separates direct writer tests from transformation tests and records
+the fixture and third-party boundaries. CPIO is the first implementation
+step; TAR follows separately. No backend switch is included in either import.
+
+The [CPIO step](cpio-extraction.md) introduces the standalone writer and
+private stream-copy subset. Its successful output profile is retained;
+controlled output ownership and rejection of Create on an open writer are
+explicit lifecycle additions. TAR extraction and Abuild integration remain
+pending.

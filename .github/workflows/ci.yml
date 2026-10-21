@@ -20,9 +20,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - name: Check development wrapper arguments
+        run: python3 tests/check-dev-wrappers.py
       - name: Build the Trixie development image
-        run: docker build -t arca-dev:trixie -f docker/dev/Dockerfile .
+        run: docker/dev/build
       - name: Check development shell and batch input
         run: python3 tests/check-dev-shell.py arca-dev:trixie
       - name: Build and check as the runner user
         run: docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
+      - name: Check coverage inventory and executed production bodies
+        run: docker/dev/run arca-dev:trixie make -j8 coverage NUM_CPUS=8

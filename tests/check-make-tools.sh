@@ -16,6 +16,8 @@ mkdir -p "$scratch/selected tools" "$scratch/project/scripts" \
 # Exercise the real Make recipes in isolation; consumer checks run separately.
 ln -s "$repo_root/scripts/check-tools.sh" \
     "$scratch/project/scripts/check-tools.sh"
+ln -s /bin/true "$scratch/project/scripts/check-test-tools.sh"
+ln -s /bin/true "$scratch/project/tests/check-cpio.py"
 for script in check-preflight check-make-tools check-install check-install-tools; do
     ln -s /bin/true "$scratch/project/tests/$script.sh"
 done
@@ -55,8 +57,11 @@ done
 cat >"$scratch/expected.log" <<EOF
 selected build <-p> <-P> <arca.gpr> <-j$num_cpus>
 selected build <-p> <-P> <examples/client/client.gpr> <-aP.> <-j$num_cpus>
+selected build <-p> <-P> <tests/tests.gpr> <-j$num_cpus>
 selected build <-p> <-P> <arca.gpr> <-j$num_cpus>
 selected install <-p> <-P> <arca.gpr> <--prefix=$scratch/install prefix>
+selected clean <-P> <tests/tests.gpr>
+selected clean <-P> <tests/tests.gpr> <-XARCA_COVERAGE=enabled>
 selected clean <-P> <examples/client/client.gpr> <-aP.>
 selected clean <-P> <arca.gpr>
 EOF
