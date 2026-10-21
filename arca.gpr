@@ -1,0 +1,18 @@
+-- SPDX-License-Identifier: BSD-3-Clause
+
+library project Arca is
+
+   for Languages use ("Ada");
+   for Source_Dirs use ("src");
+   for Object_Dir use "obj";
+   for Library_Dir use "lib";
+   for Library_Name use "arca";
+   for Library_Kind use "static";
+   for Library_Interface use ("arca");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato");
+   end Compiler;
+
+end Arca;

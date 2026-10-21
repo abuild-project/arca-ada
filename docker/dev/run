@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: BSD-3-Clause
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+    echo "Usage: $0 IMAGE [COMMAND [ARGUMENT]...]" >&2
+    exit 2
+fi
+
+if [[ $(id -u) -eq 0 ]]; then
+    echo "Run the development container as a regular user" >&2
+    exit 1
+fi
+
+image=$1
+shift
+script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
+repo_root=$(CDPATH='' cd -- "$script_dir/../.." && pwd -P)
+
+if [[ $# -eq 0 ]]; then
+    set -- bash
+fi
+
+exec docker run --rm \
+    --user "$(id -u):$(id -g)" \
+    --env HOME=/tmp \
+    --mount "type=bind,source=$repo_root,target=/work" \
+    --workdir /work \
+    "$image" "$@"

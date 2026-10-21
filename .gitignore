@@ -1,0 +1,10 @@
+/obj/
+/lib/
+/build/
+/examples/client/obj/
+/examples/client/bin/
+*.ali
+*.o
+*.a
+*.gcda
+*.gcno

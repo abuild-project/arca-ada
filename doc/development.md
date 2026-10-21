@@ -1,0 +1,65 @@
+# Development guide
+
+## Reference environment
+
+Validate changes in Debian 13 (Trixie), using GNAT and GPRbuild. The development
+Dockerfile installs build tools while constructing the image. Runtime build
+and test steps do not install packages. The launcher maps the invoking user
+and group into the container and supplies `HOME=/tmp`.
+
+```sh
+docker build -t arca-dev:trixie -f docker/dev/Dockerfile .
+docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
+```
+
+The image tag follows Debian's Trixie updates; it is not an immutable image
+digest and does not promise bit-reproducible toolchains. The GitHub workflow
+builds this Dockerfile and runs the same check command.
+
+## Project boundary
+
+`arca.gpr` is a static Ada library with no Abuild or third-party project
+imports. Only the root namespace exists in this revision. Do not add proposed
+format packages as empty API promises. Introduce each API with its writer,
+documented constraints and independent tests.
+
+`examples/client/client.gpr` imports the project by name. The installation
+check copies this client into a private scratch directory, removes inherited
+Ada/GPR search paths, and discovers Arca only through the installed prefix.
+It cleans that scratch directory on success, failure and handled signals.
+After the successful build, hiding the installed project must produce the
+specific missing-import diagnostic. This negative control verifies that
+the consumer cannot silently fall back to the original source project.
+
+The check establishes GPR packaging and compiler/linker usability. It cannot
+establish archive correctness, payload handling, concurrency or performance;
+those checks arrive with the format implementations. There are no production
+package bodies to include in a coverage inventory yet.
+
+## Commands
+
+- `make -j8 all NUM_CPUS=8` builds the static library.
+- `make -j8 check NUM_CPUS=8` builds and runs both client configurations.
+- `make install PREFIX=/absolute/prefix` installs using GPRinstall.
+- `make clean` removes generated GPRbuild artifacts.
+
+Do not run independent top-level builds concurrently against `obj/`. Install
+into an empty prefix or use GPRinstall's explicit uninstall/upgrade procedure.
+Tests use a fresh prefix on every run.
+
+## Consumers
+
+Add this import to the consuming GPR project:
+
+```ada
+with "arca";
+```
+
+For an installed library, pass `-aP<prefix>/share/gpr` to GPRbuild. For source
+integration, pass the directory containing `arca.gpr`. Pin the dependency to
+an accepted commit; do not depend on a moving branch for released builds.
+Private repository access must be configured in every build environment.
+
+Abuild integration is a later change: transformation adapters, source-file
+inventory, coverage, dependency checkout, release licensing, manuals and
+integration tests must change together. The bootstrap does not modify Abuild.
