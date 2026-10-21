@@ -34,3 +34,10 @@ The private repository has been created. The local Trixie build, clean
 rebuild, installed-consumer check and missing-install negative control pass.
 Ada MCP loads both projects completely and reports no diagnostics for either
 Ada source. Final remote initialization and CI verification remain pending.
+
+The prepared source is committed locally on `codex/bootstrap`. The GitHub
+default branch currently contains only the generated README and licence.
+The session permits a host-side `git fetch`, but not a host-side `git push`;
+the sandboxed push cannot resolve GitHub. The API upload also requires the
+missing OAuth `workflow` scope because it includes a new Actions file.
+Resume through an authorized host push or after the appropriate API grant.

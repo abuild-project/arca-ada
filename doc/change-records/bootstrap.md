@@ -36,7 +36,10 @@ state. No production format behavior or performance claim needs validation
 in this bootstrap. The source inventory contains no production bodies, so
 there is no body-coverage omission to add.
 
-Remote CI verification remains pending until the prepared files are uploaded.
+Remote upload and CI verification remain pending. The private repository
+exists, but the host push is not available to this session and the API token
+lacks the `workflow` scope required to add the prepared Actions file. The
+locally committed source and executable modes are ready for upload.
 
 ## Review lessons
 
