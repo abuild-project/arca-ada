@@ -58,12 +58,13 @@ It also verifies that hiding the installed project makes discovery fail.
 Preflight regression checks cover selected and missing build-tool overrides.
 Installation regressions cover relative builder paths and relative PATH
 entries across the isolated client's directory change.
+Make recipe regressions cover selected executable paths containing spaces.
 These are packaging checks, not format-conformance tests.
 
 Select alternative GPR executables with the Make variables `GPRBUILD`,
-`GPRINSTALL` and `GPRCLEAN`. Each value is one executable name or path. The
-preflight checks those selected executables; unset variables use the standard
-names.
+`GPRINSTALL` and `GPRCLEAN`. Each value is one executable name or path,
+including paths containing spaces. The preflight checks those selected
+executables; unset variables use the standard names.
 
 Consumers import `arca.gpr` with `with "arca";` and add the installed
 `<prefix>/share/gpr` directory to their GPR search path. The root Ada package

@@ -15,6 +15,8 @@ values assigned in a Makefile. Restricted-PATH regression checks cover valid
 overrides, fallback names and missing overrides masked by available defaults.
 The installed-client check resolves its selected builder before changing
 directories, preserving explicit relative paths and relative PATH lookups.
+Make recipes quote every direct GPR executable selection, preserving paths
+containing spaces for builds, installation and cleanup.
 
 The bootstrap contains no archive or filesystem writer. Existing Abuild
 behavior, dependencies and documentation remain unchanged. The new files use
@@ -70,6 +72,15 @@ They pass after resolving lookup results to absolute paths in the caller's
 initial directory. The fixture delegates to the real compiler and verifies
 that the selected wrapper actually ran in the copied client's directory.
 
+The Make recipe regression fails against the unquoted executable calls and
+passes after all five calls are quoted. It runs the real Makefile against an
+isolated fixture and checks the exact tool identities and argument boundaries
+for library and client builds, installation and both cleanup commands. The
+fixture replaces consumer checks to prevent recursion and leaves the
+checkout's build artifacts untouched. Normal consumer checks still use the
+real compiler. The full parallel check target passes with this regression
+included.
+
 ## Review lessons
 
 - Claims are scoped to project packaging; no format, performance or coverage
@@ -89,5 +100,8 @@ that the selected wrapper actually ran in the copied client's directory.
   complete diagnostic line, excluding a success caused by checking defaults.
 - Relative-builder checks require a log from the selected wrapper in the
   client directory, so ignoring the override cannot make the regression pass.
+- The documented executable-path contract is checked across every direct GPR
+  recipe. Exact invocation logs detect ignored selections and split arguments;
+  the isolated fixture cannot race the checkout's compiler object directory.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

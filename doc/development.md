@@ -22,15 +22,23 @@ and output are terminals. Explicit commands run without forwarded input or
 a TTY, so the build and test invocations remain suitable for CI.
 
 `GPRBUILD`, `GPRINSTALL` and `GPRCLEAN` select individual executable names or
-paths. Make passes its selected values explicitly to the tool preflight, so
-values assigned by a Makefile work like command-line overrides. Missing tools
-are reported together using their selected names or paths.
+paths, including paths containing spaces. Make passes its selected values
+explicitly to the tool preflight, so values assigned by a Makefile work like
+command-line overrides. Missing tools are reported together using their
+selected names or paths.
 
 `make check` includes preflight regressions with a restricted fixture PATH.
 The checks cover command-line selections, Makefile selections, default-name
 fallback and missing selections even when default-name executables exist.
 The recursive Make calls retain the outer build's jobserver; fixtures and
 diagnostics live in a private temporary directory below `build/`.
+
+The check target also exercises the real Make recipes in an isolated fixture
+with executable paths containing spaces. Recording tools verify the selected
+executable identities and argument boundaries for library and client builds,
+installation and both cleanup commands. The fixture replaces the consumer
+checks to avoid recursion; the normal check target runs those checks with the
+real compiler separately. It does not change the checkout's build artifacts.
 
 `python3 tests/check-dev-shell.py IMAGE` runs on the Docker host, where Python
 3 and Docker must already be available. It checks a default shell with piped

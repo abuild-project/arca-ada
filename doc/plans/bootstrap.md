@@ -48,9 +48,12 @@ The owner requested both Copilot corrections on 2026-10-21. Keep the existing
 format and licensing boundaries while correcting the launcher and preflight.
 The subsequent relative-builder finding was accepted on 2026-10-21 as a
 further packaging correction.
+The Make recipe finding for executable paths containing spaces was accepted
+on 2026-10-21.
 
 | Item | Status | Evidence |
 | --- | --- | --- |
 | Default shell input and TTY | Implemented | Real-container tests reject the old launcher for pipe and terminal input; the explicit batch case already passes |
 | Selected preflight tools | Implemented | Restricted-PATH tests reject the old preflight's handling of valid and missing selections; Makefile and command-line values now pass through explicitly |
 | Relative installed-client builder | Implemented | Both an explicit relative executable and a tool found in a relative PATH entry fail with the old installation helper and pass after lookup is anchored before the directory change |
+| GPR executable paths containing spaces | Implemented | An isolated fixture exercises the real Make recipes and verifies selected tool identities and argument boundaries; the old recipes fail and the quoted recipes pass |
