@@ -1,0 +1,28 @@
+name: Build and installation checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trixie:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Build the Trixie development image
+        run: docker build -t arca-dev:trixie -f docker/dev/Dockerfile .
+      - name: Check development shell and batch input
+        run: python3 tests/check-dev-shell.py arca-dev:trixie
+      - name: Build and check as the runner user
+        run: docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8

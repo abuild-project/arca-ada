@@ -1,0 +1,18 @@
+-- SPDX-License-Identifier: BSD-3-Clause
+
+with "arca";
+
+project Client is
+
+   for Languages use ("Ada");
+   for Source_Dirs use (".");
+   for Object_Dir use "obj";
+   for Exec_Dir use "bin";
+   for Main use ("arca_client.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato");
+   end Compiler;
+
+end Client;

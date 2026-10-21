@@ -1,0 +1,6 @@
+.git
+obj
+lib
+build
+examples/client/obj
+examples/client/bin
