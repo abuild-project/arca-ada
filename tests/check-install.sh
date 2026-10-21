@@ -1,5 +1,5 @@
 #!/bin/sh
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: LGPL-2.1-or-later
 
 set -eu
 
@@ -20,6 +20,10 @@ num_cpus=${NUM_CPUS:-8}
 
 "$gprinstall_command" -p -P "$repo_root/arca.gpr" \
     --prefix="$scratch/prefix"
+# Installed notices must match the project's actual grant byte for byte.
+for notice in LICENSE COPYRIGHT; do
+    cmp "$repo_root/$notice" "$scratch/prefix/share/doc/arca/$notice"
+done
 mkdir -p "$scratch/client"
 cp "$repo_root/examples/client/client.gpr" \
     "$repo_root/examples/client/arca_client.adb" "$scratch/client/"

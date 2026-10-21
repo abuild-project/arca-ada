@@ -72,11 +72,12 @@ is `Arca`. See the [development guide](doc/development.md).
 
 ## Licence
 
-The newly authored bootstrap is licensed under [BSD-3-Clause](LICENSE).
-This grant does not relicense any existing Abuild source. The planned writer
-extraction requires a per-file provenance review and an explicit additional
-BSD grant from the relevant rights holders before GPL-covered code can be
-included in the BSD library. See [licensing and provenance](doc/licensing.md).
+Arca is licensed under [LGPL-2.1-or-later](LICENSE); see [COPYRIGHT](COPYRIGHT)
+for the project notice. The owner has granted additional LGPL licensing for
+the identified CPIO/TAR material. Existing Abuild source is not imported by
+this bootstrap. Imports must retain attribution and record their exact scope.
+See [licensing and provenance](doc/licensing.md), including the requirements
+for distributing statically linked applications.
 
 ## Roadmap
 

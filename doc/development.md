@@ -85,6 +85,12 @@ Tests use a fresh prefix on every run.
 
 ## Consumers
 
+GPRinstall copies `LICENSE` and `COPYRIGHT` to `<prefix>/share/doc/arca`.
+The installation check compares both notices byte for byte with their source
+files. Binary distributors must also provide the source and relinking material
+described in the [licensing guide](licensing.md); installing licence notices
+alone does not fulfil those requirements.
+
 Add this import to the consuming GPR project:
 
 ```ada

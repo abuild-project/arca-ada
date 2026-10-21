@@ -9,8 +9,9 @@ Status: Implemented on 2026-10-21. Authorized on 2026-10-21.
 - Initial repository: private `mweidle73/arca-ada`.
 - Intended later home: `abuild-project/arca-ada`, through a separate transfer.
 - Root package: `Arca`; project: `arca.gpr`.
-- Licence target: BSD-3-Clause, with a separate grant required for existing
-  GPL-covered source.
+- Current licence target: LGPL-2.1-or-later, as authorized on 2026-10-22;
+  see the [licensing plan](lgpl-licensing.md). Existing GPL-covered source
+  requires a recorded additional grant before import.
 
 ## Bootstrap scope
 
