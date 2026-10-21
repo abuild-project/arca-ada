@@ -18,11 +18,16 @@ shift
 script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd -P)
 repo_root=$(CDPATH='' cd -- "$script_dir/../.." && pwd -P)
 
+docker_args=(run --rm)
 if [[ $# -eq 0 ]]; then
     set -- bash
+    docker_args+=(--interactive)
+    if [[ -t 0 && -t 1 ]]; then
+        docker_args+=(--tty)
+    fi
 fi
 
-exec docker run --rm \
+exec docker "${docker_args[@]}" \
     --user "$(id -u):$(id -g)" \
     --env HOME=/tmp \
     --mount "type=bind,source=$repo_root,target=/work" \

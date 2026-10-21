@@ -22,5 +22,7 @@ jobs:
           persist-credentials: false
       - name: Build the Trixie development image
         run: docker build -t arca-dev:trixie -f docker/dev/Dockerfile .
+      - name: Check development shell and batch input
+        run: python3 tests/check-dev-shell.py arca-dev:trixie
       - name: Build and check as the runner user
         run: docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8

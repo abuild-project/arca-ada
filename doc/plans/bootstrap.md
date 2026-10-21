@@ -41,3 +41,13 @@ also passes. Its job status and logs confirm the fresh checkout, construction
 of the repository's Trixie image, warning-free build, installed-consumer check
 and negative control. No format source has been imported, no Abuild dependency
 has been changed and no release or public publication has been made.
+
+## Review follow-up
+
+The owner requested both Copilot corrections on 2026-10-21. Keep the existing
+format and licensing boundaries while correcting the launcher and preflight.
+
+| Item | Status | Evidence |
+| --- | --- | --- |
+| Default shell input and TTY | Implemented | Real-container tests reject the old launcher for pipe and terminal input; the explicit batch case already passes |
+| Selected preflight tools | Pending | Check selected GPR tool overrides instead of fixed executable names |

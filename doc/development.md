@@ -16,6 +16,18 @@ The image tag follows Debian's Trixie updates; it is not an immutable image
 digest and does not promise bit-reproducible toolchains. The GitHub workflow
 builds this Dockerfile and runs the same check command.
 
+With no explicit command, the launcher starts Bash and forwards standard
+input, including piped commands. It allocates a TTY only when both its input
+and output are terminals. Explicit commands run without forwarded input or
+a TTY, so the build and test invocations remain suitable for CI.
+
+`python3 tests/check-dev-shell.py IMAGE` runs on the Docker host, where Python
+3 and Docker must already be available. It checks a default shell with piped
+input, a default shell connected to a real pseudo-terminal and an explicit
+batch command. The terminal sentinel is checked as a complete output line
+after the container confirms its terminal fds, so echoed command text cannot
+satisfy the assertion. CI runs these checks against its freshly built image.
+
 ## Project boundary
 
 `arca.gpr` is a static Ada library with no Abuild or third-party project

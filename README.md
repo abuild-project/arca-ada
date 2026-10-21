@@ -28,6 +28,16 @@ docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
 ```
 
 The launcher runs as the invoking user and supplies a writable temporary home.
+Omit the command to open a Bash development shell with forwarded input and,
+when launched from a terminal, a TTY:
+
+```sh
+docker/dev/run arca-dev:trixie
+```
+
+Explicit commands use batch mode. The host-side shell regression checks need
+Python 3 and Docker: `python3 tests/check-dev-shell.py arca-dev:trixie`.
+
 An existing Abuild Trixie image can also run these checks:
 
 ```sh

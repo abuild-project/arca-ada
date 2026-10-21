@@ -5,3 +5,5 @@
 - Bootstrap the Arca library project, independent client and installation check.
 - Add a Trixie development image and GitHub Actions build checks.
 - Record the licensing boundary and staged writer-extraction plan.
+- Forward input and provide a terminal for the default development shell,
+  while preserving noninteractive explicit commands.

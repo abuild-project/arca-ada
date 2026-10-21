@@ -5,6 +5,11 @@ a client that imports its GPR project. A packaging check builds a second copy
 of the client against an isolated installation. A Trixie development image
 and GitHub workflow provide the same build and check command.
 
+The default development shell forwards standard input and receives a TTY
+when invoked from a terminal. Explicit commands retain batch-mode input and
+terminal behavior. Host-side regression tests exercise both shell modes and
+the explicit-command case with real containers.
+
 The bootstrap contains no archive or filesystem writer. Existing Abuild
 behavior, dependencies and documentation remain unchanged. The new files use
 BSD-3-Clause; importing the existing GPL-covered writers requires the separate
@@ -35,12 +40,17 @@ state. No production format behavior or performance claim needs validation
 in this bootstrap. The source inventory contains no production bodies, so
 there is no body-coverage omission to add.
 
-The bootstrap is uploaded to the private repository. The
+The bootstrap is uploaded to the private repository. The initial
 [GitHub workflow](https://github.com/mweidle73/arca-ada/actions/runs/39592187985)
 passes from a fresh checkout, builds the repository's own Trixie image and
 runs the same consumer and installation checks. The job status and relevant
-build logs have been read. Follow-up documentation changes do not modify the
-validated build or test implementation.
+build logs have been read. The review follow-up below adds launcher coverage
+that the initial workflow did not exercise.
+
+The shell regression tests fail against the original launcher for both piped
+input and terminal input, while its explicit-command test passes. With the
+launcher correction, all three cases pass in the supported Trixie image.
+CI runs the same cases against its freshly built development image.
 
 ## Review lessons
 
@@ -53,5 +63,8 @@ validated build or test implementation.
 - Scratch paths are private to each check and cleaned on failure and signals.
 - No mutable writer state, containers, file streams or production bodies are
   introduced; format lifecycle and concurrency tests belong to their imports.
+- Launcher checks verify actual stdin and terminal behavior. The TTY sentinel
+  cannot be satisfied by echoed test input, and explicit commands remain a
+  positive control for the existing CI mode.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
