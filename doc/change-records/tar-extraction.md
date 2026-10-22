@@ -95,8 +95,19 @@ Abuild's User Manual, Developer Guide, dependencies and coverage inventory are
 unaffected because no Abuild backend switch is included. There is no separate
 Arca release manual or stable release to annotate.
 
-Implementation and local validation are complete. The final independent author
-review is pending before this topic is handed to external review.
+Implementation, local validation and final author self-review are complete.
+Two independent static passes covered implementation/lifecycle and
+tests/build/provenance/documentation; neither identified a blocking or
+fix-before-PR finding. Compatibility, oracle sensitivity, instance-local
+state, stack use and performance costs were rechecked against the source.
+Serializer work is unchanged; no benchmarked performance improvement is
+claimed.
+
+The final sweep also checked API comments and Ada layout, documentation and
+links, commit attribution and 50/72 wrapping, whitespace, generated artifacts
+and the clean topic worktree. This independent repository requires no Abuild
+ticket. The topic is ready for external review. Validation above was performed
+locally; hosted TAR CI results are reported separately.
 
 ## Review lessons
 

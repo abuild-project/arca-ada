@@ -1,6 +1,7 @@
 # TAR extraction
 
-Status: Implemented and locally validated on 2026-10-22; final review pending.
+Status: Implemented, locally validated and author-reviewed on 2026-10-22;
+ready for external review.
 
 ## Accepted scope
 
@@ -44,5 +45,6 @@ the existing manifest; retain the original fixture producer record.
 Implementation, source identities, predecessor bytes, reference fixture,
 external readers, ownership, installed-client and fresh-source coverage checks
 pass on `codex/tar-extraction`. Ada MCP project, symbol, navigation and file
-checks pass. The final independent author review is pending; see the
+checks pass. Final author review and two independent static passes found no
+blocking or fix-before-PR findings. See the
 [change record](../change-records/tar-extraction.md) for evidence and limits.

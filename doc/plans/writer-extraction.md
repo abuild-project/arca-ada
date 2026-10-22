@@ -2,7 +2,7 @@
 
 Status: Accepted direction as discussed on 2026-10-21. The source inventory
 and additional LGPL grant are recorded. CPIO is accepted; TAR is implemented
-locally and validated, with final review pending.
+locally, validated and author-reviewed, ready for external review.
 
 ## Scope and order
 
