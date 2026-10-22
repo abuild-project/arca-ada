@@ -1,7 +1,7 @@
 # Archive creation CLI
 
-Status: Initial implementation locally validated and reviewed on 2026-10-22.
-The owner-requested reduction of the C boundary is in progress; not published.
+Status: Implemented and locally validated on 2026-10-22, including the smaller
+C boundary. Author and independent static reviews complete; not published.
 
 ## Scope and interface
 
@@ -105,3 +105,17 @@ executable and the new Ada-backed executable. They are committed before the
 adapter change to pin its existing observable behavior. The new adapter
 compiles warning-free; CLI checks, complete normal checks and production
 coverage pass.
+
+## C boundary revision completed on 2026-10-22
+
+The C object exports only arca_lstat. Both independent static follow-up passes
+report no blocking, fix-before-PR or follow-up findings. Final author review
+checked direct ABI signatures/constants, errno capture, initialized readlink
+slices, protected callback lifetime and staging ownership, plus retained
+format/cleanup contracts and documentation/source/commit hygiene.
+
+The final source/test stand also passes coverage first and the full normal
+check in a fresh, rootless Trixie copy without network or Abuild access. The
+production-body inventory remains complete. Ada MCP reports a complete CLI
+project/index and complete empty diagnostics for the changed filesystem body;
+semantic navigation confirms the protected handler and libc binding boundary.

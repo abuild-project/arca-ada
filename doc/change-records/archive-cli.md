@@ -26,8 +26,8 @@ The library, public interfaces and source imports are unchanged. Only the
 CLI project uses C only to convert lstat metadata to a fixed-width record.
 Simple readlink, mkdtemp, rename and renameat2 calls use direct Ada bindings;
 signal handlers and their shared state use an Ada protected object. GNAT's
-existing normalization and raw directory-name iterator
-are reused. The higher-level Ada.Directories iterator is unsuitable here:
+existing normalization and raw directory-name iterator are reused. The
+higher-level Ada.Directories iterator is unsuitable here:
 its modification-time query rejects FIFOs and dangling links. New CLI code
 is independently authored under LGPL-2.1-or-later; no further Abuild source
 material or grant is imported.
@@ -62,8 +62,8 @@ The reserved-name regression failed before its guard: the command returned
 success for a CPIO member readers interpret as the end marker. It passes
 after the guard and still accepts the same filename in TAR. A private
 mutation replacing no-clobber publication with ordinary rename makes the late
-destination test fail at its success/error assertion. The production adapter passes
-the same test and preserves the competing output bytes.
+destination test fail at its success/error assertion. The production adapter
+passes the same test and preserves the competing output bytes.
 
 The owner-requested C-boundary reduction keeps only the lstat wrapper. Ada
 interrupt handlers record both termination signals in protected state;
@@ -81,6 +81,22 @@ change, pinning observable behavior across the refactor. Warning-free CLI
 compilation, complete normal checks and production coverage pass with the new
 bindings. The production-body inventory is unchanged; its C entry now contains
 only the metadata wrapper. Library code, APIs and format fixtures are unchanged.
+
+After the boundary revision, coverage-first and complete normal checks also
+pass from fresh sources in a rootless, network-disabled container with no
+Abuild mount. Object-symbol inspection shows only arca_lstat defined by the C
+object. Both independent static follow-up passes report no blocking,
+fix-before-PR or follow-up findings. Final author review rechecked ABI/result
+types and constants, errno ordering, initialized symlink-target slices,
+protected-state/callback lifetime, guard finalization, retained format and
+failure contracts, source style, documentation and commit hygiene. No new
+container state or writer API is introduced; no performance gain is claimed.
+
+Ada MCP's CLI project/index and changed-file diagnostics are complete, with
+no diagnostics. Navigation resolves Attach_Handler to the GNAT interrupt API
+and confirms the direct readlink binding's result type. These checks helped
+verify the new boundary without broadly searching runtime sources; no missing
+semantic evidence or fallback was needed for this follow-up.
 
 Final author review found two fixture weaknesses, also confirmed by the
 independent validation finder. The trailing-output-slash check now removes

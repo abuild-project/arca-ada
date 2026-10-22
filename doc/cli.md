@@ -112,8 +112,8 @@ reproducibility, empty trees, installed execution and parallel processes.
 Phase-controlled tests exercise SIGINT/SIGTERM cancellation, changed input and
 a destination created just before publication. Failure tests verify old output
 and staging cleanup, including an unwritable output parent. Device emission
-is covered by native writer tests; creating device
-fixtures through the CLI is not part of the rootless test suite.
+is covered by native writer tests; creating device fixtures through the CLI
+is not part of the rootless test suite.
 
 `make coverage` instruments both Ada and C CLI bodies. The inventory gate
 requires executed lines for every production body and does not claim complete
