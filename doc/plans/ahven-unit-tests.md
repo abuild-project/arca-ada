@@ -1,6 +1,7 @@
 # Ahven unit tests
 
-Status: Implemented and locally validated on 2026-10-22; final review pending.
+Status: Implemented, locally validated and author-reviewed on 2026-10-22;
+ready for external review.
 
 ## Scope
 
@@ -40,6 +41,8 @@ Named suites, shared scenarios, failure controls, image dependency and CI XML
 reports are implemented. Fresh-source coverage and normal checks pass without
 network or Abuild access; both optional predecessor comparisons pass. A
 missing-Ahven negative control and installed-consumer isolation confirm the
-test-only dependency boundary. Final author review remains pending. CLI
-development stays separate; see the
+test-only dependency boundary. Final author review and two independent static
+passes are complete. The XML-report finding is corrected and re-reviewed;
+there are no remaining blocking or fix-before-PR findings. CLI development
+stays separate; see the
 [change record](../change-records/ahven-unit-tests.md) for evidence and limits.

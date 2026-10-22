@@ -62,12 +62,23 @@ prevented XML generation. The unchanged harness failed the regression with
 no XML; the corrected harness retains the same failing assertion in XML and
 still fails overall. Its integrated probe now pins this orchestration path.
 The source/lifecycle review found no blocking or fix-before-PR findings.
-Review of the report correction is pending.
+The targeted validation re-review confirms that the report finding is
+resolved, with no remaining concrete findings. Unit checks and complete
+coverage pass again after the correction. Development wrapper and real-image
+shell/batch regressions also pass.
 
 The library, sources and coverage inventory have no
 production changes. Abuild's User Manual, Developer Guide, dependencies and release
 markers need no change because this topic only changes Arca's test setup.
 Arca's README, developer guide, changelog and indexed plans describe it.
+
+Final author self-review is complete. The proposed commit series was checked
+for retained scenario behavior, oracle sensitivity, fixture ownership,
+instance-local concurrency and bounded comparison buffers. Source comments,
+Ada declaration/layout rules, documentation and links, commit 50/72 wrapping,
+attribution, whitespace, generated artifacts and the clean worktree were
+checked. This independent repository requires no Abuild ticket. No production
+performance improvement or hosted CI result is claimed by local validation.
 
 ## Ada MCP
 
