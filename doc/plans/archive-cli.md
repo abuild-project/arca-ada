@@ -200,3 +200,14 @@ does not change the production inventory. Compiled CLI artifacts confirm
 all three added switches. Public writer sources and the production lstat
 wrapper remain byte-identical. Final author review is complete; independent
 static review follows on the committed correction.
+
+## Review corrections completed on 2026-10-22
+
+Both independent static passes report no blocking, fix-before-PR or follow-up
+findings in the correction. They confirm errno/diagnostic ordering, fallback
+publication and inode verification, nonthrowing cleanup, sensitive syscall
+faults and the previously missing metadata/ordering/mode/FIFO assertions.
+Final author review confirms that the committed code matches the validated
+fresh sources and that documentation, source style, commit rules and worktree
+hygiene are complete. The CLI executable in the working checkout is rebuilt
+from the same final code. The topic remains local and unpublished.

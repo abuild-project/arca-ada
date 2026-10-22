@@ -221,6 +221,16 @@ Errno_Message call; the Trixie compiler did. A named Err argument resolves
 that ambiguity. Semantic navigation remains useful for the call boundaries;
 compiler and runtime results supply the final validation evidence.
 
+Both independent static reviews of the committed correction report no
+blocking, fix-before-PR or follow-up findings. The source pass confirms the
+publication/cleanup boundary and preservation of low-level errors; the
+validation pass confirms fixture guards, syscall traces, independent negative
+controls and the old/new sensitivity evidence. Final author review checked
+the committed code against the validated fresh sources, all source-style
+and documentation requirements, commit hygiene and generated-artifact
+exclusion. The checkout's CLI binary is rebuilt from the same final code.
+This documentation completion changes no runtime or test source.
+
 ## Ada MCP
 
 The exact CLI project and anchored package index are complete. File-scoped
