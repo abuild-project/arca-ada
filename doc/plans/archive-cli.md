@@ -1,7 +1,7 @@
 # Archive creation CLI
 
-Status: Implemented, locally validated and reviewed on 2026-10-22. GitHub PR
-publication is authorized; delivery preparation is complete.
+Status: Implemented, locally validated and submitted for review in
+[PR #7](https://github.com/mweidle73/arca-ada/pull/7) on 2026-10-22.
 
 ## Scope and interface
 
@@ -235,3 +235,7 @@ The owner requested PR creation. The canonical change record is condensed to
 the final implementation, validation and boundaries; dated implementation and
 review evidence remains in this plan and Git history. Runtime/test sources
 match the validated revision, and the accepted main base is unchanged.
+
+The CLI branch is published as PR #7 against main. The PR description matches
+the canonical change record. This delivery-status update changes no runtime
+or test source.
