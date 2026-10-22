@@ -22,8 +22,8 @@ Explicit --force atomically replaces a regular file or symlink. Controlled
 ownership and handled SIGINT/SIGTERM clean up ordinary incomplete output;
 the previous destination survives errors before publication.
 
-The library, public interfaces and source imports are unchanged. Only the
-CLI project uses C only to convert lstat metadata to a fixed-width record.
+The library, public interfaces and source imports are unchanged. The CLI
+project uses C only to convert lstat metadata to a fixed-width record.
 Simple readlink, mkdtemp, rename and renameat2 calls use direct Ada bindings;
 signal handlers and their shared state use an Ada protected object. GNAT's
 existing normalization and raw directory-name iterator are reused. The
@@ -114,6 +114,36 @@ the accepted library serialization code is unchanged. Device-node creation
 is not exercised through the rootless CLI fixtures, although native writer
 tests pin its serialized metadata. Full maximum-size payload completion and
 exhaustive storage faults are not claimed.
+
+## Accepted library base and source layout
+
+This topic follows accepted [PR #6](https://github.com/mweidle73/arca-ada/pull/6).
+Rebase conflicts were limited to the changelog and plan index; both topics'
+entries survive. CLI sources and tests were byte-identical after rebase,
+and the accepted library cleanup, compiler defaults and unit tests remain
+unchanged. This CLI topic does not claim those library improvements.
+
+The CLI's Ada layout now follows the established readability conventions.
+Blank lines separate declaration groups, nested blocks and processing phases;
+case alternatives occupy separate lines and multiline parameter declarations
+are aligned. A lexical comparison with the pre-rebase CLI confirms identical
+Ada tokens, including literal values. The entry point already followed the
+required layout. All CLI Ada units retain their declaration contracts and
+80-column limit. No new regression test is needed for a token-identical
+layout change; the existing full checks validate the combined library/CLI.
+
+The CLI guide, README and changelog still describe the same behavior and need
+no additional user-facing entry for this layout revision. The development
+guide records the readability conventions; the plan and this record document
+the accepted base and parity evidence.
+
+After rebase and formatting, the complete normal check passes again in the
+rootless AMD64 Trixie container, including the accepted finalizer-failure
+cases. Ada MCP reports complete empty diagnostics for every CLI Ada unit.
+The author reviewed the complete layout diff and enclosing code, confirming
+unchanged cancellation, publication ordering, container ownership and ABI
+contracts. Literal-preserving token parity supplies direct evidence that the
+layout edit retains behavior; no performance change is claimed.
 
 ## Ada MCP
 

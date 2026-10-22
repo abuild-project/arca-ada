@@ -4,6 +4,7 @@ with Ada.Strings.Unbounded;
 with Interfaces;
 
 package Archive_CLI.Options is
+
    type Command_Kind is (Create_Command, Help_Command, Version_Command);
    type Format_Kind is (CPIO_Format, TAR_Format);
 
@@ -33,4 +34,5 @@ package Archive_CLI.Options is
 
    procedure Print_Help;
    --  Describe the supported create command and its output/metadata policy.
+
 end Archive_CLI.Options;

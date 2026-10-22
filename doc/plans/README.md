@@ -8,5 +8,5 @@
 | [CPIO extraction](cpio-extraction.md) | Accepted in PR #3 |
 | [LGPL licensing](lgpl-licensing.md) | Accepted in PR #2 before writer imports |
 | [TAR extraction](tar-extraction.md) | Accepted in PR #4 |
-| [Writer cleanup and compiler checks](writer-cleanup.md) | Locally validated and reviewed; separate library change before the CLI |
+| [Writer cleanup and compiler checks](writer-cleanup.md) | Accepted in PR #6 |
 | [Writer extraction](writer-extraction.md) | CPIO/TAR and Ahven accepted; CLI ready for review; Abuild integration pending |

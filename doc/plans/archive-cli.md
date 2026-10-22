@@ -119,3 +119,27 @@ check in a fresh, rootless Trixie copy without network or Abuild access. The
 production-body inventory remains complete. Ada MCP reports a complete CLI
 project/index and complete empty diagnostics for the changed filesystem body;
 semantic navigation confirms the protected handler and libc binding boundary.
+
+## Rebase and source layout on 2026-10-22
+
+The owner accepted PR #6 without waiting further for the stalled external
+Codex review. The CLI topic is rebased onto that accepted main revision.
+Conflicts were confined to the changelog and plan index; both CLI and library
+entries are retained. CLI sources and tests were byte-identical immediately
+after rebase, and library sources, compiler settings and unit tests match
+accepted main.
+
+The owner also requested the established Abuild readability conventions in
+the CLI. Declaration groups, nested blocks, validation/emission phases and
+case alternatives now have explicit whitespace separation; multiline
+parameters and related declarations are aligned. A lexical comparison of
+every CLI Ada unit with its pre-rebase counterpart confirms identical tokens,
+including strings and character literals. This changes layout only, with the
+same subprogram contracts, ABI, ordering and object lifetime. Source copies
+contain only tracked files; editor artifacts are excluded from commits.
+
+The complete normal check passes in the rootless AMD64 Trixie environment,
+including the accepted finalizer-failure cases, CLI, format, reader and
+installation checks. Ada MCP's exact CLI project/index and all CLI Ada file
+diagnostics are complete and empty. Fresh-source coverage and final static
+parity review follow on this rebased, reformatted state.

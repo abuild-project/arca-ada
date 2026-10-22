@@ -1,7 +1,7 @@
 # Writer cleanup and compiler checks
 
-Status: Implemented and locally validated on 2026-10-22 as a separate library
-PR before the CLI; author review complete and external review prepared.
+Status: Accepted in [PR #6](https://github.com/mweidle73/arca-ada/pull/6)
+on 2026-10-22 before the CLI.
 
 ## Accepted scope
 

@@ -81,8 +81,7 @@ imports. `Arca.CPIO` and `Arca.TAR` expose format-specific APIs;
 `Arca.Binary_IO` is their private implementation helper containing only the
 used stream-copy operation and best-effort cleanup shared by both writers.
 Do not add empty API promises for proposed format packages. Introduce each API
-with its writer, documented constraints and
-independent tests.
+with its writer, documented constraints and independent tests.
 
 `cli/cli.gpr` imports the library and builds `cli/bin/arca`. Argument policy,
 filesystem inventory and hardlink maps belong to this CLI consumer. Its Ada
@@ -152,6 +151,12 @@ match Abuild's extra validity/stack checks and exception-detail policy. GPR
 imports do not inherit a parent's compiler defaults automatically. Abuild's
 separate compiler style profile is not adopted by this runtime-check change;
 Arca retains its established source-style rules.
+
+CLI Ada sources follow the same readability conventions: separate declaration
+groups, nested blocks and processing phases with blank lines; expand case
+alternatives onto separate lines; align multiline parameter declarations;
+and retain adjacent subprogram contracts and plain body separators. Keep
+manually maintained Ada lines within 80 columns.
 
 ## Commands
 

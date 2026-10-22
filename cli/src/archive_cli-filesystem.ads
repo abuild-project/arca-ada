@@ -5,6 +5,7 @@ with Interfaces;
 with Interfaces.C;
 
 package Archive_CLI.Filesystem is
+
    type Entry_Kind is
      (Regular, Directory, Symlink, FIFO, Block_Device, Char_Device,
       Unsupported);
@@ -50,14 +51,18 @@ package Archive_CLI.Filesystem is
    --  Return the private filename passed to the archive writer.
 
    procedure Publish
-     (Item : Transaction; Target : String; Replace : Boolean);
+     (Item    : Transaction;
+      Target  : String;
+      Replace : Boolean);
    --  Atomically publish a closed output, enforcing no-clobber by default.
 
 private
+
    use type Interfaces.C.size_t;
 
    --  Linux path/link bound; fixed storage avoids allocation during setup.
    Path_Capacity : constant := 4096;
+
    type Transaction is new Ada.Finalization.Limited_Controlled with record
       Buffer : Interfaces.C.char_array (0 .. Path_Capacity - 1) :=
         (others => Interfaces.C.nul);
@@ -66,4 +71,5 @@ private
 
    overriding procedure Finalize (Item : in out Transaction);
    --  Delete the owned staging tree after writer finalization or publication.
+
 end Archive_CLI.Filesystem;

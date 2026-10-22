@@ -7,7 +7,9 @@ with GNAT.OS_Lib;
 with Interfaces.C.Strings;
 
 package body Archive_CLI.Filesystem is
+
    package C renames Interfaces.C;
+
    use type C.int;
    use type C.long;
    use type C.Strings.chars_ptr;
@@ -15,9 +17,10 @@ package body Archive_CLI.Filesystem is
 
    --  Linux fcntl/stdio constants; the CLI targets the 64-bit Linux ABI.
    Current_Directory_FD : constant C.int := -100; --  AT_FDCWD
-   Rename_No_Replace : constant C.unsigned := 1; --  RENAME_NOREPLACE
+   Rename_No_Replace    : constant C.unsigned := 1; --  RENAME_NOREPLACE
 
    protected Cancellation is
+
       procedure Handle_Interrupt;
       --  Record SIGINT without filesystem work or exception propagation.
       pragma Interrupt_Handler (Handle_Interrupt);
@@ -30,8 +33,10 @@ package body Archive_CLI.Filesystem is
       --  Read the process-owned signal state through protected access.
 
    private
+
       pragma Interrupt_State (Ada.Interrupts.Names.SIGINT, User);
       pragma Interrupt_State (Ada.Interrupts.Names.SIGTERM, User);
+
       Last_Signal : Natural := 0;
    end Cancellation;
 
@@ -40,7 +45,9 @@ package body Archive_CLI.Filesystem is
    pragma Import (C, C_Stat, "arca_lstat");
 
    function C_Readlink
-     (Name : C.char_array; Buffer : out C.char_array; Capacity : C.size_t)
+     (Name     :     C.char_array;
+      Buffer   : out C.char_array;
+      Capacity :     C.size_t)
       return C.long;
    --  Return a byte count without a NUL, or -1; Linux64 ssize_t is long.
    pragma Import (C, C_Readlink, "readlink");
@@ -56,8 +63,11 @@ package body Archive_CLI.Filesystem is
    pragma Import (C, C_Rename, "rename");
 
    function C_Renameat2
-     (Source_FD : C.int; Source : C.char_array;
-      Target_FD : C.int; Target : C.char_array; Flags : C.unsigned)
+     (Source_FD : C.int;
+      Source    : C.char_array;
+      Target_FD : C.int;
+      Target    : C.char_array;
+      Flags     : C.unsigned)
       return C.int;
    --  Apply Linux rename flags and return zero or -1 with errno on failure.
    pragma Import (C, C_Renameat2, "renameat2");
@@ -73,6 +83,7 @@ package body Archive_CLI.Filesystem is
    --  Map a captured errno value to a contextual command diagnostic.
 
    protected body Cancellation is
+
       procedure Handle_Interrupt is
       begin
          Last_Signal := Natural (Ada.Interrupts.Names.SIGINT);
@@ -91,6 +102,7 @@ package body Archive_CLI.Filesystem is
       begin
          return Last_Signal;
       end Number;
+
    end Cancellation;
 
    -------------------------------------------------------------------------
@@ -117,6 +129,7 @@ package body Archive_CLI.Filesystem is
       if Item.Kind > 6 then
          raise Command_Error with "invalid filesystem node classification";
       end if;
+
       return Entry_Kind'Val (Item.Kind);
    end Kind;
 
@@ -124,14 +137,16 @@ package body Archive_CLI.Filesystem is
 
    function Exists (Name : String; Item : out Metadata) return Boolean is
       Value : aliased Metadata;
-      Code : constant C.int := C_Stat (C.To_C (Name), Value'Access);
+      Code  : constant C.int := C_Stat (C.To_C (Name), Value'Access);
    begin
       if Code = 2 then --  ENOENT on the supported Linux environment.
          Item := (others => <>);
          return False;
       end if;
+
       Require (Code, "cannot inspect '" & Name & "'");
       Item := Value;
+
       return True;
    end Exists;
 
@@ -143,6 +158,7 @@ package body Archive_CLI.Filesystem is
       if not Exists (Name, Result) then
          raise Command_Error with "source does not exist: '" & Name & "'";
       end if;
+
       return Result;
    end Stat;
 
@@ -154,6 +170,7 @@ package body Archive_CLI.Filesystem is
       if Result = "" then
          raise Command_Error with "cannot resolve path: '" & Name & "'";
       end if;
+
       return Result;
    end Canonical;
 
@@ -164,6 +181,7 @@ package body Archive_CLI.Filesystem is
       Length : C.long;
    begin
       Length := C_Readlink (C.To_C (Name), Buffer, Buffer'Length);
+
       if Length < 0 then
          declare
             Code : constant C.int := C.int (GNAT.OS_Lib.Errno);
@@ -175,6 +193,7 @@ package body Archive_CLI.Filesystem is
       elsif Length = 0 then
          return "";
       end if;
+
       return C.To_Ada
         (Buffer (0 .. C.size_t (Length) - 1), Trim_Nul => False);
    end Link_Target;
@@ -214,10 +233,13 @@ package body Archive_CLI.Filesystem is
          if Template'Length > Result.Buffer'Length then
             raise Command_Error with "output path is too long";
          end if;
+
          Result.Buffer (Template'Range) := Template;
+
          if C_Mkdtemp (Result.Buffer) = C.Strings.Null_Ptr then
             Require (C.int (GNAT.OS_Lib.Errno), "cannot create output staging");
          end if;
+
          Result.Active := True;
       end return;
    end Begin_Output;
@@ -232,11 +254,14 @@ package body Archive_CLI.Filesystem is
    -------------------------------------------------------------------------
 
    procedure Publish
-     (Item : Transaction; Target : String; Replace : Boolean)
+     (Item    : Transaction;
+      Target  : String;
+      Replace : Boolean)
    is
       Code : C.int;
    begin
       Check_Interrupted;
+
       if Replace then
          Code := Errno_On_Failure
            (C_Rename (C.To_C (Staging_Name (Item)), C.To_C (Target)));
@@ -246,6 +271,7 @@ package body Archive_CLI.Filesystem is
               (Current_Directory_FD, C.To_C (Staging_Name (Item)),
                Current_Directory_FD, C.To_C (Target), Rename_No_Replace));
       end if;
+
       Require (Code, "cannot publish '" & Target & "'");
    end Publish;
 
@@ -257,4 +283,5 @@ package body Archive_CLI.Filesystem is
          Ada.Directories.Delete_Tree (C.To_Ada (Item.Buffer));
       end if;
    end Finalize;
+
 end Archive_CLI.Filesystem;
