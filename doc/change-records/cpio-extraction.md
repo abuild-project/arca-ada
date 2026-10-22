@@ -6,10 +6,10 @@ Abuild configuration, file-object types, logging or scheduling. Public
 operation names, metadata arguments and successful output retain the
 predecessor's behaviour.
 
-The licence and metadata-only provenance prerequisite is prepared separately
+The licence and metadata-only provenance prerequisite was accepted separately
 in [PR #2](https://github.com/mweidle73/arca-ada/pull/2), before this writer
-is published. This topic is based on that LGPL-2.1-or-later decision. Imported
-units retain upstream copyright notices; their SPDX identifiers select the
+is published. This topic is based on the merged LGPL-2.1-or-later decision.
+Imported units retain upstream copyright notices; their SPDX identifiers select the
 additional LGPL grant. The original source grant remains available upstream.
 
 The standalone writer owns its output: an unclosed writer removes unfinished
@@ -51,6 +51,14 @@ specifications and bodies are unchanged apart from licence comments. A parity
 sweep confirms that executable source and existing test behavior are retained.
 Fresh MCP project and symbol queries are complete; writer bodies and both Ada
 test drivers have complete, empty diagnostics after the rebase.
+
+After the licensing merge, this topic was rebased onto the accepted `main`.
+The resulting file tree was identical to the validated pre-merge topic, so
+runtime and coverage checks were not repeated. The native Ada MCP tools are
+available again and confirm complete library/test project views and anchored
+symbol results, with complete empty diagnostics for both writer bodies and
+both test drivers. A final parity sweep found no lost implementation or test
+changes; only this delivery-status documentation was updated afterward.
 
 The fresh AMD64 Trixie image builds through `docker/dev/build`. The clean
 rebuild and parallel check target pass through `docker/dev/run`. The

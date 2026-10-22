@@ -34,6 +34,11 @@ CPIO is first; TAR and Abuild integration remain separate steps.
 
 ## Progress
 
+The separate licensing prerequisite was merged in
+[PR #2](https://github.com/mweidle73/arca-ada/pull/2) on 2026-10-22.
+The topic is rebased onto the accepted `main` with an identical file tree.
+Native Ada MCP project, symbol and file checks pass after that rebase.
+
 Implementation and tests are present on `codex/cpio-extraction`. The copy
 algorithm is preserved. Fresh-image checks, predecessor parity, coverage,
 real-container wrapper tests and author review pass. The fresh Ada MCP pass
