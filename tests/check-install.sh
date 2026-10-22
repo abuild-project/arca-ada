@@ -34,11 +34,16 @@ cp "$repo_root/examples/client/client.gpr" \
     unset ADA_INCLUDE_PATH ADA_OBJECTS_PATH GPR_PROJECT_PATH ADA_PROJECT_PATH
     "$gprbuild_command" -p -P client.gpr \
         -aP"$scratch/prefix/share/gpr" -j"$num_cpus"
-    output=$(./bin/arca_client "$scratch/client/smoke.cpio")
+    output=$(./bin/arca_client "$scratch/client/smoke.cpio" \
+        "$scratch/client/smoke.tar")
     test "$output" = 'Arca project import succeeded'
     test -s "$scratch/client/smoke.cpio"
     grep -a -q '^070701' "$scratch/client/smoke.cpio"
     grep -a -q 'TRAILER!!!' "$scratch/client/smoke.cpio"
+    # The installed TAR API must emit exactly its two empty end blocks.
+    test "$(wc -c < "$scratch/client/smoke.tar")" -eq 1024
+    dd if=/dev/zero bs=512 count=2 2>/dev/null | \
+        cmp - "$scratch/client/smoke.tar"
 
     # A missing install must fail even while the original sources exist.
     mv "$scratch/prefix/share/gpr/arca.gpr" \

@@ -5,7 +5,8 @@ project Tests is
    Coverage := external ("ARCA_COVERAGE", "disabled");
    for Languages use ("Ada");
    for Source_Dirs use (".", "../src");
-   for Main use ("cpio_driver.adb", "arca-copy_checks.adb");
+   for Main use
+     ("cpio_driver.adb", "tar_driver.adb", "arca-copy_checks.adb");
 
    case Coverage is
       when "enabled" =>

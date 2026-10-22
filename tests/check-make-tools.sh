@@ -18,6 +18,7 @@ ln -s "$repo_root/scripts/check-tools.sh" \
     "$scratch/project/scripts/check-tools.sh"
 ln -s /bin/true "$scratch/project/scripts/check-test-tools.sh"
 ln -s /bin/true "$scratch/project/tests/check-cpio.py"
+ln -s /bin/true "$scratch/project/tests/check-tar.py"
 for script in check-preflight check-make-tools check-install check-install-tools; do
     ln -s /bin/true "$scratch/project/tests/$script.sh"
 done

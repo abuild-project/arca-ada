@@ -71,21 +71,24 @@ satisfy the assertion. CI runs these checks against its freshly built image.
 For an ARM image, add `--platform linux/arm64` to the host-side shell check.
 `python3 tests/check-dev-wrappers.py` separately checks wrapper defaults,
 platform/tag selections, paths with spaces, root rejection and command
-argument boundaries without a Docker engine. CI runs it before image builds.
+argument boundaries without a Docker engine. CI runs it after the fresh-source
+coverage check so it cannot create coverage's scratch parent in advance.
 
 ## Project boundary
 
 `arca.gpr` is a static Ada library with no Abuild or third-party project
-imports. `Arca.CPIO` provides the first writer; `Arca.Binary_IO` is a private
-implementation helper containing only the used stream-copy operation. Do not
-add proposed format packages as empty API promises. Introduce each API with
+imports. `Arca.CPIO` and `Arca.TAR` expose format-specific APIs;
+`Arca.Binary_IO` is their private implementation helper containing only the
+used stream-copy operation. Do not add empty API promises for proposed format
+packages. Introduce each API with
 its writer, documented constraints and independent tests.
 
 `examples/client/client.gpr` imports the project by name. The installation
-check copies this client, including its CPIO type use, into a private scratch
-directory, removes inherited Ada/GPR search paths, and discovers Arca only
-through the installed prefix. It also creates and closes a CPIO archive
-through the installed API and checks its newc header and trailer.
+check copies this client, including its CPIO and TAR type use, into a private
+scratch directory, removes inherited Ada/GPR search paths, and discovers Arca only
+through the installed prefix. It creates and closes CPIO and TAR archives
+through the installed APIs, checks the newc header/trailer and compares the
+empty TAR output with exactly two zero blocks.
 It cleans that scratch directory on success, failure and handled signals.
 The selected builder is resolved to an absolute executable path in the
 caller's initial directory before entering the copied client. This preserves
@@ -97,9 +100,11 @@ specific missing-import diagnostic. This negative control verifies that
 the consumer cannot silently fall back to the original source project.
 
 The consumer check establishes GPR packaging and compiler/linker usability.
-The separate CPIO suite checks raw layout, payloads, two external readers,
+The separate CPIO and TAR suites check raw layout, payloads, two external readers,
 parallel instances, errors, reproducibility and scope-exit cleanup. See the
-[CPIO guide](cpio.md) for its contract and the optional predecessor check.
+[CPIO guide](cpio.md) and [TAR guide](tar.md) for their contracts and optional
+predecessor checks. TAR also retains the historical GNU ustar fixture with
+its original producer record; it is checked without device-node privileges.
 Ada checks currently run as direct executables with assertion helpers;
 Python `unittest` orchestrates them and performs independent format checks.
 
@@ -114,7 +119,7 @@ the generated counts do not promise complete branch coverage.
 ## Commands
 
 - `make -j8 all NUM_CPUS=8` builds the static library.
-- `make -j8 check NUM_CPUS=8` runs packaging and CPIO format/lifecycle checks.
+- `make -j8 check NUM_CPUS=8` runs packaging and both writer suites.
 - `make -j8 coverage NUM_CPUS=8` reports executed lines for all production bodies.
 - `make install PREFIX=/absolute/prefix` installs using GPRinstall.
 - `make clean` removes generated GPRbuild artifacts.

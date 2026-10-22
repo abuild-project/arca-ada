@@ -1,0 +1,53 @@
+This golden master was generated with GNU tar 1.34 for the POSIX ustar subset
+that GNU tar and Abuild's native writer can both encode byte-identically.
+
+Covered entry kinds and layout rules:
+- regular file with payload and zero padding
+- empty directory with trailing slash
+- symbolic link with a short target
+- FIFO node
+- character and block device nodes with major/minor numbers
+- regular file whose path is split into POSIX ustar prefix/name fields
+
+Intentionally not covered here:
+- GNU LongName/LongLink metadata records
+- PAX records
+- Abuild-specific metadata/error handling
+
+Those cases are covered by direct raw-header tests and by reader checks against
+GNU tar and libarchive. This fixture exists specifically as an independent
+byte-for-byte reference for the standardized POSIX ustar subset.
+
+Generation command used in an abuild-dev container:
+
+  rm -rf /tmp/tar-golden-root /tmp/tar-golden.tar /tmp/tar-golden.hex
+  mkdir -p /tmp/tar-golden-root/directory
+  cp /work/data/tests_abuild_file_formats_tar/regular_file \
+    /tmp/tar-golden-root/regular_file
+  ln -s regular_file /tmp/tar-golden-root/symbolic_link
+  mkfifo /tmp/tar-golden-root/fifo
+  mknod /tmp/tar-golden-root/character_device c 5 12
+  mknod /tmp/tar-golden-root/block_device b 21 5
+  p=$(printf %0150d 0 | tr 0 a)
+  mkdir -p /tmp/tar-golden-root/$p/middle
+  cp /work/data/tests_abuild_file_formats_tar/regular_file \
+    /tmp/tar-golden-root/$p/middle/leaf.txt
+  chmod 0644 /tmp/tar-golden-root/regular_file \
+    /tmp/tar-golden-root/$p/middle/leaf.txt
+  chmod 0755 /tmp/tar-golden-root/directory
+  chmod 0777 /tmp/tar-golden-root/fifo
+  chmod 0772 /tmp/tar-golden-root/character_device
+  chmod 0006 /tmp/tar-golden-root/block_device
+  tar -b1 --format=ustar --owner=0 --group=0 --numeric-owner \
+    --mtime=@946684800 -C /tmp/tar-golden-root \
+    -cf /tmp/tar-golden.tar \
+    regular_file directory symbolic_link fifo character_device block_device \
+    $p/middle/leaf.txt
+  hexdump -vC /tmp/tar-golden.tar > gnu-ustar-subset.hex
+
+Regenerating the fixture requires privileges for mknod. The unit test itself
+uses the committed hex dump and does not need any special privileges.
+
+Reference SHA-256 of /tmp/tar-golden.tar:
+
+  4a57dfbf22f27b4829a79b814342b8efda7e05fb03e5c5930c525f2941cf4bfc

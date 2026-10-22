@@ -23,6 +23,7 @@ check: all
 		NUM_CPUS="$(NUM_CPUS)" ./tests/check-install-tools.sh
 	"$(GPRBUILD)" -p -P tests/tests.gpr -j$(NUM_CPUS)
 	./tests/check-cpio.py
+	./tests/check-tar.py
 
 coverage: preflight
 	./scripts/check-test-tools.sh

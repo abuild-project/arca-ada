@@ -8,7 +8,7 @@ library project Arca is
    for Library_Dir use "lib";
    for Library_Name use "arca";
    for Library_Kind use "static";
-   for Library_Interface use ("arca", "arca.cpio");
+   for Library_Interface use ("arca", "arca.cpio", "arca.tar");
 
    package Compiler is
       for Default_Switches ("Ada") use
