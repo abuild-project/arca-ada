@@ -27,6 +27,8 @@ def main():
         raise RuntimeError(f"Coverage inventory differs: {inventory ^ actual}")
     if shutil.which("gcov") is None:
         raise RuntimeError("Missing coverage tool: gcov; rebuild the development image")
+    scratch_parent = root / "build"
+    scratch_parent.mkdir(exist_ok=True)
     objects = root / "tests/obj-coverage"
     for data in objects.glob("*.gcda"):
         data.unlink()
@@ -37,7 +39,7 @@ def main():
                     "--copy-driver", str(root / "tests/bin-coverage/arca-copy_checks")],
                    cwd=root, check=True)
     report = {}
-    with tempfile.TemporaryDirectory(prefix="gcov.", dir=root / "build") as name:
+    with tempfile.TemporaryDirectory(prefix="gcov.", dir=scratch_parent) as name:
         scratch = Path(name)
         for source in sorted(inventory):
             subprocess.run(["gcov", "--json-format", "--branch-probabilities",
@@ -58,7 +60,7 @@ def main():
                 report[matches[0]] = {"covered_lines": covered, "executable_lines": len(lines)}
     if set(report) != inventory:
         raise RuntimeError("Missing coverage reports: " + str(inventory - set(report)))
-    destination = root / "build/coverage.json"
+    destination = scratch_parent / "coverage.json"
     destination.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
 

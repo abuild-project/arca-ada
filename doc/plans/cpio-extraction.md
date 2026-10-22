@@ -44,3 +44,10 @@ algorithm is preserved. Fresh-image checks, predecessor parity, coverage,
 real-container wrapper tests and author review pass. The fresh Ada MCP pass
 also confirms complete project and symbol views and empty file diagnostics.
 Results are maintained in the [change record](../change-records/cpio-extraction.md).
+
+## Review follow-up
+
+On 2026-10-22, Codex and Copilot reported the same missing scratch-parent
+dependency in standalone coverage. The coverage entry point now creates its
+own parent, and CI checks coverage first with no existing `build/` directory.
+The fresh-source failure and corrected run are recorded in the change record.

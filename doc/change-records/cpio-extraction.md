@@ -115,6 +115,30 @@ sensitivity, per-instance concurrency, bounded stacks and unchanged copy
 complexity. Documentation, licences, coverage inventory, source style, commit
 message limits, generated artifacts and publication hygiene were checked.
 
+## Review follow-up: standalone coverage
+
+Codex and Copilot identified the same missing scratch parent in PR #3.
+The documented coverage command failed before its first format test when a
+fresh source checkout had no `build/`; earlier packaging and wrapper checks
+had created the directory in the original CI order and masked the dependency.
+
+The coverage entry point now creates that parent before invoking its child
+suite and reuses it for gcov scratch files and the final report. CI runs
+coverage before every other test and asserts that `build/` is initially absent.
+README, development guidance, plan and changelog reflect the standalone path.
+
+In the AMD64 Trixie image, the unchanged committed source snapshot fails with
+`FileNotFoundError` in the suite's `TemporaryDirectory` setup. The corrected
+entry point succeeds in a second fresh source copy without prebuilt objects
+or a scratch parent, runs the instrumented suite and produces the same
+production-body line counts. The normal check also passes afterward in that
+copy, verifying the new target order. The optional predecessor comparison
+is not enabled by this standalone coverage command;
+its earlier separate parity evidence remains unchanged. No Ada writer or
+format behavior changes. The follow-up self-review checks the whole startup
+path and CI order, rather than treating the earlier sequential green run as
+evidence for independent coverage startup.
+
 ## Review lessons
 
 - Every payload-bearing operation is covered, including symlink data and

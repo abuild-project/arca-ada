@@ -67,8 +67,10 @@ These are packaging checks, not format-conformance tests.
 
 The same target separately runs CPIO raw-layout, payload, external-reader,
 reproducibility, error and lifecycle checks. `make -j8 coverage NUM_CPUS=8`
-checks the production-body inventory and records executed lines. See the
-[CPIO guide](doc/cpio.md) for the API and optional predecessor comparison.
+checks the production-body inventory and records executed lines. It also runs
+from a fresh checkout before `make check`; it creates its scratch parent.
+The [CPIO guide](doc/cpio.md) describes the API and optional predecessor
+comparison.
 
 Select alternative GPR executables with the Make variables `GPRBUILD`,
 `GPRINSTALL` and `GPRCLEAN`. Each value is one executable name or path,

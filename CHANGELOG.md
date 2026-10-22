@@ -8,6 +8,7 @@
 - Remove unfinished CPIO outputs on scope exit and preserve writer state when
   a second Create is rejected.
 - Add raw-layout, reader, parity, lifecycle and coverage checks.
+- Run standalone coverage from a fresh checkout and check that order in CI.
 - Use shared development build/run wrappers locally and in CI, with explicit
   architecture selection and consistent AMD64 defaults.
 - Bootstrap the Arca library project, independent client and installation check.

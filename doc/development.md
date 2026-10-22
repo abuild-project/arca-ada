@@ -30,8 +30,10 @@ They do not install tools during a build or test run.
 
 The image tag follows Debian's Trixie updates; it is not an immutable image
 digest and does not promise bit-reproducible toolchains. The GitHub workflow
-builds this Dockerfile and runs the same check command.
-It then runs the separate coverage target. Python 3, GNU cpio, libarchive's
+builds this Dockerfile and runs the standalone coverage target before any
+other tests. It first asserts that `build/` does not exist, verifying that
+coverage creates its own scratch parent without packaging or wrapper checks.
+The normal check target follows. Python 3, GNU cpio, libarchive's
 bsdtar and gcov are supplied by the development image; the test preflight
 reports missing reader tools together.
 
