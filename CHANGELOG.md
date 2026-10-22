@@ -7,6 +7,8 @@
 - Test installed CLI execution, independent readers, metadata overrides,
   relative paths, option forms, cancellation, source changes and output
   preservation; cover CLI Ada/C bodies.
+- Synchronize phase-sensitive CLI tests with an acknowledged child barrier
+  instead of staging polling and delayed SIGSTOP.
 - Handle CLI signals in Ada and bind simple system calls directly, retaining
   C only for the lstat metadata wrapper.
 - Preserve CLI I/O diagnostics, reject directory-read failures, make staging

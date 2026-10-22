@@ -5,17 +5,17 @@
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 import os
 from pathlib import Path
 import runpy
+import select
 import signal
 import socket
 import stat
 import subprocess
 import sys
 import tempfile
-import time
 import unittest
 
 
@@ -595,39 +595,121 @@ class CLIChecks(unittest.TestCase):
         self.assertEqual(list(self.work.glob(".arca-*")), [])
 
     @contextmanager
-    def paused_creation(self, format_name, root, archive, *options):
-        """Stop after staging opens, proving inventory and handlers are ready."""
+    def paused_creation(self, format_name, root, archive, *options, barrier=True):
+        """Hold at staging open; callers explicitly release and wait for exit."""
         environment = dict(os.environ)
         environment.pop("SOURCE_DATE_EPOCH", None)
-        process = subprocess.Popen(
-            [str(OPTIONS.cli), *map(str, self.command(
-                format_name, root, archive, *options))],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment)
-        try:
-            deadline = time.monotonic() + 30
-            while not any(archive.parent.glob(".arca-*/archive")):
-                self.assertIsNone(process.poll(), "CLI exited before test phase")
-                self.assertLess(time.monotonic(), deadline, "no staging output")
-                time.sleep(0.001)
-            os.kill(process.pid, signal.SIGSTOP)
-            _, status = os.waitpid(process.pid, os.WUNTRACED)
-            self.assertTrue(os.WIFSTOPPED(status), "CLI must be paused in emission")
-            self.assertFalse(archive.exists() and not options,
-                             "default publication must still be pending")
-            yield process
-        finally:
-            if process.poll() is None:
-                process.kill()
-            process.communicate(timeout=30)
+        settings, log = self.faults("phase-barrier" if barrier else "", root)
+        environment.update(settings)
+        original = archive.read_bytes() if archive.exists() else None
+
+        with ExitStack() as stack:
+            ready_r, ready_w = os.pipe()
+            ready = stack.enter_context(os.fdopen(ready_r, "rb", buffering=0))
+            child_ready = stack.enter_context(os.fdopen(ready_w, "wb", buffering=0))
+            release_r, release_w = os.pipe()
+            child_release = stack.enter_context(os.fdopen(release_r, "rb", buffering=0))
+            release_pipe = stack.enter_context(os.fdopen(release_w, "wb", buffering=0))
+            environment["ARCA_TEST_READY_FD"] = str(child_ready.fileno())
+            environment["ARCA_TEST_RELEASE_FD"] = str(child_release.fileno())
+
+            def reap_child(process):
+                """Own the child and its streams even if readiness setup fails."""
+                release_pipe.close()
+                if process.poll() is None:
+                    process.kill()
+                try:
+                    process.communicate(timeout=30)
+                finally:
+                    process.stdout.close()
+                    process.stderr.close()
+
+            process = subprocess.Popen(
+                [str(OPTIONS.cli), *map(str, self.command(
+                    format_name, root, archive, *options))],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment,
+                pass_fds=(child_ready.fileno(), child_release.fileno()))
+            stack.callback(reap_child, process)
+            child_ready.close()
+            child_release.close()
+            released = False
+
+            def release():
+                """Allow exactly one blocked child to start emission."""
+                nonlocal released
+                self.assertFalse(released, "phase already released")
+                self.assertEqual(release_pipe.write(b"G"), 1)
+                release_pipe.close()
+                released = True
+
+            readable, _, _ = select.select([ready], [], [], 30)
+            self.assertTrue(readable, "phase barrier acknowledgement timed out")
+            self.assertEqual(ready.read(1), b"R", "phase barrier acknowledgement missing")
+            self.assertIsNone(process.poll(), "CLI exited at the barrier")
+            self.assertEqual(log.read_text(), "barrier ready\n")
+            staging = list(archive.parent.glob(".arca-*/archive"))
+            self.assertEqual(len(staging), 1)
+            self.assertEqual(staging[0].stat().st_size, 0)
+            if original is None:
+                self.assertFalse(archive.exists())
+            else:
+                self.assertEqual(archive.read_bytes(), original)
+            yield process, release
+            self.assertTrue(released, "caller must release the phase barrier")
 
     def phase_tree(self):
-        # Enough entries to observe emission before publication even on a fast
-        # local filesystem. Readiness is asserted; an early exit cannot pass.
+        # The pipe barrier holds even this tiny tree before entry emission.
         root = self.work / "phase-source"
         root.mkdir()
-        for number in range(2048):
+        for number in range(2):
             (root / f"entry-{number:04}").write_bytes(b"x")
         return root
+
+    def test_phase_barrier_release_control(self):
+        root = self.phase_tree()
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("release." + format_name)
+            with self.paused_creation(format_name, root, archive) as (process, release):
+                release()
+                _, error = process.communicate(timeout=30)
+                self.assertEqual(process.returncode, 0, error)
+            entries = records(archive, format_name)
+            self.assertEqual(set(entries), {"entry-0000", "entry-0001"})
+            self.assertTrue(all(entry["data"] == b"x" for entry in entries.values()))
+            self.assertIn("barrier released", (self.work / "fault.log").read_text())
+            self.assertEqual(list(self.work.glob(".arca-*")), [])
+
+    def test_phase_barrier_requires_acknowledgement(self):
+        root = self.phase_tree()
+        descriptors = len(list(Path("/proc/self/fd").iterdir()))
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("no-barrier." + format_name)
+            # A completed CLI without the hook must fail readiness, rather
+            # than pass because its staging file happened to be observed.
+            with self.assertRaisesRegex(AssertionError, "phase barrier acknowledgement"):
+                with self.paused_creation(format_name, root, archive, barrier=False):
+                    self.fail("missing barrier must not reach the test body")
+            self.assertEqual(len(list(Path("/proc/self/fd").iterdir())), descriptors)
+
+    def test_phase_barrier_reaps_child_on_parent_error(self):
+        root = self.phase_tree()
+        descriptors = len(list(Path("/proc/self/fd").iterdir()))
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("parent-error." + format_name)
+            with self.assertRaisesRegex(RuntimeError, "parent marker"):
+                with self.paused_creation(format_name, root, archive) as (process, _):
+                    raise RuntimeError("parent marker")
+            self.assertIsNotNone(process.poll())
+            self.assertFalse(archive.exists())
+            self.assertEqual(len(list(Path("/proc/self/fd").iterdir())), descriptors)
+            # Forced termination bypasses Ada finalization. Remove only the
+            # empty staging file/tree owned by this test before the next case.
+            staging = list(self.work.glob(".arca-*"))
+            self.assertEqual(len(staging), 1)
+            self.assertEqual(list(staging[0].iterdir()), [staging[0] / "archive"])
+            self.assertEqual((staging[0] / "archive").stat().st_size, 0)
+            (staging[0] / "archive").unlink()
+            staging[0].rmdir()
 
     def test_cancel_preserves_output_and_cleans_staging(self):
         root = self.phase_tree()
@@ -637,9 +719,9 @@ class CLIChecks(unittest.TestCase):
                     archive = self.work / ("cancel." + format_name)
                     archive.write_bytes(b"keep original")
                     with self.paused_creation(format_name, root, archive,
-                                              "--force") as process:
+                                              "--force") as (process, release):
                         os.kill(process.pid, number)
-                        os.kill(process.pid, signal.SIGCONT)
+                        release()
                         _, error = process.communicate(timeout=30)
                         self.assertEqual(process.returncode, 128 + number, error)
                         self.assertIn(b"interrupted", error)
@@ -650,9 +732,9 @@ class CLIChecks(unittest.TestCase):
         root = self.phase_tree()
         for format_name in ("cpio", "tar"):
             archive = self.work / ("late." + format_name)
-            with self.paused_creation(format_name, root, archive) as process:
+            with self.paused_creation(format_name, root, archive) as (process, release):
                 archive.write_bytes(b"created by another process")
-                os.kill(process.pid, signal.SIGCONT)
+                release()
                 _, error = process.communicate(timeout=30)
                 self.assertEqual(process.returncode, 1, error)
                 self.assertIn(b"cannot publish", error)
@@ -664,14 +746,14 @@ class CLIChecks(unittest.TestCase):
         for format_name in ("cpio", "tar"):
             # Force a size change in both formats, regardless of filesystem
             # timestamp resolution or the preceding format's test mutation.
-            (root / "entry-2047").write_bytes(b"x")
+            (root / "entry-0001").write_bytes(b"x")
             archive = self.work / ("changed." + format_name)
-            with self.paused_creation(format_name, root, archive) as process:
-                (root / "entry-2047").write_bytes(b"changed after inventory")
-                os.kill(process.pid, signal.SIGCONT)
+            with self.paused_creation(format_name, root, archive) as (process, release):
+                (root / "entry-0001").write_bytes(b"changed after inventory")
+                release()
                 _, error = process.communicate(timeout=30)
                 self.assertEqual(process.returncode, 1, error)
-                self.assertIn(b"source changed: 'entry-2047'", error)
+                self.assertIn(b"source changed: 'entry-0001'", error)
             self.assertFalse(archive.exists())
             self.assertEqual(list(self.work.glob(".arca-*")), [])
 

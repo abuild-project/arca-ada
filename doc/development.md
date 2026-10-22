@@ -168,6 +168,15 @@ asserting archive behavior. Maximum-size acceptance reaches an intentionally
 unreadable source; rejection at max+1 happens during inventory, without
 creating multi-gigabyte archive payloads.
 
+Phase-sensitive CLI tests use the same preload library to hold the child
+after the successful staging-file open, before entry emission. One inherited
+pipe acknowledges readiness; another requires an explicit release byte. The
+parent checks that staging is empty and the destination is unchanged before
+mutating input or sending signals. Interrupted pipe calls retry. Timeouts,
+EOF and unexpected tokens fail readiness. Parent pipes and child processes
+have exception-safe ownership; positive release, missing-hook and parent-error
+controls check the protocol and descriptor cleanup with small input trees.
+
 ## Commands
 
 - `make -j8 all NUM_CPUS=8` builds the static library and CLI.

@@ -259,3 +259,26 @@ Use small fixtures and add a successful release control plus a missing-barrier
 control. Validate the phase tests, full normal checks and complete coverage
 in rootless Trixie. Keep runtime sources and production test-hook boundaries
 unchanged, then update PR #7 and request another Copilot review.
+
+## Phase barrier implemented on 2026-10-22
+
+The test-only fopen/fopen64 wrapper now acknowledges successful staging open
+and waits for a release token, retrying interrupted pipe calls. The parent
+owns all pipe endpoints, subprocess streams and child cleanup through an
+ExitStack. Readiness checks require the exact acknowledgement, a live child,
+empty staging and the original destination state. Explicit release replaces
+SIGCONT; staging polling, SIGSTOP and the large timing fixture are removed.
+
+Release, absent-hook and parent-exception controls pass alongside all affected
+cases. Repeated runs pass with the two-file fixture. Replacing the new shim
+with its pre-barrier version deterministically fails readiness assertions;
+the test body cannot proceed without the handshake. After forced child
+termination, the parent-error control explicitly removes only its own empty
+staging file/tree because SIGKILL bypasses Ada finalization.
+
+Fresh-source complete coverage first and the full normal check pass rootless
+in AMD64 Trixie without network or Abuild access. The production inventory,
+build inputs and runtime sources are unchanged. Author self-review covered
+phase ordering, protocol/error ownership, signal delivery, independent output
+assertions and negative controls, source/documentation hygiene and commits.
+Independent static review follows on the committed test-only correction.

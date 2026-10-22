@@ -52,9 +52,17 @@ guides, changelog and indexed plans describe the supported interface.
   rejected before emission, without writing multi-gigabyte archives.
 - Phase-controlled tests cover cancellation, changed sources and late targets.
   A child-only preload library injects read, write, rename, link and cleanup
-  faults. Traces and positive controls verify real paths, preserved output,
-  original diagnostics, stale errno and success after publication. Production
-  code contains no test hooks.
+  faults. It also acknowledges staging-file open through an inherited pipe
+  and blocks entry emission until a second pipe delivers an explicit release.
+  Small fixtures replace timing-based polling/SIGSTOP. Successful release,
+  missing-hook and parent-error controls check readiness, process reaping and
+  descriptor cleanup. The previous preload library fails the new readiness
+  assertions deterministically. Traces and positive controls verify real
+  paths, preserved output, original diagnostics, stale errno and success
+  after publication. Production code contains no test hooks.
+  The barrier controls and affected cases pass repeated runs; full coverage
+  and normal checks also pass from fresh rootless Trixie sources without
+  network or Abuild access after the synchronization correction.
 - Regression assertions fail against the pre-correction CLI and pass with the
   correction. The trailer-name and no-clobber guards also have sensitivity
   evidence. Coverage's complete inventory requires executed lines for every

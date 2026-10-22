@@ -4,6 +4,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,64 @@ static void trace(const char *message)
         _exit(125);
     errno = saved;
 }
+
+static int phase_fd(const char *name)
+{
+    const char *value = getenv(name);
+    char *end;
+    if (!value || !*value)
+        _exit(125);
+    errno = 0;
+    long fd = strtol(value, &end, 10);
+    if (errno || *end || fd < 3 || fd > INT_MAX)
+        _exit(125);
+    return (int)fd;
+}
+
+static void phase_barrier(const char *path)
+{
+    static int entered;
+    if (!fault("phase-barrier") || entered ||
+        !strstr(path, "/.arca-") || !strstr(path, "/archive"))
+        return;
+    entered = 1;
+
+    /* fopen has created empty staging after inventory and handler setup.
+       No entry can be emitted until the parent sends the release token. */
+    int saved = errno;
+    int ready = phase_fd("ARCA_TEST_READY_FD");
+    int release = phase_fd("ARCA_TEST_RELEASE_FD");
+    char token = 'R';
+    ssize_t count;
+    trace("barrier ready\n");
+    do {
+        count = write(ready, &token, 1);
+    } while (count < 0 && errno == EINTR);
+    if (count != 1 || close(ready) != 0)
+        _exit(125);
+    do {
+        count = read(release, &token, 1);
+    } while (count < 0 && errno == EINTR);
+    if (count != 1 || token != 'G' || close(release) != 0)
+        _exit(125);
+    trace("barrier released\n");
+    errno = saved;
+}
+
+/* Cover both libc stdio entry points used by GNAT runtimes. */
+#define FOPEN_HOOK(name) \
+FILE *name(const char *path, const char *mode) \
+{ \
+    FILE *(*original)(const char *, const char *); \
+    NEXT(#name, original); \
+    FILE *result = original(path, mode); \
+    if (result) \
+        phase_barrier(path); \
+    return result; \
+}
+
+FOPEN_HOOK(fopen)
+FOPEN_HOOK(fopen64)
 
 static int selected_directory(DIR *dir)
 {

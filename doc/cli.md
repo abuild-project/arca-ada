@@ -120,8 +120,10 @@ it with GNU cpio/tar and libarchive's bsdtar. Fixtures cover metadata limits,
 source hardlinks, Unicode names, dangling and directory symlinks, FIFOs,
 reproducibility, empty trees, installed execution and parallel processes.
 Phase-controlled tests exercise SIGINT/SIGTERM cancellation, changed input and
-a destination created just before publication. Failure tests verify old output
-and staging cleanup, including an unwritable output parent. Device emission
+a destination created just before publication. A test-only child barrier
+confirms inventory completion and holds emission until explicitly released.
+Failure tests verify old output and staging cleanup, including an unwritable
+output parent. Device emission
 is covered by native writer tests; creating device fixtures through the CLI
 is not part of the rootless test suite.
 
