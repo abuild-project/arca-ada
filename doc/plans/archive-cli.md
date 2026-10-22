@@ -143,3 +143,15 @@ including the accepted finalizer-failure cases, CLI, format, reader and
 installation checks. Ada MCP's exact CLI project/index and all CLI Ada file
 diagnostics are complete and empty. Fresh-source coverage and final static
 parity review follow on this rebased, reformatted state.
+
+## Rebase validation completed on 2026-10-22
+
+Fresh tracked sources pass complete coverage first and then the normal check
+in a rootless AMD64 Trixie container with network disabled and no Abuild mount.
+The unchanged production-body inventory has executed lines for every entry.
+Both independent static parity passes confirm the retained implementation,
+tests and accepted library base; no Ada layout issue was found. The source
+pass identified a change-record index ordering error, corrected before
+delivery. Final author review confirms token parity, contracts, cleanup and
+state ownership, unchanged test sensitivity/scaling, documentation links,
+commit-message rules and a clean tracked worktree.

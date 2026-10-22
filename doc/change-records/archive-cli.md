@@ -145,6 +145,19 @@ unchanged cancellation, publication ordering, container ownership and ABI
 contracts. Literal-preserving token parity supplies direct evidence that the
 layout edit retains behavior; no performance change is claimed.
 
+The rebased, reformatted sources also pass complete coverage first and then
+the full normal check in a fresh tracked-source copy, running rootless in
+AMD64 Trixie with no network or Abuild mount. All production bodies have
+executed lines and no inventory entry is omitted. Both static parity passes
+confirm retained CLI behavior, fixtures, build/installation/CI wiring and
+accepted library changes. The source pass identified an index ordering
+mistake; the change-record index now follows filename order. No Ada layout
+finding remains. Final author review rechecked literal-preserving parity,
+declaration contracts and separators, whitespace, documentation links and
+commit 50/72 limits. Relevant lifecycle, metadata, concurrency, sensitivity
+and scaling review lessons retain their earlier dispositions because the
+runtime tokens and tests are unchanged. No generated artifact is committed.
+
 ## Ada MCP
 
 The exact CLI project and anchored package index are complete. File-scoped
