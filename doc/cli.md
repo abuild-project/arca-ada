@@ -91,10 +91,10 @@ file without overwriting another destination. The private staging name is
 then removed during cleanup. Filesystems must support at least one of these
 publication methods. An ambiguous NFS link error is accepted as success only
 when the destination has the same regular-file identity as the staging file.
-`--force` uses atomic rename to replace the
-destination; for an existing symlink it replaces the link itself and leaves
-its target alone. Existing directories and special nodes are rejected. Keep
-the destination stable when using `--force`.
+`--force` uses atomic rename to replace the destination; for an existing
+symlink it replaces the link itself and leaves its target alone. Existing
+directories and special nodes are rejected. Keep the destination stable
+when using `--force`.
 
 Errors before publication preserve the previous output. Directory-read
 errors abort inventory instead of being treated as its end. Entry diagnostics
@@ -102,9 +102,8 @@ retain the underlying exception message, or its name when no message exists.
 Normal unwinding attempts staging removal. Cleanup is best effort: failure
 can leave a private staging directory, but never masks an earlier error or
 turns successful publication into failure.
-SIGINT and SIGTERM request controlled cleanup at the next
-filesystem or entry boundary;
-a synchronous payload copy may finish before the request is observed.
+SIGINT and SIGTERM request controlled cleanup at the next filesystem or entry
+boundary; a synchronous payload copy may finish before the request is observed.
 SIGKILL, a process crash or power loss cannot guarantee cleanup. Atomic
 publication does not promise durable storage after a power failure.
 

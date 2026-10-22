@@ -398,6 +398,22 @@ class CLIChecks(unittest.TestCase):
             self.assert_tree(first, format_name, root, uid=123, gid=456, mtime=0)
             self.assertEqual(first.read_bytes(), second.read_bytes())
 
+    def test_relative_output_and_long_options(self):
+        root = self.tree()
+        (self.work / "output files").mkdir()
+        for format_name in ("cpio", "tar"):
+            for index, (directory, output) in enumerate(
+                    (("-C", "-o"), ("--directory", "--output"))):
+                relative = Path("relative." + format_name)
+                if index:
+                    relative = Path("output files") / relative
+                archive = self.work / relative
+                self.invoke(["create", "--format", format_name,
+                             directory, root.name, output, str(relative)],
+                            cwd=self.work)
+                self.assert_tree(archive, format_name, root)
+                self.assertEqual(list(archive.parent.glob(".arca-*")), [])
+
     def test_epoch_environment_and_precedence(self):
         root = self.work / "empty-root"
         root.mkdir()
@@ -410,6 +426,13 @@ class CLIChecks(unittest.TestCase):
             self.invoke(self.command(format_name, root, archive, "--force", "--mtime=0"),
                         env={"SOURCE_DATE_EPOCH": "invalid"})
             self.assertEqual(records(archive, format_name)["file"]["mtime"], 0)
+            archive.unlink()
+            for value in ("invalid", "-1", ""):
+                result = self.invoke(self.command(format_name, root, archive),
+                                     expected=2, env={"SOURCE_DATE_EPOCH": value})
+                self.assertIn(b"SOURCE_DATE_EPOCH", result.stderr)
+                self.assertFalse(archive.exists())
+                self.assertEqual(list(self.work.glob(".arca-*")), [])
 
     def test_maximum_metadata(self):
         root = self.work / "maximum-root"

@@ -5,7 +5,8 @@
 - Add a Linux CLI for creating uncompressed CPIO and TAR archives, preserving
   metadata and links with deterministic ordering and atomic publication.
 - Test installed CLI execution, independent readers, metadata overrides,
-  cancellation, source changes and output preservation; cover CLI Ada/C bodies.
+  relative paths, option forms, cancellation, source changes and output
+  preservation; cover CLI Ada/C bodies.
 - Handle CLI signals in Ada and bind simple system calls directly, retaining
   C only for the lstat metadata wrapper.
 - Preserve CLI I/O diagnostics, reject directory-read failures, make staging

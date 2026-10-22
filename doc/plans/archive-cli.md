@@ -211,3 +211,20 @@ Final author review confirms that the committed code matches the validated
 fresh sources and that documentation, source style, commit rules and worktree
 hygiene are complete. The CLI executable in the working checkout is rebuilt
 from the same final code. The topic remains local and unpublished.
+
+## Final option coverage on 2026-10-22
+
+The external read-only review accepted the correction and noted three small
+remaining test gaps. CLI fixtures now create both formats with relative
+basenames and relative parent directories, using both short and long
+directory/output options. They independently decode and check the archive.
+The epoch/precedence case also rejects malformed, negative and empty
+SOURCE_DATE_EPOCH without an explicit mtime, requiring exit 2, a named
+diagnostic and no output or staging. The CLI guide's paragraph wrapping is
+corrected. This step changes tests and documentation only.
+
+The expanded CLI suite, complete coverage and full normal check pass in the
+rootless AMD64 Trixie environment. All production bodies retain executed
+coverage; build recipes and production sources are unchanged. Author review
+checked the independent output assertions, environment-error controls,
+fixture cleanup, documentation links, commit hygiene and final worktree.

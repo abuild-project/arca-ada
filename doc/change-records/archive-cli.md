@@ -231,6 +231,20 @@ and documentation requirements, commit hygiene and generated-artifact
 exclusion. The checkout's CLI binary is rebuilt from the same final code.
 This documentation completion changes no runtime or test source.
 
+The final option checks exercise successful relative output basenames and
+relative parent directories with both short and long directory/output options
+in both formats. Independent decoders verify the resulting archives. The
+existing epoch/precedence positive controls are extended with invalid,
+negative and empty SOURCE_DATE_EPOCH values without a mtime override; each
+requires exit 2, a contextual diagnostic and no output or staging. The CLI
+guide's paragraph wrapping and the changelog's test inventory are updated.
+These additions change no production code or metadata policy.
+The complete coverage target and full normal check pass again in rootless
+AMD64 Trixie. Author review confirms independent format assertions, valid
+epoch controls alongside the negative cases, absence of output/staging on
+usage errors and retained production/build/coverage inputs. Documentation
+links, whitespace, final newlines and commit-message requirements pass.
+
 ## Ada MCP
 
 The exact CLI project and anchored package index are complete. File-scoped
