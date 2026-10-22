@@ -6,10 +6,14 @@ GPRBUILD ?= gprbuild
 GPRINSTALL ?= gprinstall
 GPRCLEAN ?= gprclean
 
-.PHONY: all check coverage install clean preflight
+.PHONY: all cli check coverage install clean preflight
 
 all: preflight
 	"$(GPRBUILD)" -p -P arca.gpr -j$(NUM_CPUS)
+	"$(GPRBUILD)" -p -P cli/cli.gpr -aP. -j$(NUM_CPUS)
+
+cli: preflight
+	"$(GPRBUILD)" -p -P cli/cli.gpr -aP. -j$(NUM_CPUS)
 
 check: all
 	./scripts/check-test-tools.sh
@@ -25,6 +29,7 @@ check: all
 	./tests/check-unit.py
 	./tests/check-cpio.py
 	./tests/check-tar.py
+	./tests/check-cli.py
 
 coverage: preflight
 	./scripts/check-test-tools.sh
@@ -32,11 +37,15 @@ coverage: preflight
 
 install: all
 	"$(GPRINSTALL)" -p -P arca.gpr --prefix="$(PREFIX)"
+	"$(GPRINSTALL)" -p -P cli/cli.gpr -aP. --prefix="$(PREFIX)" \
+		--mode=usage --no-project
 
 clean:
 	"$(GPRCLEAN)" -P tests/tests.gpr
 	"$(GPRCLEAN)" -P tests/tests.gpr -XARCA_COVERAGE=enabled
 	"$(GPRCLEAN)" -P examples/client/client.gpr -aP.
+	"$(GPRCLEAN)" -P cli/cli.gpr -aP.
+	"$(GPRCLEAN)" -P cli/cli.gpr -aP. -XARCA_CLI_COVERAGE=enabled
 	"$(GPRCLEAN)" -P arca.gpr
 
 preflight:

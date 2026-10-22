@@ -56,3 +56,19 @@ the library's synchronous file copy has no cancellation callback.
    handing the local topic to external review.
 
 No Abuild checkout or credentials are required by the CLI or its normal tests.
+
+## Progress on 2026-10-22
+
+Steps 1 and 2 are implemented locally: the warning-free command builds and
+installs independently of the public library API. Integration checks cover
+both writers, numeric metadata, independent decoders and external readers,
+selected hardlinks, symlinks, FIFOs, deterministic output and error cleanup.
+Phase-controlled checks pin cancellation, late destination creation and
+changed input. GNAT's raw directory-name iterator is used because the higher
+level Ada.Directories search rejects dangling symlinks and special nodes
+while fetching modification times. The CLI takes their metadata with lstat.
+
+Step 3 is implemented: coverage checks the complete Ada/C body inventory and
+normal installation checks execute the installed CLI for both formats. A
+fresh source copy passes coverage first and then the complete normal target
+in a rootless, network-disabled Trixie container with no Abuild mount.

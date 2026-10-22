@@ -2,3 +2,9 @@
 src/arca-binary_io.adb
 src/arca-cpio.adb
 src/arca-tar.adb
+cli/src/arca_main.adb
+cli/src/archive_cli.adb
+cli/src/archive_cli-filesystem.adb
+cli/src/archive_cli-options.adb
+cli/src/archive_cli-writer.adb
+cli/src/posix_bridge.c

@@ -5,7 +5,7 @@ set -eu
 
 missing=''
 for tool in "${GPRBUILD:-gprbuild}" "${GPRINSTALL:-gprinstall}" \
-    "${GPRCLEAN:-gprclean}" gnatls make mktemp grep; do
+    "${GPRCLEAN:-gprclean}" gnatls gcc make mktemp grep; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         missing="$missing $tool"
     fi

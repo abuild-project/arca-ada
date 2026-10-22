@@ -43,7 +43,7 @@ def decode_newc(data):
         require(end <= len(data), "truncated name")
         require(data[end - 1] == 0 and b"\0" not in data[start:end - 1],
                 "name terminator")
-        name = data[start:end - 1].decode("ascii")
+        name = os.fsdecode(bytes(data[start:end - 1]))
         aligned = (end + 3) & ~3
         require(not any(data[end:aligned]), "name padding")
         start = aligned
