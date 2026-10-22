@@ -1,6 +1,7 @@
 # Writer cleanup and compiler checks
 
-Status: Requested on 2026-10-22 as a separate library PR before the CLI.
+Status: Implemented and locally validated on 2026-10-22 as a separate library
+PR before the CLI; author review complete and external review prepared.
 
 ## Accepted scope
 
@@ -48,3 +49,10 @@ Fresh-source coverage-first and complete normal checks pass without network
 or Abuild access. A mutation omitting the close fallback fails both new cases
 at their descriptor assertion. Author review and complete Ada MCP diagnostics
 are finished; independent static review is next, before publication.
+
+## Final review on 2026-10-22
+
+The validation pass reports no concrete findings. The source pass identified
+minor fixture-path and index/status documentation issues, corrected before
+publication; it found no runtime blocker. Source and test behavior are stable,
+all required local validation is complete and the topic contains no CLI work.

@@ -57,6 +57,12 @@ complete test project/index with empty file-scoped diagnostics for all changed
 Ada units. Its semantic-only Ahven view comes from the reference package;
 compiler/runtime validation uses the installed dependency in the Trixie image.
 
+Independent static validation found no concrete findings. The source pass
+confirmed cleanup behavior and identified minor fixture-path/index/status
+documentation issues, corrected before publication. Final author review of
+those corrections preserves the tested production/test behavior. The Ahven
+plan/index now records its already accepted PR #5 status consistently.
+
 The topic starts from accepted main and contains no CLI implementation or
 Abuild dependency switch. The separate Abuild roadmap/P7 topic records the
 future repository and adapter boundaries. CPIO/TAR guides, developer/unit-test

@@ -15,7 +15,7 @@ package Unit_Support is
    --  Own an empty private Linux /tmp tree for real permission-failure tests.
 
    function Path (Item : Fixture) return String;
-   --  Return the fixture directory beneath this runner's private root.
+   --  Return the owned directory beneath the runner root or on native /tmp.
 
    procedure Assert_Equal_Files (Left, Right : String);
    --  Compare complete files with bounded buffers, including their lengths.
