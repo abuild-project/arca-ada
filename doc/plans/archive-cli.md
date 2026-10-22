@@ -282,3 +282,13 @@ build inputs and runtime sources are unchanged. Author self-review covered
 phase ordering, protocol/error ownership, signal delivery, independent output
 assertions and negative controls, source/documentation hygiene and commits.
 Independent static review follows on the committed test-only correction.
+
+## Phase barrier review completed on 2026-10-22
+
+Both independent static passes report no concrete findings. They confirm the
+staging-open phase boundary, exact acknowledgement/release protocol, EINTR
+handling, exception-safe fd/stream/process ownership and non-vacuous controls.
+The small-fixture signal, input-change and competing-output assertions retain
+their purpose. Final author review confirms validated-source parity and
+unchanged runtime/build/coverage inputs. The correction is ready for PR #7
+and another Copilot review.
