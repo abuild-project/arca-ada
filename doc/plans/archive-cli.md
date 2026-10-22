@@ -1,7 +1,7 @@
 # Archive creation CLI
 
-Status: Implemented and locally validated on 2026-10-22, including the smaller
-C boundary. Author and independent static reviews complete; not published.
+Status: Implemented, locally validated and reviewed on 2026-10-22. GitHub PR
+publication is authorized; delivery preparation is complete.
 
 ## Scope and interface
 
@@ -228,3 +228,10 @@ rootless AMD64 Trixie environment. All production bodies retain executed
 coverage; build recipes and production sources are unchanged. Author review
 checked the independent output assertions, environment-error controls,
 fixture cleanup, documentation links, commit hygiene and final worktree.
+
+## GitHub delivery on 2026-10-22
+
+The owner requested PR creation. The canonical change record is condensed to
+the final implementation, validation and boundaries; dated implementation and
+review evidence remains in this plan and Git history. Runtime/test sources
+match the validated revision, and the accepted main base is unchanged.
