@@ -87,7 +87,10 @@ aligned TAR and numeric-owner scenarios. Representative corruptions accepted
 by the previous PR checks are rejected now: extra zero blocks, lowercase hex,
 symlink/rdev fields and checksum-valid GNU hardlink type/fallback changes.
 The individual matrix includes all 15 CPIO, 28 TAR and three shared-helper
-registrations. Final review of these additions is pending.
+registrations. Independent CPIO and TAR re-reviews confirm the identified
+gaps are closed, with no blocking, fix-before-PR or follow-up findings. Final
+author review of the additions, assertion sensitivity, documented mapping,
+source style, commit hygiene and unchanged production boundary is complete.
 
 The library, sources and coverage inventory have no
 production changes. Abuild's User Manual, Developer Guide, dependencies and release

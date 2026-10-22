@@ -64,4 +64,6 @@ the existing PR before merge:
 The additions, individual case matrix, targeted corruption controls and
 expanded predecessor comparisons are implemented and locally validated.
 Complete normal and coverage checks also pass from fresh sources without
-network or Abuild access. Final review of the follow-up is pending.
+network or Abuild access. Independent CPIO/TAR re-reviews and final author
+review confirm the gaps are closed, with no remaining findings. The additions
+are ready for the existing PR.
