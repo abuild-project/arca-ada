@@ -91,8 +91,8 @@ its target alone. Existing directories and special nodes are rejected. Keep
 the destination stable when using `--force`.
 
 Errors before publication preserve the previous output; normal unwinding
-removes staging. SIGINT and
-SIGTERM request controlled cleanup at the next filesystem or entry boundary;
+removes staging. SIGINT and SIGTERM request controlled cleanup at the next
+filesystem or entry boundary;
 a synchronous payload copy may finish before the request is observed.
 SIGKILL, a process crash or power loss cannot guarantee cleanup. Atomic
 publication does not promise durable storage after a power failure.

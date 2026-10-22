@@ -138,8 +138,8 @@ Installed-library usability is checked separately by the copied client.
 Coverage uses distinct object and executable directories, clears previous
 execution counts and checks `tests/coverage-sources.txt` against every current
 production body, including the CLI's Ada and C sources. It requires a report
-with executed lines for each body;
-the generated counts do not promise complete branch coverage.
+with executed lines for each body; the generated counts do not promise
+complete branch coverage.
 
 Library and test compilation enable `-gnatVa`, `-fstack-check` and `-gnateE`
 in addition to the existing warnings, overflow and normal Ada checks. These

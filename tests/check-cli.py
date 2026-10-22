@@ -266,8 +266,11 @@ class CLIChecks(unittest.TestCase):
                 self.assertFalse(archive.exists())
         for invalid in (self.work / "missing", root / "socket"):
             self.invoke(self.command("tar", invalid, self.work / "no.tar"), expected=1)
-        self.invoke(self.command("tar", root, str(self.work / "trailing") + "/"),
-                    expected=1)
+        # Remove the socket so it cannot mask acceptance of a trailing slash.
+        (root / "socket").unlink()
+        result = self.invoke(
+            self.command("tar", root, str(self.work / "trailing") + "/"), expected=1)
+        self.assertIn(b"output must name a file", result.stderr)
         self.assertFalse((self.work / "trailing").exists())
 
     def test_help_and_invalid_options(self):
@@ -368,6 +371,9 @@ class CLIChecks(unittest.TestCase):
     def test_changed_source_is_rejected(self):
         root = self.phase_tree()
         for format_name in ("cpio", "tar"):
+            # Force a size change in both formats, regardless of filesystem
+            # timestamp resolution or the preceding format's test mutation.
+            (root / "entry-2047").write_bytes(b"x")
             archive = self.work / ("changed." + format_name)
             with self.paused_creation(format_name, root, archive) as process:
                 (root / "entry-2047").write_bytes(b"changed after inventory")

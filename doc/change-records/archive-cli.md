@@ -64,6 +64,14 @@ mutation replacing no-clobber rename with ordinary rename makes the late
 destination test fail at its success/error assertion. The real bridge passes
 the same test and preserves the competing output bytes.
 
+Final author review found two fixture weaknesses, also confirmed by the
+independent validation finder. The trailing-output-slash check now removes
+its earlier socket and pins the intended path diagnostic. Removing that
+explicit guard produces a missing-source diagnostic and fails the corrected
+assertion. The source-change test resets the last file before each format,
+forcing a size change instead of depending on subsecond timestamp resolution.
+Both corrected checks pass against the real implementation.
+
 Complete coverage and the normal check pass sequentially in a fresh source
 copy, with coverage first, no prior artifacts, no network and no Abuild mount.
 All production Ada/C bodies report executed lines. Optional predecessor
@@ -106,5 +114,15 @@ No throughput improvement or hosted CI result is claimed. Abuild integration,
 its User Manual, Developer Guide, dependencies and release markers remain
 outside this Arca-only topic. Arca's README, developer/CLI guides, changelog,
 indexed plan and change record describe the new consumer.
+
+Final author self-review covered the complete proposed range and enclosing
+code across all six dimensions. Compatibility and independent reader claims,
+numeric bounds, test sensitivity, cleanup ownership, invocation-local state,
+scaling, documentation/links, publication scope, Ada declaration comments
+and body layout, whitespace, final newlines, generated artifacts and commit
+50/72 wrapping/attribution were checked. This independent repository requires
+no Abuild ticket or User Manual release marker. The concrete fixture findings
+and their sensitivity evidence are recorded above; local validation does not
+claim a hosted pipeline result.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

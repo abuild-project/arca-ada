@@ -70,8 +70,8 @@ make install PREFIX=/absolute/path/to/prefix
 ```
 
 `all` builds the library and CLI. `check` also builds the client, installs
-the library and CLI into a temporary prefix, and
-builds and runs a copied client in isolation against the installed project.
+the library and CLI into a temporary prefix, and builds and runs a copied
+client in isolation against the installed project.
 It also verifies that hiding the installed project makes discovery fail.
 Preflight regression checks cover selected and missing build-tool overrides.
 Installation regressions cover relative builder paths and relative PATH
@@ -82,8 +82,8 @@ These are packaging checks, not format-conformance tests.
 The same target runs Ahven suites and separately checks CPIO and TAR layout,
 payloads, external readers, reproducibility, errors and lifetime behavior.
 CLI checks cover directory traversal, source metadata, links, atomic
-publication and cleanup after errors or handled signals. Normal tests need no Abuild
-checkout, credentials or network access.
+publication and cleanup after errors or handled signals. Normal tests need
+no Abuild checkout, credentials or network access.
 `make -j8 coverage NUM_CPUS=8`
 checks the production-body inventory and records executed lines. It also runs
 from a fresh checkout before `make check`; it creates its scratch parent.
