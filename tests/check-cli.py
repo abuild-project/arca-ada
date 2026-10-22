@@ -254,6 +254,30 @@ class CLIChecks(unittest.TestCase):
             self.assertEqual(archive.read_bytes(), b"keep original")
             self.assertEqual(list(workspace.glob(".arca-*")), [])
 
+    def test_staging_failure_preserves_output(self):
+        self.assertNotEqual(os.geteuid(), 0, "run the documented rootless checks")
+        # Native Linux storage is needed for reliable permission enforcement.
+        native = tempfile.TemporaryDirectory(prefix="arca-cli-staging-")
+        self.addCleanup(native.cleanup)
+        workspace = Path(native.name)
+        root = workspace / "source"
+        root.mkdir()
+        (root / "file").write_bytes(b"source bytes")
+        parent = workspace / "read-only-output"
+        parent.mkdir()
+        archives = [parent / ("preserved." + name) for name in ("cpio", "tar")]
+        for archive in archives:
+            archive.write_bytes(b"keep original")
+        os.chmod(parent, 0o500)
+        self.addCleanup(os.chmod, parent, 0o700)
+        for format_name, archive in zip(("cpio", "tar"), archives):
+            result = self.invoke(self.command(format_name, root, archive, "--force"),
+                                 expected=1)
+            self.assertIn(b"cannot create output staging", result.stderr)
+            self.assertIn(b"Permission denied", result.stderr)
+            self.assertEqual(archive.read_bytes(), b"keep original")
+            self.assertEqual(list(parent.glob(".arca-*")), [])
+
     def test_socket_and_invalid_roots(self):
         root = self.work / "socket-root"
         root.mkdir()
@@ -344,16 +368,19 @@ class CLIChecks(unittest.TestCase):
     def test_cancel_preserves_output_and_cleans_staging(self):
         root = self.phase_tree()
         for format_name in ("cpio", "tar"):
-            archive = self.work / ("cancel." + format_name)
-            archive.write_bytes(b"keep original")
-            with self.paused_creation(format_name, root, archive, "--force") as process:
-                os.kill(process.pid, signal.SIGTERM)
-                os.kill(process.pid, signal.SIGCONT)
-                _, error = process.communicate(timeout=30)
-                self.assertEqual(process.returncode, 143, error)
-                self.assertIn(b"interrupted", error)
-            self.assertEqual(archive.read_bytes(), b"keep original")
-            self.assertEqual(list(self.work.glob(".arca-*")), [])
+            for number in (signal.SIGINT, signal.SIGTERM):
+                with self.subTest(format=format_name, signal=number):
+                    archive = self.work / ("cancel." + format_name)
+                    archive.write_bytes(b"keep original")
+                    with self.paused_creation(format_name, root, archive,
+                                              "--force") as process:
+                        os.kill(process.pid, number)
+                        os.kill(process.pid, signal.SIGCONT)
+                        _, error = process.communicate(timeout=30)
+                        self.assertEqual(process.returncode, 128 + number, error)
+                        self.assertIn(b"interrupted", error)
+                    self.assertEqual(archive.read_bytes(), b"keep original")
+                    self.assertEqual(list(self.work.glob(".arca-*")), [])
 
     def test_publication_refuses_a_late_destination(self):
         root = self.phase_tree()
