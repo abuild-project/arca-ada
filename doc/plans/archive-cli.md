@@ -1,6 +1,7 @@
 # Archive creation CLI
 
-Status: Implementation in progress, requested on 2026-10-22 after PR #5.
+Status: Implemented and locally validated on 2026-10-22; author and independent
+static reviews complete. Ready for external review; not yet published.
 
 ## Scope and interface
 
@@ -72,3 +73,14 @@ Step 3 is implemented: coverage checks the complete Ada/C body inventory and
 normal installation checks execute the installed CLI for both formats. A
 fresh source copy passes coverage first and then the complete normal target
 in a rootless, network-disabled Trixie container with no Abuild mount.
+
+## Final review on 2026-10-22
+
+Step 4 is complete: help, CLI/developer guides, changelog, indexes and the
+[change record](../change-records/archive-cli.md) describe the implementation
+and validation limits. Ada MCP analysis is complete. The source finder found
+no blocking, fix-before-PR or follow-up issues. The validation finder confirmed
+two author-found test fixture issues; their committed corrections pass its
+targeted re-review, with no remaining findings. Final author review is
+complete. The final source/test stand again passes fresh-source coverage first
+and the full normal check without network access or an Abuild mount.
