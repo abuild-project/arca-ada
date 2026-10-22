@@ -312,3 +312,17 @@ The owner also noted the obsolescent foreign-interface pragmas. After the
 test-only CI correction, migrate the CLI's Import/Convention declarations to
 Ada 2012 aspects in a separate commit and verify ABI/runtime behavior with
 the same compiler and test suites.
+
+## Signal acknowledgement implemented on 2026-10-22
+
+The test shim tracks the last sigwait result in thread-local state. Its next
+entry on that same GNAT interrupt-server thread follows the protected handler
+and acknowledges the handled signal on the readiness pipe. Cancellation cases
+require that token before releasing the staging barrier. Signal delivery
+alone no longer permits emission to resume. Each signal/format fixture owns
+its output parent, so an intentional failure cannot contaminate later cases.
+
+All four signal/format cases fail at the missing acknowledgement with the
+previous shim and pass with the correction. Repeated cancellation checks,
+complete coverage and normal tests pass in rootless AMD64 Trixie. Runtime
+code and production coverage inputs are unchanged by this correction.

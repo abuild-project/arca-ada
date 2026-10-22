@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,12 +67,12 @@ static void phase_barrier(const char *path)
     do {
         count = write(ready, &token, 1);
     } while (count < 0 && errno == EINTR);
-    if (count != 1 || close(ready) != 0)
+    if (count != 1)
         _exit(125);
     do {
         count = read(release, &token, 1);
     } while (count < 0 && errno == EINTR);
-    if (count != 1 || token != 'G' || close(release) != 0)
+    if (count != 1 || token != 'G' || close(release) != 0 || close(ready) != 0)
         _exit(125);
     trace("barrier released\n");
     errno = saved;
@@ -91,6 +92,37 @@ FILE *name(const char *path, const char *mode) \
 
 FOPEN_HOOK(fopen)
 FOPEN_HOOK(fopen64)
+
+int sigwait(const sigset_t *set, int *number)
+{
+    int (*original)(const sigset_t *, int *);
+    static _Thread_local int previous;
+    NEXT("sigwait", original);
+
+    /* GNAT 14 s-interr.adb invokes the protected handler between successive
+       sigwait calls on its dedicated server thread. Report completion only
+       on re-entry, never merely when the kernel delivers the signal. */
+    int handled = previous;
+    previous = 0;
+    if (fault("phase-barrier") && (handled == SIGINT || handled == SIGTERM)) {
+        int saved = errno;
+        int ready = phase_fd("ARCA_TEST_READY_FD");
+        unsigned char token = (unsigned char)handled;
+        ssize_t count;
+        trace("signal handled\n");
+        do {
+            count = write(ready, &token, 1);
+        } while (count < 0 && errno == EINTR);
+        if (count != 1)
+            _exit(125);
+        errno = saved;
+    }
+
+    int result = original(set, number);
+    if (result == 0)
+        previous = *number;
+    return result;
+}
 
 static int selected_directory(DIR *dir)
 {

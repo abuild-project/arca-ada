@@ -122,6 +122,7 @@ reproducibility, empty trees, installed execution and parallel processes.
 Phase-controlled tests exercise SIGINT/SIGTERM cancellation, changed input and
 a destination created just before publication. A test-only child barrier
 confirms inventory completion and holds emission until explicitly released.
+Cancellation cases also confirm completed signal handling before release.
 Failure tests verify old output and staging cleanup, including an unwritable
 output parent. Native writer tests cover device emission; creating device
 fixtures through the CLI is not part of the rootless test suite.

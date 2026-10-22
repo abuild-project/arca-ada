@@ -63,6 +63,10 @@ guides, changelog and indexed plans describe the supported interface.
   The barrier controls and affected cases pass repeated runs; full coverage
   and normal checks also pass from fresh rootless Trixie sources without
   network or Abuild access after the synchronization correction.
+  Cancellation cases additionally require a signal-specific acknowledgement
+  after GNAT's protected handler has returned, before releasing emission.
+  A test-only sigwait observer uses the supported GNAT 14 server-loop order;
+  the previous shim fails this acknowledgement for both formats and signals.
 - Regression assertions fail against the pre-correction CLI and pass with the
   correction. The trailer-name and no-clobber guards also have sensitivity
   evidence. Coverage's complete inventory requires executed lines for every

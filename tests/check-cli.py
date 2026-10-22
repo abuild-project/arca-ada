@@ -634,10 +634,18 @@ class CLIChecks(unittest.TestCase):
             child_release.close()
             released = False
 
-            def release():
-                """Allow exactly one blocked child to start emission."""
+            def release(signal_number=None):
+                """Optionally require completed signal handling before release."""
                 nonlocal released
                 self.assertFalse(released, "phase already released")
+                if signal_number is not None:
+                    readable, _, _ = select.select([ready], [], [], 30)
+                    self.assertTrue(readable, "signal acknowledgement timed out")
+                    self.assertEqual(ready.read(1), bytes([signal_number]),
+                                     "signal acknowledgement missing")
+                    self.assertIsNone(process.poll(), "CLI exited before release")
+                    self.assertIn("signal handled", log.read_text())
+                    self.assertEqual(staging[0].stat().st_size, 0)
                 self.assertEqual(release_pipe.write(b"G"), 1)
                 release_pipe.close()
                 released = True
@@ -716,17 +724,19 @@ class CLIChecks(unittest.TestCase):
         for format_name in ("cpio", "tar"):
             for number in (signal.SIGINT, signal.SIGTERM):
                 with self.subTest(format=format_name, signal=number):
-                    archive = self.work / ("cancel." + format_name)
+                    parent = self.work / (format_name + "-" + str(int(number)))
+                    parent.mkdir()
+                    archive = parent / "cancelled-output"
                     archive.write_bytes(b"keep original")
                     with self.paused_creation(format_name, root, archive,
                                               "--force") as (process, release):
                         os.kill(process.pid, number)
-                        release()
+                        release(number)
                         _, error = process.communicate(timeout=30)
                         self.assertEqual(process.returncode, 128 + number, error)
                         self.assertIn(b"interrupted", error)
                     self.assertEqual(archive.read_bytes(), b"keep original")
-                    self.assertEqual(list(self.work.glob(".arca-*")), [])
+                    self.assertEqual(list(parent.glob(".arca-*")), [])
 
     def test_publication_refuses_a_late_destination(self):
         root = self.phase_tree()

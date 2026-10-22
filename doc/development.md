@@ -176,6 +176,12 @@ mutating input or sending signals. Interrupted pipe calls retry. Timeouts,
 EOF and unexpected tokens fail readiness. Parent pipes and child processes
 have exception-safe ownership; positive release, missing-hook and parent-error
 controls check the protocol and descriptor cleanup with small input trees.
+Cancellation also waits for a signal-specific acknowledgement before release.
+In the supported GNAT 14 runtime, the dedicated interrupt server invokes the
+protected handler between successive sigwait calls. The test shim observes
+the next call on that same thread, proving the handler has returned; queuing
+a signal alone is insufficient. This runtime-specific observation remains
+test support and introduces no production signal hook.
 
 ## Commands
 
