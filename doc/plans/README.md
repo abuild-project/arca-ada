@@ -2,6 +2,7 @@
 
 | Plan | Status |
 | --- | --- |
+| [Writer cleanup and compiler checks](writer-cleanup.md) | In progress; separate library change before the CLI |
 | [Ahven unit tests](ahven-unit-tests.md) | Locally validated and author-reviewed; ready for external review |
 | [Repository bootstrap](bootstrap.md) | Implemented |
 | [CPIO extraction](cpio-extraction.md) | Accepted in PR #3 |

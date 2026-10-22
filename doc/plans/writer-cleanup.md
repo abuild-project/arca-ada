@@ -1,0 +1,36 @@
+# Writer cleanup and compiler checks
+
+Status: Requested on 2026-10-22 as a separate library PR before the CLI.
+
+## Accepted scope
+
+Keep archive serialization and public operation signatures unchanged. Both
+writer finalizers must attempt removal of an unfinished regular output,
+attempt stream closure when deletion fails before closing, and avoid replacing
+an existing exception with a finalization failure. Nonregular destinations
+remain usable without trying to unlink them after a rejected stream deletion.
+Implicit cleanup is best effort; explicit Close continues to report failures.
+
+Put the shared nonthrowing cleanup operation in the private binary helper and
+call it from both finalizers. Retain independent instance ownership and the
+existing bounded worker-stack tests. Add direct Ahven regression checks for
+nonregular outputs, original-exception preservation and deletion failure in
+a native Linux directory with write permission removed. Check descriptors,
+retained paths and exception-safe fixture cleanup. Prove failure before the
+production correction and success afterward.
+
+Enable full GNAT validity checks, stack checking and additional exception
+information for library and test compilation, matching Abuild's runtime
+checking policy. Existing warning and source-style policies still apply;
+Abuild's separate style-switch profile is not a runtime-check prerequisite.
+
+## Delivery
+
+Start from accepted main without CLI commits. Validate normal checks and
+complete coverage in the rootless Trixie image, including a fresh-source,
+network-isolated coverage-first run. Refresh Ada MCP and user/developer guides,
+changelog and indexed change record. Complete author and independent static
+reviews before publishing the library topic and requesting Copilot.
+
+The Abuild roadmap/P7 reconciliation belongs to a separate documentation
+topic. The owner specified TBD because no extraction ticket exists yet.
