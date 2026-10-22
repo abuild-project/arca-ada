@@ -1,7 +1,7 @@
 # Archive creation CLI
 
-Status: Implemented and locally validated on 2026-10-22; author and independent
-static reviews complete. Ready for external review; not yet published.
+Status: Initial implementation locally validated and reviewed on 2026-10-22.
+The owner-requested reduction of the C boundary is in progress; not published.
 
 ## Scope and interface
 
@@ -84,3 +84,18 @@ two author-found test fixture issues; their committed corrections pass its
 targeted re-review, with no remaining findings. Final author review is
 complete. The final source/test stand again passes fresh-source coverage first
 and the full normal check without network access or an Abuild mount.
+
+## C boundary revision requested on 2026-10-22
+
+The owner requested Ada signal handling, direct bindings for simple system
+calls and C only for the lstat metadata wrapper. Keep the existing CLI and
+publication contracts. Use the protected Ada interrupt-handler pattern
+already present in Abuild, implemented independently for this CLI. Bind
+readlink, mkdtemp, rename and renameat2 directly; capture errno before building
+diagnostics. Keep target-specific stat layout and file-type/device macros
+inside the remaining C wrapper.
+
+Extend the existing cancellation checks to SIGINT as well as SIGTERM, retain
+late-destination/error cleanup assertions and run normal checks plus complete
+coverage in the supported Trixie environment. Refresh Ada MCP, documentation
+and final review after the implementation is stable.
