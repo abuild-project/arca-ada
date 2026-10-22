@@ -2,6 +2,7 @@
 
 | Record | Scope |
 | --- | --- |
+| [Archive creation CLI](archive-cli.md) | Filesystem inventory, metadata/link policy, atomic output and independent CLI tests |
 | [Ahven unit suites](ahven-unit-tests.md) | Named direct contracts, shared scenarios and runner failure controls |
 | [Repository bootstrap](bootstrap.md) | Independent project and development infrastructure |
 | [Standalone CPIO writer](cpio-extraction.md) | First independent writer and lifecycle validation |

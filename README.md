@@ -7,7 +7,8 @@ Archive and filesystem image writers for Ada.
 ## Status
 
 Arca is being bootstrapped in a private repository. It provides an independent
-[CPIO `newc` writer](doc/cpio.md), a [TAR writer](doc/tar.md), a minimal client,
+[CPIO `newc` writer](doc/cpio.md), a [TAR writer](doc/tar.md), an
+[archive creation CLI](doc/cli.md), a minimal library client,
 installation checks and development infrastructure. The client verifies
 project discovery and linking; format tests create and independently inspect
 archives. Named [Ahven unit suites](doc/unit-tests.md) test library contracts.
@@ -15,6 +16,14 @@ Finalizer regressions cover nonregular outputs and failed deletion without
 masking caller exceptions. Library/test builds enable full validity and
 stack checks alongside the existing Ada checks.
 There is no stable format API or published release yet.
+
+The initial CLI targets 64-bit Linux. After building in the reference
+environment, create an archive with:
+
+```sh
+cli/bin/arca create --format cpio -C rootfs -o rootfs.cpio
+cli/bin/arca create --format tar -C contents -o contents.tar --mtime 0
+```
 
 CPIO and TAR retain Abuild's format behaviour and add standalone resource
 ownership. VFAT, EXT2 and ISO are later candidates. OCI requires
@@ -60,7 +69,8 @@ make -j8 check NUM_CPUS=8
 make install PREFIX=/absolute/path/to/prefix
 ```
 
-`check` builds the library and client, installs into a temporary prefix, and
+`all` builds the library and CLI. `check` also builds the client, installs
+the library and CLI into a temporary prefix, and
 builds and runs a copied client in isolation against the installed project.
 It also verifies that hiding the installed project makes discovery fail.
 Preflight regression checks cover selected and missing build-tool overrides.
@@ -71,6 +81,9 @@ These are packaging checks, not format-conformance tests.
 
 The same target runs Ahven suites and separately checks CPIO and TAR layout,
 payloads, external readers, reproducibility, errors and lifetime behavior.
+CLI checks cover directory traversal, source metadata, links, atomic
+publication and cleanup after errors or handled signals. Normal tests need no Abuild
+checkout, credentials or network access.
 `make -j8 coverage NUM_CPUS=8`
 checks the production-body inventory and records executed lines. It also runs
 from a fresh checkout before `make check`; it creates its scratch parent.

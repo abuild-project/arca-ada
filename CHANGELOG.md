@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add a Linux CLI for creating uncompressed CPIO and TAR archives, preserving
+  metadata and links with deterministic ordering and atomic publication.
+- Test installed CLI execution, independent readers, metadata overrides,
+  cancellation, source changes and output preservation; cover CLI Ada/C bodies.
 - Preserve caller exceptions during writer finalization and attempt stream
   closure when unfinished-output deletion fails; cleanup is best effort.
 - Add finalizer-failure Ahven cases and enable full validity, stack and

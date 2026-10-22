@@ -84,6 +84,22 @@ Do not add empty API promises for proposed format packages. Introduce each API
 with its writer, documented constraints and
 independent tests.
 
+`cli/cli.gpr` imports the library and builds `cli/bin/arca`. Argument policy,
+filesystem inventory and hardlink maps belong to this CLI consumer. Its Ada
+containers are invocation-local and used sequentially; integration tests run
+separate CLI processes against an immutable input tree. The library remains
+Ada-only and does not depend on the CLI or its C code. The CLI's initial
+platform is 64-bit Linux; the reference validation uses AMD64 Trixie.
+
+GNAT supplies path normalization and a raw directory-name iterator. The
+higher-level Ada.Directories search also queries modification times through
+an API that rejects dangling links and special nodes. The raw iterator lets
+the CLI inspect every name with lstat. Public GNAT APIs do not expose all the
+required numeric metadata or symlink target text, so `cli/src/posix_bridge.c`
+supplies these through a fixed-width record, plus mkdtemp, atomic publication
+and signal flags. No Abuild OS helper is imported. See the [CLI guide](cli.md)
+for the stable-input contract, format limits and cancellation boundaries.
+
 `examples/client/client.gpr` imports the project by name. The installation
 check copies this client, including its CPIO and TAR type use, into a private
 scratch directory, removes inherited Ada/GPR search paths, and discovers Arca only
@@ -116,11 +132,13 @@ writer assertion and the transformation behavior intentionally left in Abuild.
 
 `tests/tests.gpr` compiles source units into its own object directory so the
 private copy helper can be tested by a private child without publishing it.
-Only this test project imports Ahven; the library and installed client do not.
+Only this test project imports Ahven; the library, CLI and installed client
+do not.
 Installed-library usability is checked separately by the copied client.
 Coverage uses distinct object and executable directories, clears previous
 execution counts and checks `tests/coverage-sources.txt` against every current
-production body. It requires a report with executed lines for each body;
+production body, including the CLI's Ada and C sources. It requires a report
+with executed lines for each body;
 the generated counts do not promise complete branch coverage.
 
 Library and test compilation enable `-gnatVa`, `-fstack-check` and `-gnateE`
@@ -132,10 +150,11 @@ Arca retains its established source-style rules.
 
 ## Commands
 
-- `make -j8 all NUM_CPUS=8` builds the static library.
-- `make -j8 check NUM_CPUS=8` runs packaging and both writer suites.
+- `make -j8 all NUM_CPUS=8` builds the static library and CLI.
+- `make -j8 cli NUM_CPUS=8` builds the CLI and its library dependency.
+- `make -j8 check NUM_CPUS=8` runs packaging, unit, writer and CLI suites.
 - `make -j8 coverage NUM_CPUS=8` reports executed lines for all production bodies.
-- `make install PREFIX=/absolute/prefix` installs using GPRinstall.
+- `make install PREFIX=/absolute/prefix` installs the library and CLI.
 - `make clean` removes generated GPRbuild artifacts.
 
 Do not run independent top-level builds concurrently against `obj/`. Install
