@@ -39,7 +39,8 @@ def main():
         (scratch / "abuild.ads").write_text("package Abuild is end Abuild;\n")
         (scratch / "abuild-file_formats.ads").write_text(
             "package Abuild.File_Formats is end Abuild.File_Formats;\n")
-        for name in ("test_support.ads", "test_support.adb", "cpio_driver.adb"):
+        for name in ("test_support.ads", "test_support.adb", "cpio_driver.adb",
+                     "cpio_scenarios.ads", "cpio_scenarios.adb"):
             source = (root / "tests" / name).read_text()
             (scratch / name).write_text(
                 source.replace("Arca.CPIO", "Abuild.File_Formats.CPIO"))

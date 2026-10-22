@@ -1,6 +1,6 @@
 # Ahven unit tests
 
-Status: Implementation in progress, agreed on 2026-10-22.
+Status: Implemented and locally validated on 2026-10-22; final review pending.
 
 ## Scope
 
@@ -36,5 +36,10 @@ must remain self-contained, with no Abuild source or credentials.
 
 ## Progress
 
-The existing assertion drivers and predecessor test declarations have been
-inventoried. Framework migration and CLI development remain separate topics.
+Named suites, shared scenarios, failure controls, image dependency and CI XML
+reports are implemented. Fresh-source coverage and normal checks pass without
+network or Abuild access; both optional predecessor comparisons pass. A
+missing-Ahven negative control and installed-consumer isolation confirm the
+test-only dependency boundary. Final author review remains pending. CLI
+development stays separate; see the
+[change record](../change-records/ahven-unit-tests.md) for evidence and limits.

@@ -44,7 +44,8 @@ def main():
         (scratch / "abuild.ads").write_text("package Abuild is end Abuild;\n")
         (scratch / "abuild-file_formats.ads").write_text(
             "package Abuild.File_Formats is end Abuild.File_Formats;\n")
-        for filename in ("test_support.ads", "test_support.adb", "tar_driver.adb"):
+        for filename in ("test_support.ads", "test_support.adb", "tar_driver.adb",
+                         "tar_scenarios.ads", "tar_scenarios.adb"):
             source = (root / "tests" / filename).read_text()
             (scratch / filename).write_text(
                 source.replace("Arca.TAR", "Abuild.File_Formats.TAR"))

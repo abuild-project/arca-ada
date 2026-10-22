@@ -1,8 +1,8 @@
 # Writer extraction
 
 Status: Accepted direction as discussed on 2026-10-21. The source inventory
-and additional LGPL grant are recorded. CPIO is accepted; TAR is implemented
-locally, validated and author-reviewed, ready for external review.
+and additional LGPL grant are recorded. CPIO and TAR are accepted. The owner
+requested Ahven suites next, followed by a separate archive-creation CLI.
 
 ## Scope and order
 
@@ -18,6 +18,13 @@ locally, validated and author-reviewed, ready for external review.
    their existing per-format compatibility and review gates.
 6. Decouple OCI's hashing, compression, copying and temporary-path needs before
    importing it. Keep the SquashFS backend decision separate.
+
+## Next steps agreed on 2026-10-22
+
+After accepting both writer imports, the owner requested
+[Ahven unit suites](ahven-unit-tests.md) followed by a separate CLI consuming
+CPIO/TAR. These steps precede the originally planned Abuild integration.
+Independent format checks and self-contained normal tests/CI remain required.
 
 ## Initial dependency inventory
 
@@ -78,4 +85,6 @@ controlled output ownership and rejection of Create on an open writer are
 explicit lifecycle additions. CPIO was accepted in
 [PR #3](https://github.com/mweidle73/arca-ada/pull/3). The
 [TAR step](tar-extraction.md) follows the same independent ownership boundary
-and reuses the accepted copy helper. Abuild integration remains pending.
+and reuses the accepted copy helper. TAR was accepted in
+[PR #4](https://github.com/mweidle73/arca-ada/pull/4). Ahven suites precede
+the CLI; Abuild integration remains pending.

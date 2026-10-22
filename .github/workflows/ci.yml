@@ -32,3 +32,10 @@ jobs:
         run: python3 tests/check-dev-shell.py arca-dev:trixie
       - name: Build and check as the runner user
         run: docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
+      - name: Preserve Ahven XML reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ahven-unit-results
+          path: build/unit-results-*/*.xml
+          if-no-files-found: ignore

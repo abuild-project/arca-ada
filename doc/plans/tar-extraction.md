@@ -1,7 +1,7 @@
 # TAR extraction
 
-Status: Implemented, locally validated and author-reviewed on 2026-10-22;
-ready for external review.
+Status: Accepted in [PR #4](https://github.com/mweidle73/arca-ada/pull/4)
+on 2026-10-22.
 
 ## Accepted scope
 
