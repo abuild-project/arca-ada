@@ -155,3 +155,31 @@ pass identified a change-record index ordering error, corrected before
 delivery. Final author review confirms token parity, contracts, cleanup and
 state ownership, unchanged test sensitivity/scaling, documentation links,
 commit-message rules and a clean tracked worktree.
+
+## Review corrections requested on 2026-10-22
+
+Before publishing the CLI PR, preserve original I/O diagnostics, discriminate
+directory-read errors from EOF, make staging finalization nonthrowing and
+enable the library's additional runtime checks in the CLI project. Retain
+the Ada/direct-binding boundary and unchanged public writer APIs.
+
+When no-replace rename is unsupported, publish the closed regular staging
+file using a hard link on the same filesystem. The successful link is the
+publication point; removing its private staging name is best-effort cleanup.
+If NFS reports an ambiguous link failure, accept success only when lstat
+proves that the destination is the same regular inode as the staging file.
+Other errors retain the no-clobber contract and contextual diagnostic.
+
+Add independent, test-only syscall fault injection for directory-read errors,
+unsupported rename, late destinations, ambiguous/failed links, output write
+failure and staging cleanup failure. Test original-exception preservation
+and success after publication despite cleanup failure. No production test
+hooks or additional C wrappers are introduced.
+
+Close the source timestamp/size, timestamp override rescue, forced FIFO,
+global full-path ordering and special permission-bit test gaps. Keep the
+existing byte-reproducibility checks. Run old/new sensitivity checks, full
+normal tests and coverage in rootless Trixie, then refresh Ada MCP and static
+review. Signal re-raising/SIGHUP, install-manifest naming and cosmetic root
+output diagnostics remain separate follow-ups; this step changes no CLI
+syntax or metadata normalization policy.
