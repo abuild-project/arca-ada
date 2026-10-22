@@ -239,3 +239,23 @@ match the validated revision, and the accepted main base is unchanged.
 The CLI branch is published as PR #7 against main. The PR description matches
 the canonical change record. This delivery-status update changes no runtime
 or test source.
+
+## Phase barrier requested on 2026-10-22
+
+Copilot identified a race between observing the staging file and sending
+SIGSTOP. A large input tree reduces its likelihood but cannot guarantee the
+child has not already emitted changed entries or published output.
+
+Replace that protocol with a child-side barrier in the existing test-only
+preload library. Intercept the successful open of the private staging file,
+after inventory and signal-handler installation and before entry emission.
+The child acknowledges readiness through one inherited pipe and waits for an
+explicit release byte on another. The parent verifies empty staging and
+preserved destination state before mutating input, creating a late target or
+sending a signal. Pipe EOF, timeout or unexpected protocol bytes fail loudly;
+all parent fds and child processes are owned by exception-safe test cleanup.
+
+Use small fixtures and add a successful release control plus a missing-barrier
+control. Validate the phase tests, full normal checks and complete coverage
+in rootless Trixie. Keep runtime sources and production test-hook boundaries
+unchanged, then update PR #7 and request another Copilot review.
