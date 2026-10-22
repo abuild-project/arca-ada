@@ -18,6 +18,30 @@ package body Arca.Binary_IO is
 
    -------------------------------------------------------------------------
 
+   procedure Discard_Output (File : in out Ada.Streams.Stream_IO.File_Type) is
+      package SIO renames Ada.Streams.Stream_IO;
+   begin
+      if SIO.Is_Open (File) then
+         begin
+            SIO.Delete (File);
+         exception
+            when others =>
+               --  GNAT rejects nonregular outputs before closing them.
+               --  A failed unlink may instead have closed the stream already.
+               if SIO.Is_Open (File) then
+                  SIO.Close (File);
+               end if;
+         end;
+      end if;
+   exception
+      when others =>
+         --  Implicit finalization must preserve the caller's original failure.
+         --  Explicit writer Close remains the reporting operation for I/O.
+         null;
+   end Discard_Output;
+
+   -------------------------------------------------------------------------
+
    procedure Copy_File_To_Stream
      (Source_Name :        String;
       Source_Size :        Ada.Directories.File_Size;

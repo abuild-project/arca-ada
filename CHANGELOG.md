@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Preserve caller exceptions during writer finalization and attempt stream
+  closure when unfinished-output deletion fails; cleanup is best effort.
+- Add finalizer-failure Ahven cases and enable full validity, stack and
+  additional exception-information checks for library/test builds.
 - Add named Ahven unit suites with shared direct checks, writer-reuse and
   copy-helper cases, XML reports and runner failure controls.
 - Pin the remaining predecessor CPIO/TAR raw-field, padding, long-metadata

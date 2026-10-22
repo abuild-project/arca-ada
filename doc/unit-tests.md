@@ -36,6 +36,12 @@ It collects failures from both modes before failing the check, so an actual
 text-mode test failure still leaves XML diagnostics for CI. Each mode owns
 a separate fixture root so failed cleanup cannot prevent the other mode.
 
+Finalizer-failure cases also own randomized mode-0700 directories on native
+Linux /tmp storage. Docker Desktop's host sharing can bypass mode-based denial,
+so these fixtures verify the denial with a real failed file creation before
+testing deletion. Controlled fixture cleanup restores directory write access
+and removes the private tree; each case checks that the tree is gone.
+
 A separate deliberately failing executable verifies exit status 1, the
 assertion diagnostic, XML failure reporting and fixture cleanup during
 exception unwinding. The probe uses the real two-mode orchestration and
@@ -70,6 +76,7 @@ Ahven result. The Python harness accepts neither failures nor errors.
 | --- | --- |
 | Unopened operations, missing sources and invalid metadata | Named CPIO/TAR error cases; independent recovery-archive decoding |
 | Repeated Create and unfinished-output ownership | Named state/lifetime cases; descriptor counts, task exit/abort and independent state-output checks |
+| Finalizer failures (additional Arca regression) | Named cleanup cases check /dev/null, explicit Close, normal/exceptional exits, failed unlink, original exception messages and descriptor recovery |
 | Parallel native writers | Named parallel cases compare complete outputs on bounded worker stacks; independent suites also decode their reference archives |
 | Timestamp/size/owner/device boundaries | Shared error cases plus independent maximum-field and first-rejected-value checks |
 | Header fields, TAR prefix/long metadata, padding and end markers | Independent raw decoders, short CPIO record layout, corruption controls and historical GNU fixture |

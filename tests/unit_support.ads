@@ -2,6 +2,7 @@
 
 with Ada.Finalization;
 with Ada.Strings.Unbounded;
+with Interfaces.C;
 
 package Unit_Support is
 
@@ -10,8 +11,11 @@ package Unit_Support is
    function Prepare (Name : String) return Fixture;
    --  Create private patterned, empty, tiny and sparse sources for one test.
 
+   function Prepare_Native (Name : String) return Fixture;
+   --  Own an empty private Linux /tmp tree for real permission-failure tests.
+
    function Path (Item : Fixture) return String;
-   --  Return the fixture directory beneath this runner's private root.
+   --  Return the owned directory beneath the runner root or on native /tmp.
 
    procedure Assert_Equal_Files (Left, Right : String);
    --  Compare complete files with bounded buffers, including their lengths.
@@ -26,11 +30,14 @@ package Unit_Support is
 private
 
    type Fixture is new Ada.Finalization.Limited_Controlled with record
-      Directory : Ada.Strings.Unbounded.Unbounded_String;
-      Created   : Boolean := False;
+      Directory   : Ada.Strings.Unbounded.Unbounded_String;
+      Created     : Boolean := False;
+      Native      : Boolean := False;
+      Native_Path : Interfaces.C.char_array (0 .. 127) :=
+        (others => Interfaces.C.nul);
    end record;
 
    overriding procedure Finalize (Item : in out Fixture);
-   --  Remove only the directory successfully created by this fixture.
+   --  Restore native-directory write permission, then remove the owned tree.
 
 end Unit_Support;

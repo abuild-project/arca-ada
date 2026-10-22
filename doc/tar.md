@@ -68,11 +68,18 @@ promise byte identity with every GNU tar output profile.
 ## Ownership and failures
 
 Each instance owns its output file. Close completes the archive and retains
-it. Leaving scope without Close removes unfinished output, including exception
-unwinding and owner-task termination between operations. Independent instances
-must use distinct output paths; synchronize calls that share one instance.
+it. Leaving scope without Close attempts to remove unfinished output, including
+exception unwinding and owner-task termination between operations. Independent
+instances must use distinct output paths; synchronize shared calls.
 Calling Create on an open instance raises `Ada.IO_Exceptions.Status_Error`
 with `TAR_Create called on an open archive` and retains the existing state.
+
+Implicit cleanup never propagates a cleanup failure. If deletion fails before
+closing, it still attempts to close the stream; a nonregular output rejected
+by GNAT's Delete is closed without separately unlinking its pathname. A failed
+unlink may already have closed the stream. Cleanup preserves the caller's
+original exception and can leave partial output if filesystem operations
+fail. Explicit Close remains the completing operation that reports I/O errors.
 
 Unopened operations raise `TAR_Not_Initialized`; missing sources raise
 `File_Not_Found`, oversized payloads raise `File_Too_Big`, a shortened source

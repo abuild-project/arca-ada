@@ -22,4 +22,8 @@ private package Arca.Binary_IO is
    --  position. Reject a nonpositive buffer and changed source sizes.
    --  Close the source and free the private buffer on success or exception.
 
+   procedure Discard_Output (File : in out Ada.Streams.Stream_IO.File_Type);
+   --  Best-effort removal of an open incomplete output. If Delete fails,
+   --  still attempt Close; never propagate an implicit-cleanup failure.
+
 end Arca.Binary_IO;

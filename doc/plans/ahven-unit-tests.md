@@ -1,7 +1,7 @@
 # Ahven unit tests
 
-Status: Implemented, locally validated and author-reviewed on 2026-10-22;
-ready for external review.
+Status: Accepted in [PR #5](https://github.com/mweidle73/arca-ada/pull/5)
+on 2026-10-22.
 
 ## Scope
 

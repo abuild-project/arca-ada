@@ -49,9 +49,7 @@ package body Arca.CPIO is
 
    overriding procedure Finalize (Item : in out CPIO_Archive_Type) is
    begin
-      if Is_Open (Item.File) then
-         Delete (Item.File);
-      end if;
+      Arca.Binary_IO.Discard_Output (Item.File);
    end Finalize;
 
    -------------------------------------------------------------------------

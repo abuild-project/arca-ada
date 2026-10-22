@@ -11,6 +11,9 @@ Arca is being bootstrapped in a private repository. It provides an independent
 installation checks and development infrastructure. The client verifies
 project discovery and linking; format tests create and independently inspect
 archives. Named [Ahven unit suites](doc/unit-tests.md) test library contracts.
+Finalizer regressions cover nonregular outputs and failed deletion without
+masking caller exceptions. Library/test builds enable full validity and
+stack checks alongside the existing Ada checks.
 There is no stable format API or published release yet.
 
 CPIO and TAR retain Abuild's format behaviour and add standalone resource
