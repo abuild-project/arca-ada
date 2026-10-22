@@ -41,6 +41,27 @@ def read_reports(directory):
     return reports
 
 
+def run_modes(executable, root, scratch, reports, capture=False):
+    """Keep XML diagnostics even when text-mode tests fail."""
+    scratch.mkdir()
+    issues, results = [], []
+    for mode, arguments in (("text", []), ("XML", ["-x", "-d", str(reports)])):
+        fixtures = scratch / mode
+        fixtures.mkdir()
+        env = dict(os.environ, ARCA_TEST_ROOT=str(fixtures))
+        result = subprocess.run([str(executable), *arguments], cwd=root, env=env,
+                                capture_output=capture, text=True, timeout=90)
+        results.append(result)
+        if capture:
+            print(result.stdout, end="", flush=True)
+            print(result.stderr, end="", flush=True)
+        if result.returncode:
+            issues.append(f"{mode} runner returned {result.returncode}")
+        if list(fixtures.iterdir()):
+            issues.append(f"{mode} runner retained fixture directories")
+    return issues, results
+
+
 def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser()
@@ -56,14 +77,7 @@ def main():
         old.unlink()
     with tempfile.TemporaryDirectory(prefix="unit-check.", dir=parent) as name:
         scratch = Path(name)
-        fixtures = scratch / "fixtures"
-        fixtures.mkdir()
-        env = dict(os.environ, ARCA_TEST_ROOT=str(fixtures))
-        for arguments in ([], ["-x", "-d", str(reports)]):
-            subprocess.run([str(runner), *arguments], cwd=root, env=env,
-                           check=True, timeout=90)
-            if list(fixtures.iterdir()):
-                raise RuntimeError("Ahven cases retained fixture directories")
+        issues, _ = run_modes(runner, root, scratch / "real", reports)
         actual = read_reports(reports)
         if set(actual) != set(EXPECTED):
             raise RuntimeError("Missing or unexpected Ahven suites")
@@ -76,20 +90,19 @@ def main():
             if (int(suite.attrib["failures"]) or int(suite.attrib["errors"]) or
                     int(suite.attrib["skips"]) or suite.findall(".//skipped") or
                     suite.findall(".//failure") or suite.findall(".//error")):
-                raise RuntimeError("Ahven XML reports a failure: " + suite_name)
+                issues.append("Ahven XML reports a failure: " + suite_name)
+        if issues:
+            raise RuntimeError("; ".join(issues))
         probe_reports = scratch / "probe"
         probe_reports.mkdir()
-        for arguments in ([], ["-x", "-d", str(probe_reports)]):
-            result = subprocess.run([str(probe), *arguments], cwd=root, env=env,
-                                    capture_output=True, text=True, timeout=15)
-            print(result.stdout, end="", flush=True)
-            print(result.stderr, end="", flush=True)
-            if result.returncode != 1:
-                raise RuntimeError("Failing assertion did not return exit status 1")
-            if list(fixtures.iterdir()):
-                raise RuntimeError("Assertion failure retained a fixture directory")
-            if not arguments and "intentional assertion probe" not in result.stdout:
-                raise RuntimeError("Text runner omitted the assertion diagnostic")
+        # Use the real orchestration path with an unexpected test failure.
+        # Both failed statuses must be retained, and XML must still exist.
+        issues, results = run_modes(probe, root, scratch / "negative",
+                                    probe_reports, capture=True)
+        if issues != ["text runner returned 1", "XML runner returned 1"]:
+            raise RuntimeError("Failure/cleanup control differs: " + str(issues))
+        if "intentional assertion probe" not in results[0].stdout:
+            raise RuntimeError("Text runner omitted the assertion diagnostic")
         probe_suite = read_reports(probe_reports)
         if set(probe_suite) != {"Harness_probe"}:
             raise RuntimeError("Missing failure-control suite")

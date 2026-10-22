@@ -32,10 +32,15 @@ a private fixture root beneath `build/`; each case owns and removes its own
 subdirectory. XML reports remain in `build/unit-results-bin/`. The harness
 requires the complete named case inventory, zero failures/errors/skips and
 no retained fixture directories. It rejects absent or duplicate reports.
+It collects failures from both modes before failing the check, so an actual
+text-mode test failure still leaves XML diagnostics for CI. Each mode owns
+a separate fixture root so failed cleanup cannot prevent the other mode.
 
 A separate deliberately failing executable verifies exit status 1, the
 assertion diagnostic, XML failure reporting and fixture cleanup during
-exception unwinding. Its expected failure is printed as a harness probe;
+exception unwinding. The probe uses the real two-mode orchestration and
+requires XML to exist even after a failed text run. Its expected failure is
+printed as a harness probe;
 it is excluded from the real suites and their retained XML reports.
 
 `make -j8 coverage NUM_CPUS=8` runs the same checks against instrumented
@@ -52,8 +57,8 @@ in process. The drivers remain inputs to independent Python decoders and
 external GNU/libarchive readers. Assertions about emitted bytes therefore
 retain an oracle outside the writer and outside Ahven.
 
-Shared scenario assertion failures are translated into Ahven failures by the
-unit adapter; unexpected exceptions remain errors. The private-copy shared
+Shared scenario `Program_Error` assertions are translated into Ahven failures
+by the unit adapter; other exception kinds remain errors. The private-copy shared
 scenario retains its original assertion exception, also producing a failing
 Ahven result. The Python harness accepts neither failures nor errors.
 

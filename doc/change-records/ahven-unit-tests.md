@@ -26,7 +26,9 @@ text and XML modes sequentially, validates the complete suite/case inventory
 and rejects failures, errors, skips and retained fixture directories. A
 separate deliberately failing probe must return exit status 1 with the
 assertion diagnostic and XML failure; it also verifies cleanup on failure.
-Probe reports are not retained among real test results.
+The same orchestration path runs both modes and collects their failures,
+retaining XML even when text-mode tests fail. Each mode has its own fixture
+root. Probe reports are not retained among real test results.
 
 Debian's `libahven-dev` is installed while building Arca's Trixie image.
 Preflight checks resolve the test project before compilation and report
@@ -55,7 +57,14 @@ installed consumer still pass while the test preflight correctly rejects
 missing Ahven. Both optional predecessor comparisons pass, including their
 original-writer descriptor-leak negative controls.
 
-Final review is pending. The library, sources and coverage inventory have no
+The final validation review found that an early text-mode failure originally
+prevented XML generation. The unchanged harness failed the regression with
+no XML; the corrected harness retains the same failing assertion in XML and
+still fails overall. Its integrated probe now pins this orchestration path.
+The source/lifecycle review found no blocking or fix-before-PR findings.
+Review of the report correction is pending.
+
+The library, sources and coverage inventory have no
 production changes. Abuild's User Manual, Developer Guide, dependencies and release
 markers need no change because this topic only changes Arca's test setup.
 Arca's README, developer guide, changelog and indexed plans describe it.
