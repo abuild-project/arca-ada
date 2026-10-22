@@ -341,3 +341,17 @@ reports a complete CLI project/index and empty diagnostics for the changed
 Ada files. Author review checked ABI/profile parity, declaration comments,
 signal-server ordering, test fixture ownership and documentation/commit
 hygiene before the independent static passes.
+
+## Signal and aspect review completed on 2026-10-22
+
+Both independent static passes report no concrete findings. They verified
+the supported GNAT 14 handler/wait ordering against its runtime sources,
+thread-local acknowledgement state, readiness-fd lifetime and signal-token
+checks before release. Isolated fixtures and the existing positive/negative
+barrier controls remain effective. All seven foreign profiles and symbol
+names retain their C ABI, including the metadata representation contract.
+
+Final author review confirms that runtime/test sources match the successful
+fresh-source coverage and normal check. Ada MCP project/index and changed
+file diagnostics are complete. The correction is ready for normal delivery
+to PR #7, both GitHub CI event runs and another Copilot review.

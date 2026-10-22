@@ -102,6 +102,10 @@ Trixie compiler caught an overload ambiguity absent from MCP diagnostics.
 The named-argument correction passes compiler and runtime validation.
 Independent source and validation passes also found no remaining issues in
 the acknowledged test barrier, its phase placement, protocol/error ownership
-and positive/negative controls. Production and build inputs are unchanged.
+and positive/negative controls. Final passes verified the signal completion
+acknowledgement against the supported GNAT 14 runtime and confirmed identical
+foreign profiles, C symbols and conventions after the aspect migration.
+Fresh-source coverage and normal tests pass with both final changes; the
+production-body inventory and build inputs remain unchanged.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
