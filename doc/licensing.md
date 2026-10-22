@@ -20,9 +20,10 @@ On 2026-10-22, the owner confirmed authority to grant additional
 `LGPL-2.1-or-later` licensing for the previously identified CPIO/TAR sources,
 their shared helpers, tests and fixtures. The
 [provenance record](provenance/cpio-tar.md) and its file manifest identify
-the accepted revision and exact candidate scope. The owner expressly confirmed:
+the accepted revision and exact candidate scope. The owner's confirmation,
+translated into English, was:
 
-> Die zusätzliche LGPL-Freigabe erteile ich ebenfalls.
+> I also grant permission to license this material under the LGPL.
 
 This confirmation applies to material owned by the represented rights holder.
 It does not relicense third-party source, unrelated writers or future source

@@ -16,9 +16,9 @@ checkout, and establish a fetchable source reference before public delivery.
 On 2026-10-22, the repository owner confirmed authority to act for the rights
 holder named by Abuild and expressly granted additional LGPL-2.1-or-later
 licensing for the existing CPIO and TAR files, their helpers, tests and
-fixtures. The confirmation was:
+fixtures. The confirmation, translated into English, was:
 
-> Die zusätzliche LGPL-Freigabe erteile ich ebenfalls.
+> I also grant permission to license this material under the LGPL.
 
 This records an additional licence for that rights holder's material; it
 does not revoke the existing GPL-2.0-or-later grant. Preserve applicable
