@@ -23,6 +23,8 @@ def main():
     inventory = {line for line in (root / "tests/coverage-sources.txt").read_text().splitlines()
                  if line and not line.startswith("#")}
     actual = {str(path.relative_to(root)) for path in (root / "src").glob("*.adb")}
+    actual.update(str(path.relative_to(root)) for suffix in ("*.adb", "*.c")
+                  for path in (root / "cli/src").glob(suffix))
     if inventory != actual:
         raise RuntimeError(f"Coverage inventory differs: {inventory ^ actual}")
     if shutil.which("gcov") is None:
@@ -30,8 +32,10 @@ def main():
     scratch_parent = root / "build"
     scratch_parent.mkdir(exist_ok=True)
     objects = root / "tests/obj-coverage"
-    for data in objects.glob("*.gcda"):
-        data.unlink()
+    cli_objects = root / "cli/obj-coverage"
+    for directory in (objects, cli_objects):
+        for data in directory.glob("*.gcda"):
+            data.unlink()
     subprocess.run([options.builder, "-p", "-P", str(root / "tests/tests.gpr"),
                     "-XARCA_COVERAGE=enabled", "-j" + options.jobs], check=True)
     subprocess.run([sys.executable, str(root / "tests/check-unit.py"),
@@ -45,12 +49,19 @@ def main():
     subprocess.run([sys.executable, str(root / "tests/check-tar.py"),
                     "--driver", str(root / "tests/bin-coverage/tar_driver")],
                    cwd=root, check=True)
+    subprocess.run([options.builder, "-p", "-P", str(root / "cli/cli.gpr"),
+                    "-aP" + str(root), "-XARCA_CLI_COVERAGE=enabled",
+                    "-j" + options.jobs], cwd=root, check=True)
+    subprocess.run([sys.executable, str(root / "tests/check-cli.py"),
+                    "--cli", str(root / "cli/bin-coverage/arca")],
+                   cwd=root, check=True)
     report = {}
     with tempfile.TemporaryDirectory(prefix="gcov.", dir=scratch_parent) as name:
         scratch = Path(name)
         for source in sorted(inventory):
+            source_objects = cli_objects if source.startswith("cli/") else objects
             subprocess.run(["gcov", "--json-format", "--branch-probabilities",
-                            "--object-directory", str(objects), str(root / source)],
+                            "--object-directory", str(source_objects), str(root / source)],
                            cwd=scratch, check=True)
         for archive in scratch.glob("*.gcov.json.gz"):
             with gzip.open(archive, "rt") as stream:

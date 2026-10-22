@@ -7,6 +7,10 @@
 /tests/bin/
 /tests/obj-coverage/
 /tests/bin-coverage/
+/cli/obj/
+/cli/bin/
+/cli/obj-coverage/
+/cli/bin-coverage/
 *.ali
 *.o
 *.a

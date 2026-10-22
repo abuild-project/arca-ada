@@ -88,3 +88,8 @@ explicit lifecycle additions. CPIO was accepted in
 and reuses the accepted copy helper. TAR was accepted in
 [PR #4](https://github.com/mweidle73/arca-ada/pull/4). Ahven suites precede
 the CLI; Abuild integration remains pending.
+
+On 2026-10-22, the owner accepted the Ahven suites by requesting the merge of
+[PR #5](https://github.com/mweidle73/arca-ada/pull/5), then requested work on
+the [archive creation CLI](archive-cli.md). PR #5 is merged; CLI work is a
+separate local topic. Abuild integration remains a subsequent change.

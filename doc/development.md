@@ -81,8 +81,28 @@ imports. `Arca.CPIO` and `Arca.TAR` expose format-specific APIs;
 `Arca.Binary_IO` is their private implementation helper containing only the
 used stream-copy operation and best-effort cleanup shared by both writers.
 Do not add empty API promises for proposed format packages. Introduce each API
-with its writer, documented constraints and
-independent tests.
+with its writer, documented constraints and independent tests.
+
+`cli/cli.gpr` imports the library and builds `cli/bin/arca`. Argument policy,
+filesystem inventory and hardlink maps belong to this CLI consumer. Its Ada
+containers are invocation-local and used sequentially; integration tests run
+separate CLI processes against an immutable input tree. The library remains
+Ada-only and does not depend on the CLI or its C code. The CLI's initial
+platform is 64-bit Linux; the reference validation uses AMD64 Trixie.
+
+GNAT supplies path normalization and a raw directory-name iterator. The
+higher-level Ada.Directories search also queries modification times through
+an API that rejects dangling links and special nodes. The raw iterator lets
+the CLI inspect every name with lstat. The only C wrapper,
+`cli/src/posix_bridge.c`, converts lstat metadata to a fixed-width record and
+keeps platform stat layout and type/device macros behind that boundary.
+readlink, mkdtemp, rename and renameat2 are direct Ada bindings; errno is
+captured before allocating diagnostic strings, and readlink's returned byte
+count determines the target slice without assuming a NUL terminator.
+SIGINT/SIGTERM handlers and their shared signal state use an Ada protected
+object, following the existing Abuild pattern through independently authored
+CLI code. No Abuild helper is imported. See the [CLI guide](cli.md) for the
+stable-input contract, format limits and cancellation boundaries.
 
 `examples/client/client.gpr` imports the project by name. The installation
 check copies this client, including its CPIO and TAR type use, into a private
@@ -116,26 +136,63 @@ writer assertion and the transformation behavior intentionally left in Abuild.
 
 `tests/tests.gpr` compiles source units into its own object directory so the
 private copy helper can be tested by a private child without publishing it.
-Only this test project imports Ahven; the library and installed client do not.
+Only this test project imports Ahven; the library, CLI and installed client
+do not.
 Installed-library usability is checked separately by the copied client.
 Coverage uses distinct object and executable directories, clears previous
 execution counts and checks `tests/coverage-sources.txt` against every current
-production body. It requires a report with executed lines for each body;
-the generated counts do not promise complete branch coverage.
+production body, including the CLI's Ada and C sources. It requires a report
+with executed lines for each body; the generated counts do not promise
+complete branch coverage.
 
-Library and test compilation enable `-gnatVa`, `-fstack-check` and `-gnateE`
+Library, CLI and test compilation enable `-gnatVa`, `-fstack-check` and `-gnateE`
 in addition to the existing warnings, overflow and normal Ada checks. These
 match Abuild's extra validity/stack checks and exception-detail policy. GPR
 imports do not inherit a parent's compiler defaults automatically. Abuild's
 separate compiler style profile is not adopted by this runtime-check change;
 Arca retains its established source-style rules.
 
+CLI Ada sources follow the same readability conventions: separate declaration
+groups, nested blocks and processing phases with blank lines; expand case
+alternatives onto separate lines; align multiline parameter declarations;
+and retain adjacent subprogram contracts and plain body separators. Keep
+manually maintained Ada lines within 80 columns.
+Foreign-interface declarations in the CLI use Ada 2012 Import, Convention and
+External_Name aspects, including the C convention on the metadata record.
+Use this form for new CLI bindings instead of interfacing pragmas.
+
+CLI regressions compile `tests/cli_faults.c` as a temporary preload library
+with the image's GCC. Only selected CLI child processes load it; its trace
+proves that each intended syscall fault was reached. Production code has no
+fault switches or dependency on this library. It is test support, outside the
+production-body coverage inventory. Native Linux temporary fixtures verify
+timestamp storage, sparse-file sizes and special permission bits before
+asserting archive behavior. Maximum-size acceptance reaches an intentionally
+unreadable source; rejection at max+1 happens during inventory, without
+creating multi-gigabyte archive payloads.
+
+Phase-sensitive CLI tests use the same preload library to hold the child
+after the successful staging-file open, before entry emission. One inherited
+pipe acknowledges readiness; another requires an explicit release byte. The
+parent checks that staging is empty and the destination is unchanged before
+mutating input or sending signals. Interrupted pipe calls retry. Timeouts,
+EOF and unexpected tokens fail readiness. Parent pipes and child processes
+have exception-safe ownership; positive release, missing-hook and parent-error
+controls check the protocol and descriptor cleanup with small input trees.
+Cancellation also waits for a signal-specific acknowledgement before release.
+In the supported GNAT 14 runtime, the dedicated interrupt server invokes the
+protected handler between successive sigwait calls. The test shim observes
+the next call on that same thread, proving the handler has returned; queuing
+a signal alone is insufficient. This runtime-specific observation remains
+test support and introduces no production signal hook.
+
 ## Commands
 
-- `make -j8 all NUM_CPUS=8` builds the static library.
-- `make -j8 check NUM_CPUS=8` runs packaging and both writer suites.
+- `make -j8 all NUM_CPUS=8` builds the static library and CLI.
+- `make -j8 cli NUM_CPUS=8` builds the CLI and its library dependency.
+- `make -j8 check NUM_CPUS=8` runs packaging, unit, writer and CLI suites.
 - `make -j8 coverage NUM_CPUS=8` reports executed lines for all production bodies.
-- `make install PREFIX=/absolute/prefix` installs using GPRinstall.
+- `make install PREFIX=/absolute/prefix` installs the library and CLI.
 - `make clean` removes generated GPRbuild artifacts.
 
 Do not run independent top-level builds concurrently against `obj/`. Install

@@ -12,7 +12,7 @@ make_command=$(command -v "${MAKE:-make}")
 mkdir -p "$scratch/bin" "$scratch/defaults" "$scratch/tools"
 
 # Keep support commands available while deliberately omitting default GPR names.
-for tool in gnatls make mktemp grep; do
+for tool in gnatls gcc make mktemp grep; do
     ln -s "$(command -v "$tool")" "$scratch/bin/$tool"
     ln -s "$(command -v "$tool")" "$scratch/defaults/$tool"
 done

@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Add a Linux CLI for creating uncompressed CPIO and TAR archives, preserving
+  metadata and links with deterministic ordering and atomic publication.
+- Test installed CLI execution, independent readers, metadata overrides,
+  relative paths, option forms, cancellation, source changes and output
+  preservation; cover CLI Ada/C bodies.
+- Synchronize phase-sensitive CLI tests with an acknowledged child barrier
+  and completed signal dispatch instead of staging polling and delayed SIGSTOP.
+- Handle CLI signals in Ada and bind simple system calls directly, retaining
+  C only for the lstat metadata wrapper.
+- Express CLI foreign interfaces with Ada 2012 aspects.
+- Preserve CLI I/O diagnostics, reject directory-read failures, make staging
+  finalization nonthrowing and enable the stronger runtime checks for the CLI.
+- Add a hard-link no-clobber fallback and regression checks for publication,
+  cleanup, source metadata/size bounds, FIFO outputs, ordering and mode bits.
 - Preserve caller exceptions during writer finalization and attempt stream
   closure when unfinished-output deletion fails; cleanup is best effort.
 - Add finalizer-failure Ahven cases and enable full validity, stack and

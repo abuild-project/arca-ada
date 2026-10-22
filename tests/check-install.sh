@@ -20,10 +20,20 @@ num_cpus=${NUM_CPUS:-8}
 
 "$gprinstall_command" -p -P "$repo_root/arca.gpr" \
     --prefix="$scratch/prefix"
+"$gprinstall_command" -p -P "$repo_root/cli/cli.gpr" -aP"$repo_root" \
+    --prefix="$scratch/prefix" --mode=usage --no-project
 # Installed notices must match the project's actual grant byte for byte.
 for notice in LICENSE COPYRIGHT; do
     cmp "$repo_root/$notice" "$scratch/prefix/share/doc/arca/$notice"
 done
+mkdir -p "$scratch/cli input"
+printf 'installed CLI\n' >"$scratch/cli input/payload"
+for format in cpio tar; do
+    "$scratch/prefix/bin/arca" create --format "$format" \
+        -C "$scratch/cli input" -o "$scratch/installed.$format" --mtime 0
+    test -s "$scratch/installed.$format"
+done
+tar -xOf "$scratch/installed.tar" payload | cmp - "$scratch/cli input/payload"
 mkdir -p "$scratch/client"
 cp "$repo_root/examples/client/client.gpr" \
     "$repo_root/examples/client/arca_client.adb" "$scratch/client/"
