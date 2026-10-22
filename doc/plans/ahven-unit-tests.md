@@ -46,3 +46,19 @@ passes are complete. The XML-report finding is corrected and re-reviewed;
 there are no remaining blocking or fix-before-PR findings. CLI development
 stays separate; see the
 [change record](../change-records/ahven-unit-tests.md) for evidence and limits.
+
+## Coverage follow-up on 2026-10-22
+
+A case-by-case audit found that the thematic mapping did not preserve every
+relevant predecessor assertion. The owner requested closing these gaps in
+the existing PR before merge:
+
+- Restore the short CPIO raw-record case, canonical hexadecimal spelling,
+  single-link/device-zero fields, all padding remainders and minimal length.
+- Check TAR numeric reader fallback, final types and fallback fields for GNU
+  metadata, deep prefix choices and external reader acceptance.
+- Restore block-aligned multi-buffer extraction and empty-archive readers.
+- Prove new oracle checks reject targeted corruption and record all original
+  cases individually, separating Abuild-only adapter behavior.
+
+Implementation and renewed validation/review are in progress.
