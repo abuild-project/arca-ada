@@ -25,6 +25,9 @@ package body CPIO_Scenarios is
       procedure Write_Entries (Name : String);
       --  Emit every supported entry kind, hardlinks and a multi-buffer payload.
 
+      procedure Write_Raw;
+      --  Emit the short symlink/file pair with all three-byte payload padding.
+
       procedure Check_Errors;
       --  Pin unopened, source, size and timestamp failures before continuing.
 
@@ -76,6 +79,22 @@ package body CPIO_Scenarios is
               (1970, 1, 1, Seconds => 0.0, Time_Zone => 0));
          CPIO_Close (Archive);
       end Write_Entries;
+
+      -------------------------------------------------------------------------
+
+      procedure Write_Raw is
+         Archive : CPIO_Archive_Type;
+         Epoch : constant Ada.Calendar.Time :=
+           Ada.Calendar.Formatting.Time_Of
+             (1970, 1, 1, Seconds => 0.0, Time_Zone => 0);
+      begin
+         CPIO_Create (Archive, Work & "/raw.cpio");
+         CPIO_Make_Symlink (Archive, "sym", "abcde", 8#777#, 11, 22, Epoch);
+         CPIO_Make_File
+           (Archive, "file", Work & "/raw.bin", 8#644#, 33, 44,
+            1, CPIO_Get_Next_Inode (Archive), Epoch);
+         CPIO_Close (Archive);
+      end Write_Raw;
 
       -------------------------------------------------------------------------
 
@@ -341,6 +360,8 @@ package body CPIO_Scenarios is
    begin
       if Mode = "entries" then
          Write_Entries (Work & "/entries.cpio");
+      elsif Mode = "raw" then
+         Write_Raw;
       elsif Mode = "empty" then
          declare
             Archive : CPIO_Archive_Type;

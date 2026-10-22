@@ -9,9 +9,10 @@ The CLI remains a separate subsequent change.
 Existing direct assertions are factored into shared scenario packages.
 Ahven calls their procedures in process; the archive drivers use the same
 procedures for the existing independent Python decoders and GNU/libarchive
-readers. Statement comparison against the accepted TAR-import tree confirms
-that those scenario bodies retain their executable statements. Optional
-predecessor helpers copy the new scenario units alongside the thin drivers.
+readers. Original error, lifetime and parallel contracts are retained;
+additional archive scenarios close the individual format-assertion gaps.
+Optional predecessor helpers copy the new scenario units alongside the thin
+drivers.
 
 Focused new cases cover closed-writer reuse, retry after failed Create,
 exact-buffer and empty copies, and missing-source copy recovery. Parallel
@@ -19,6 +20,17 @@ cases compare complete outputs on bounded worker stacks. Comparison
 sensitivity checks reject changed bytes/lengths and verify descriptor cleanup.
 The [unit-test guide](../unit-tests.md) maps predecessor behaviors to the
 Ahven and independent format checks, including transformation-only exclusions.
+The [individual case matrix](../native-test-coverage.md) covers every registered
+original CPIO/TAR/copy case and separates writer assertions from adapter work.
+
+The assertion audit adds the short CPIO record layout with exact uppercase
+fields, link/device defaults, three-byte payload padding and minimal archive
+length. TAR checks now pin the actual numeric reader fallback, final GNU
+entry types and fallback names/targets, deep prefix choices, empty reader
+listings and block-aligned multi-buffer extraction. Corruption controls keep
+the altered TAR headers' checksums valid and require the generic decoder to
+accept them before the intended value assertions reject them. Hardlink
+extraction uses `lstat` and a regular-file check to exclude followed symlinks.
 
 Each unit run owns a private fixture root. Controlled fixtures remove their
 own directories during normal exit and exception unwinding. The harness runs
@@ -66,6 +78,16 @@ The targeted validation re-review confirms that the report finding is
 resolved, with no remaining concrete findings. Unit checks and complete
 coverage pass again after the correction. Development wrapper and real-image
 shell/batch regressions also pass.
+
+The later case-by-case coverage audit found the format-assertion gaps above.
+The expanded CPIO/TAR suites pass locally with their new corruption controls,
+as do complete normal/coverage checks and a fresh, network-isolated source
+copy. Both expanded predecessor comparisons pass, including the short CPIO,
+aligned TAR and numeric-owner scenarios. Representative corruptions accepted
+by the previous PR checks are rejected now: extra zero blocks, lowercase hex,
+symlink/rdev fields and checksum-valid GNU hardlink type/fallback changes.
+The individual matrix includes all 15 CPIO, 28 TAR and three shared-helper
+registrations. Final review of these additions is pending.
 
 The library, sources and coverage inventory have no
 production changes. Abuild's User Manual, Developer Guide, dependencies and release

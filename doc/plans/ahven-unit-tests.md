@@ -61,4 +61,7 @@ the existing PR before merge:
 - Prove new oracle checks reject targeted corruption and record all original
   cases individually, separating Abuild-only adapter behavior.
 
-Implementation and renewed validation/review are in progress.
+The additions, individual case matrix, targeted corruption controls and
+expanded predecessor comparisons are implemented and locally validated.
+Complete normal and coverage checks also pass from fresh sources without
+network or Abuild access. Final review of the follow-up is pending.

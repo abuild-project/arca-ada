@@ -9,11 +9,13 @@ metadata arguments retain the predecessor's API without Abuild dependencies.
 
 The normative reference is the Linux kernel's
 [initramfs buffer format](https://www.kernel.org/doc/html/latest/driver-api/early-userspace/buffer-format.html).
-Output uses `070701`, 110-byte headers, eight-digit hexadecimal numeric
-fields, NUL-terminated names, four-byte entry padding and a `TRAILER!!!`
-record. Completed output is padded to 512 bytes. Supported entries are
-regular files, directories, symbolic links, hardlinks, FIFOs and character
-and block devices. Device entries do not create local device nodes.
+Output uses `070701`, 110-byte headers, eight-digit uppercase hexadecimal
+numeric fields, NUL-terminated names, four-byte entry padding and a `TRAILER!!!`
+record. Completed output uses the minimum zero padding to a 512-byte boundary.
+These spelling and padding choices retain the predecessor's output profile.
+Supported entries are regular files, directories, symbolic links, hardlinks,
+FIFOs and character and block devices. Device entries do not create local
+device nodes.
 
 Callers provide archive paths, permission bits, UID/GID values and timestamps.
 The supported 64-bit Trixie build accepts UNIX timestamps from zero through

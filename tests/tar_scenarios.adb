@@ -29,6 +29,10 @@ package body TAR_Scenarios is
         Ada.Calendar.Formatting.Time_Of
           (2242, 3, 16, Seconds => 46_591.0, Time_Zone => 0);
       Max_Field : constant Unsigned_32 := 2 ** 21 - 1;
+      Deep_Prefix : constant String :=
+        "directory/directory/directory/directory/" &
+        "directory/directory/directory/directory/" &
+        "directory/directory/directory/directory/middle";
 
       procedure Write_Entries (Name : String);
       --  Emit all entry kinds, exact-fit fields and both GNU metadata kinds.
@@ -38,6 +42,12 @@ package body TAR_Scenarios is
 
       procedure Write_Edges;
       --  Exercise padding, nondefault string bounds and long metadata sizes.
+
+      procedure Write_Aligned;
+      --  Emit a block-aligned payload spanning more than one copy buffer.
+
+      procedure Write_Owners;
+      --  Emit numeric owner/group IDs absent from the reference image's users.
 
       procedure Check_Errors;
       --  Check exceptions, explicit messages and short-header recovery.
@@ -158,7 +168,7 @@ package body TAR_Scenarios is
          Offset_Name : constant String (7 .. 106) := (others => 'i');
          Offset_Link : constant String (11 .. 110) := (others => 'j');
          Sizes : constant array (Positive range <>) of Natural :=
-           (0, 1, 511, 512, 513, 1_048_576, 1_048_577);
+           (0, 1, 511, 512, 513, 1_048_576, 1_048_577, 1_049_088);
       begin
          TAR_Create (Archive, Work & "/edges.tar");
          TAR_Make_Directory
@@ -174,6 +184,12 @@ package body TAR_Scenarios is
             0, 0, Fixed_Time);
          TAR_Make_Symlink
            (Archive, "offset-link", Offset_Link, 8#777#, 0, 0, Fixed_Time);
+         TAR_Make_File
+           (Archive, Deep_Prefix & "/leaf.bin", Work & "/tiny.bin",
+            8#644#, 0, 0, Fixed_Time);
+         TAR_Make_Hardlink
+           (Archive, "deep-hardlink", Deep_Prefix & "/leaf.bin",
+            8#644#, 0, 0, Fixed_Time);
          for Length in 511 .. 513 loop
             TAR_Make_Symlink
               (Archive, "target" & Length'Image, (1 .. Length => 'x'),
@@ -190,6 +206,30 @@ package body TAR_Scenarios is
             8#644#, 0, 0, Fixed_Time);
          TAR_Close (Archive);
       end Write_Edges;
+
+      -------------------------------------------------------------------------
+
+      procedure Write_Aligned is
+         Archive : TAR_Archive_Type;
+      begin
+         TAR_Create (Archive, Work & "/aligned.tar");
+         TAR_Make_File
+           (Archive, "aligned.bin", Work & "/size 1049088.bin",
+            8#644#, 0, 0, Fixed_Time);
+         TAR_Close (Archive);
+      end Write_Aligned;
+
+      -------------------------------------------------------------------------
+
+      procedure Write_Owners is
+         Archive : TAR_Archive_Type;
+      begin
+         TAR_Create (Archive, Work & "/owners.tar");
+         TAR_Make_File
+           (Archive, "numeric-owner", Work & "/tiny.bin", 8#644#,
+            65_432, 65_431, Fixed_Time);
+         TAR_Close (Archive);
+      end Write_Owners;
 
       -------------------------------------------------------------------------
 
@@ -465,6 +505,10 @@ package body TAR_Scenarios is
          Write_Golden;
       elsif Mode = "edges" then
          Write_Edges;
+      elsif Mode = "aligned" then
+         Write_Aligned;
+      elsif Mode = "owners" then
+         Write_Owners;
       elsif Mode = "errors" or else Mode = "state" then
          Check_Errors;
       elsif Mode = "parallel" then

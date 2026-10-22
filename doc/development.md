@@ -110,6 +110,8 @@ focused writer-reuse and copy tests. The small archive drivers reuse those
 scenarios for Python `unittest` and independent format checks. The
 [unit-test guide](unit-tests.md) explains the suites, source-test mapping,
 fixture ownership, XML reports and deliberate runner failure controls.
+The [predecessor-case mapping](native-test-coverage.md) identifies each original
+writer assertion and the transformation behavior intentionally left in Abuild.
 
 `tests/tests.gpr` compiles source units into its own object directory so the
 private copy helper can be tested by a private child without publishing it.

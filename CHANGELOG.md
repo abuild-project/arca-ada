@@ -4,6 +4,8 @@
 
 - Add named Ahven unit suites with shared direct checks, writer-reuse and
   copy-helper cases, XML reports and runner failure controls.
+- Pin the remaining predecessor CPIO/TAR raw-field, padding, long-metadata
+  and reader assertions with an individual test-case mapping.
 - Add the standalone TAR writer with retained ustar/GNU bytes, controlled
   output ownership, independent format/reader checks and predecessor parity.
 - Preserve the historical GNU ustar fixture and verify the installed TAR API.

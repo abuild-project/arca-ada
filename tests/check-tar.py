@@ -20,7 +20,9 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/tar"
-SIZES = (0, 1, 511, 512, 513, 1048576, 1048577)
+SIZES = (0, 1, 511, 512, 513, 1048576, 1048577, 1049088)
+DEEP_PREFIX = "directory/" * 12 + "middle"
+DEEP_PATH = DEEP_PREFIX + "/leaf.bin"
 
 
 def require(condition, message):
@@ -32,7 +34,7 @@ def header_fields(header):
     """Check one header using this decoder's own zero-based field map."""
     require(len(header) == 512, "truncated TAR header")
     require(header[257:265] == b"ustar\0" + b"00", "ustar magic/version")
-    require(header[265:329] == bytes(64), "numeric owner/group fallback")
+    require(header[265:329] == bytes(64), "empty user/group name fields")
     require(header[500:] == bytes(12), "reserved header bytes")
     checksum = header[148:156]
     require(checksum[6:] == b"\0 ", "checksum terminator")
@@ -120,6 +122,17 @@ def fixture_bytes():
     return bytes(result)
 
 
+def altered_header(data, record, first, replacement):
+    """Repair checksum so targeted corruption reaches the value assertions."""
+    changed = bytearray(data)
+    start = record["data_offset"] - 512
+    changed[start + first:start + first + len(replacement)] = replacement
+    changed[start + 148:start + 156] = b" " * 8
+    checksum = sum(changed[start:start + 512])
+    changed[start + 148:start + 156] = f"{checksum:06o}".encode() + b"\0 "
+    return changed
+
+
 def write_inputs(work):
     """Supply bounded payloads and sparse files used only for size checks."""
     payload = bytes(range(256)) * 8193 + b"unaligned TAR tail"
@@ -175,7 +188,16 @@ class TARChecks(unittest.TestCase):
         for name, kind, mode in (("dir/", "5", 0o750), ("empty", "0", 0o600),
                                   ("hard", "1", 0o640), ("symlink", "2", 0o777),
                                   ("fifo", "6", 0o640), ("block", "4", 0o006),
-                                  ("character", "3", 0o772)):
+                                  ("character", "3", 0o772),
+                                  ("long-symlink", "2", 0o777),
+                                  ("exact-target", "2", 0o777),
+                                  ("h" * 120, "1", 0o644),
+                                  ("a" * 155 + "/" + "p" * 100, "0", 0o644),
+                                  ("n" * 101, "0", 0o644),
+                                  ("e" * 100, "0", 0o644),
+                                  ("dir/payload", "0", 0o640),
+                                  ("epoch/", "5", 0o700),
+                                  ("max-metadata", "3", 0o7777)):
             self.assertEqual((entries[name]["type"], entries[name]["mode"]),
                              (kind, mode), name)
         self.assertEqual((entries["block"]["major"], entries["block"]["minor"]), (21, 5))
@@ -184,14 +206,19 @@ class TARChecks(unittest.TestCase):
         self.assertEqual(entries["hard"]["link"], "dir/payload")
         self.assertEqual(entries["symlink"]["link"], "dir/payload")
         self.assertEqual(entries["long-symlink"]["link"], "x" * 300)
+        self.assertEqual(entries["long-symlink"]["raw_link"], "././@LongLink")
         split = entries["a" * 155 + "/" + "p" * 100]
         self.assertEqual((split["prefix"], split["name"], split["metadata"]),
                          ("a" * 155, "p" * 100, ()))
         self.assertEqual(entries["n" * 101]["metadata"], ("L",))
+        self.assertEqual(entries["n" * 101]["name"], "n" * 100)
+        self.assertEqual(entries["n" * 101]["prefix"], "")
         self.assertEqual(entries["e" * 100]["metadata"], ())
         self.assertEqual(entries["exact-target"]["link"], "t" * 100)
         self.assertEqual(entries["exact-target"]["metadata"], ())
         self.assertEqual(entries["h" * 120]["metadata"], ("L", "K"))
+        self.assertEqual(entries["h" * 120]["name"], "h" * 100)
+        self.assertEqual(entries["h" * 120]["prefix"], "")
         self.assertEqual(entries["h" * 120]["raw_link"], "././@LongLink")
         self.assertEqual(entries["h" * 120]["link"], "n" * 101)
         self.assertEqual([r["type"] for r in records if r["type"] in ("L", "K")],
@@ -207,27 +234,99 @@ class TARChecks(unittest.TestCase):
         self.assertEqual(actual, fixture_bytes())
         self.assertEqual(len(decode_tar(actual)[0]), 7)
 
-    def test_boundaries_and_string_bounds(self):
-        self.run_driver("edges")
-        entries, _ = decode_tar((self.work / "edges.tar").read_bytes())
-        self.assertEqual(entries["already/"]["name"], "already/")
+    def check_edges(self, data):
+        entries, _ = decode_tar(data)
+        self.assertEqual((entries["already/"]["name"], entries["already/"]["type"]),
+                         ("already/", "5"))
         self.assertIn("repeated//", entries)
-        self.assertEqual(entries["d" * 150 + "/"]["metadata"], ("L",))
+        directory = entries["d" * 150 + "/"]
+        self.assertEqual((directory["metadata"], directory["type"],
+                          directory["name"], directory["prefix"]),
+                         (("L",), "5", "d" * 100, ""))
         self.assertEqual(entries["/" + "r" * 100 + "/"]["metadata"], ("L",))
         self.assertEqual(entries["i" * 100]["metadata"], ())
         self.assertEqual(entries["offset-link"]["link"], "j" * 100)
         self.assertEqual(entries["offset-link"]["metadata"], ())
+        self.assertEqual(entries["offset-link"]["type"], "2")
+        deep = entries[DEEP_PATH]
+        self.assertEqual((deep["prefix"], deep["name"], deep["metadata"], deep["type"]),
+                         (DEEP_PREFIX, "leaf.bin", (), "0"))
+        link = entries["deep-hardlink"]
+        self.assertEqual((link["type"], link["metadata"], link["link"], link["raw_link"]),
+                         ("1", ("K",), DEEP_PATH, "././@LongLink"))
         for length in range(511, 514):
             self.assertEqual(entries[f"target {length}"]["link"], "x" * length)
             self.assertEqual(entries[f"target {length}"]["metadata"], ("K",))
+            self.assertEqual(entries[f"target {length}"]["type"], "2")
+            self.assertEqual(entries[f"target {length}"]["raw_link"], "././@LongLink")
         for size in SIZES:
             self.assertEqual(entries[f"size {size}"]["data"],
                              (self.work / f"size {size}.bin").read_bytes())
         self.assertEqual(entries["\xffbyte-name"]["data"], b"abc")
+        return entries
+
+    def test_boundaries_and_string_bounds(self):
+        self.run_driver("edges")
+        self.check_edges((self.work / "edges.tar").read_bytes())
+
+    def test_numeric_owner_fallback(self):
+        self.run_driver("owners")
+        data = (self.work / "owners.tar").read_bytes()
+        entry = decode_tar(data)[0]["numeric-owner"]
+        self.assertEqual((entry["uid"], entry["gid"]), (65432, 65431))
+        # Do not force numeric output: empty uname/gname must trigger fallback.
+        listing = subprocess.run(["tar", "-tvf", str(self.work / "owners.tar")],
+                                 env=dict(os.environ, LC_ALL="C", TZ="UTC"),
+                                 capture_output=True, text=True, check=True, timeout=30)
+        self.assertRegex(listing.stdout,
+                         r"(?m)^-rw-r--r--\s+65432/65431\s+3\s+.+\s+numeric-owner$")
+
+    def test_aligned_multi_buffer_readers(self):
+        self.run_driver("aligned")
+        archive = self.work / "aligned.tar"
+        data = archive.read_bytes()
+        source = (self.work / "size 1049088.bin").read_bytes()
+        self.assertEqual(len(source), 1049088)
+        self.assertEqual(len(data), len(source) + 3 * 512)
+        self.assertEqual(decode_tar(data)[0]["aligned.bin"]["data"], source)
+        for reader in ("tar", "bsdtar"):
+            destination = self.work / (reader + "-aligned")
+            destination.mkdir()
+            subprocess.run([reader, "--no-same-owner", "-xf", str(archive),
+                            "-C", str(destination)], check=True, timeout=30)
+            self.assertEqual((destination / "aligned.bin").read_bytes(), source)
+
+    def test_legacy_reader_edges(self):
+        self.run_driver("golden")
+        self.run_driver("edges")
+        self.check_edges((self.work / "edges.tar").read_bytes())
+        selected = ["d" * 150 + "/", DEEP_PATH, "deep-hardlink"]
+        for reader in ("tar", "bsdtar"):
+            listing = subprocess.run([reader, "-tf", str(self.work / "golden.tar")],
+                                     capture_output=True, check=True, timeout=30)
+            self.assertIn("a" * 150 + "/middle/leaf.txt",
+                          listing.stdout.decode().splitlines())
+            archive = self.work / "edges.tar"
+            listing = subprocess.run([reader, "-tf", str(archive), *selected],
+                                     capture_output=True, check=True, timeout=30)
+            self.assertEqual(set(listing.stdout.decode().splitlines()), set(selected))
+            destination = self.work / (reader + "-edges")
+            destination.mkdir()
+            subprocess.run([reader, "--no-same-owner", "-xf", str(archive),
+                            "-C", str(destination), *selected], check=True, timeout=30)
+            self.assertTrue(stat.S_ISDIR((destination / ("d" * 150)).lstat().st_mode))
+            self.assertEqual((destination / DEEP_PATH).read_bytes(), b"abc")
+            link = (destination / "deep-hardlink").lstat()
+            self.assertTrue(stat.S_ISREG(link.st_mode))
+            self.assertEqual(link.st_ino, (destination / DEEP_PATH).lstat().st_ino)
 
     def test_empty_and_errors(self):
         self.run_driver("empty")
         self.assertEqual((self.work / "empty.tar").read_bytes(), bytes(1024))
+        for reader in ("tar", "bsdtar"):
+            listing = subprocess.run([reader, "-tf", str(self.work / "empty.tar")],
+                                     capture_output=True, check=True, timeout=30)
+            self.assertEqual(listing.stdout, b"")
         self.run_driver("errors")
         entries, _ = decode_tar((self.work / "errors.tar").read_bytes())
         self.assertEqual(set(entries), {"after-errors/"})
@@ -250,6 +349,35 @@ class TARChecks(unittest.TestCase):
         changed[padding] = 1
         with self.assertRaisesRegex(AssertionError, "member payload padding"):
             decode_tar(changed)
+        for name, first, replacement in (("h" * 120, 156, b"2"),
+                                          ("exact-target", 156, b"1"),
+                                          ("h" * 120, 0, b"q" * 100),
+                                          ("n" * 101, 0, b"q" * 100),
+                                          ("long-symlink", 157,
+                                           b"wrong".ljust(100, b"\0"))):
+            changed = altered_header(self.archive, entries[name], first, replacement)
+            decode_tar(changed)  # Valid checksum/layout; pin the intended value.
+            with self.assertRaises(AssertionError):
+                self.check_entries(changed)
+        self.run_driver("edges")
+        edges = (self.work / "edges.tar").read_bytes()
+        edge_entries = self.check_edges(edges)
+        for first, replacement in ((156, b"2"), (0, b"q" * 100)):
+            changed = altered_header(edges, edge_entries["d" * 150 + "/"],
+                                     first, replacement)
+            decode_tar(changed)
+            with self.assertRaises(AssertionError):
+                self.check_edges(changed)
+        # An earlier valid split reconstructs the same path but breaks the
+        # predecessor's rightmost-split convention.
+        prefix, middle, leaf = DEEP_PATH.rsplit("/", 2)
+        changed = altered_header(edges, edge_entries[DEEP_PATH], 0,
+                                 (middle + "/" + leaf).encode().ljust(100, b"\0"))
+        changed = altered_header(changed, edge_entries[DEEP_PATH], 345,
+                                 prefix.encode().ljust(155, b"\0"))
+        decode_tar(changed)
+        with self.assertRaises(AssertionError):
+            self.check_edges(changed)
 
     def test_reference_readers(self):
         entries = self.check_entries(self.archive)
@@ -269,8 +397,10 @@ class TARChecks(unittest.TestCase):
             self.assertEqual((destination / "empty").read_bytes(), b"")
             self.assertEqual((destination / "hard").stat().st_ino,
                              (destination / "dir/payload").stat().st_ino)
-            self.assertEqual((destination / ("h" * 120)).stat().st_ino,
-                             (destination / ("n" * 101)).stat().st_ino)
+            hardlink = (destination / ("h" * 120)).lstat()
+            self.assertTrue(stat.S_ISREG(hardlink.st_mode))
+            self.assertEqual(hardlink.st_ino,
+                             (destination / ("n" * 101)).lstat().st_ino)
             self.assertEqual(os.readlink(destination / "symlink"), "dir/payload")
             self.assertEqual(os.readlink(destination / "long-symlink"), "x" * 300)
             self.assertTrue(stat.S_ISFIFO((destination / "fifo").stat().st_mode))
@@ -317,7 +447,8 @@ class TARChecks(unittest.TestCase):
     def test_predecessor_parity(self):
         if OPTIONS.baseline_driver is None:
             self.skipTest("optional exact predecessor comparison")
-        for scenario in ("entries", "golden", "edges", "errors", "empty"):
+        for scenario in ("entries", "golden", "edges", "errors", "empty",
+                         "aligned", "owners"):
             work = self.work / ("baseline-" + scenario)
             work.mkdir()
             write_inputs(work)

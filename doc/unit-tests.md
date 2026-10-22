@@ -51,6 +51,10 @@ CI retains the real suites' XML files as the `ahven-unit-results` artifact.
 
 ## Relation to existing tests
 
+The [individual predecessor-case mapping](native-test-coverage.md) records
+every registered original CPIO/TAR/copy test, its equivalent assertions and
+adapter-only exclusions. The overview below is a summary of that mapping.
+
 The scenario packages contain the pre-existing direct Ada checks shared by
 the Ahven suites and the small archive drivers. Ahven calls their procedures
 in process. The drivers remain inputs to independent Python decoders and
@@ -68,13 +72,16 @@ Ahven result. The Python harness accepts neither failures nor errors.
 | Repeated Create and unfinished-output ownership | Named state/lifetime cases; descriptor counts, task exit/abort and independent state-output checks |
 | Parallel native writers | Named parallel cases compare complete outputs on bounded worker stacks; independent suites also decode their reference archives |
 | Timestamp/size/owner/device boundaries | Shared error cases plus independent maximum-field and first-rejected-value checks |
-| Header fields, TAR prefix/long metadata, padding and end markers | Independent raw decoders, corruption controls and historical GNU fixture |
+| Header fields, TAR prefix/long metadata, padding and end markers | Independent raw decoders, short CPIO record layout, corruption controls and historical GNU fixture |
 | Payloads, entry kinds and explicit hardlinks | Independent entry matrices, multi-buffer comparisons and external extraction |
 | Copy growth and short reads | Private-copy Ahven case and unchanged shared direct checks |
 
 Closed-writer reuse, retry after failed Create, exact-buffer/empty copies and
 missing-source copy recovery have focused additional Ahven cases. A comparison
 sensitivity case rejects changed bytes and lengths and checks handle cleanup.
+The independent suites also pin numeric TAR reader fallback, deep-path and
+GNU fallback headers, block-aligned multi-buffer extraction, empty-archive
+acceptance and CPIO's exact short-record padding/uppercase field profile.
 
 Abuild's transformation-level source-path hardlink grouping, configuration,
 logging and scheduling tests stay in Abuild. Endian helpers absent from Arca
