@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: LGPL-2.1-or-later
 
 """Check the launcher's stdin and terminal behavior with real containers."""
 

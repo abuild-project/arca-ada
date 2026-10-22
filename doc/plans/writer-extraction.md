@@ -1,12 +1,12 @@
 # Writer extraction
 
-Status: Accepted direction as discussed on 2026-10-21. Implementation and
-licence clearance for the existing sources remain pending.
+Status: Accepted direction as discussed on 2026-10-21. The source inventory
+and additional LGPL grant are recorded; writer imports remain pending.
 
 ## Scope and order
 
 1. Establish the independently usable repository foundation.
-2. Review provenance and obtain the additional BSD grants needed for CPIO,
+2. Review provenance and record the additional LGPL grants needed for CPIO,
    TAR, their shared binary primitives, tests and fixtures.
 3. Extract CPIO and TAR with their existing behavior. Move independent raw
    decoders and external-reader tests with them; keep Abuild transformation
@@ -61,3 +61,11 @@ change record. Keep existing source in place until parity and cleanup are
 verified. Private GitHub access is not implied by sharing an owner namespace.
 
 No extraction or Abuild backend switch has been performed by this bootstrap.
+
+## Progress
+
+On 2026-10-22, the owner authorized LGPL-2.1-or-later for Arca and granted
+additional LGPL licensing for the identified CPIO/TAR material. The
+[provenance record](../provenance/cpio-tar.md) pins the accepted revision,
+file scope, fixture boundaries and direct writer/transformation test split.
+This prerequisite is prepared separately before writer imports.

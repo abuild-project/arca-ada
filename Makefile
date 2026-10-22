@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: LGPL-2.1-or-later
 
 NUM_CPUS ?= 8
 PREFIX ?= $(CURDIR)/build/install

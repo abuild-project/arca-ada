@@ -1,19 +1,39 @@
 # Licensing and provenance
 
-## Current grant
+## Project licence
 
-The newly authored bootstrap files are distributed under BSD-3-Clause; see
-`LICENSE`. No Abuild writer, helper, test or fixture has been copied into this
-revision. Consequently the bootstrap licence does not make a grant for any
-existing Abuild source.
+Arca's project-owned source, examples, build files, tests and documentation
+use `LGPL-2.1-or-later`: GNU Lesser General Public License version 2.1 or, at
+the recipient's option, any later version. [LICENSE](../LICENSE) contains the
+unmodified version 2.1 text; [COPYRIGHT](../COPYRIGHT) identifies the project
+copyright holder and grant. Source SPDX identifiers use the same expression.
+New project-owned contributions use that licence as well.
 
-## Planned imports
+The owner authorized this project licence on 2026-10-22, before any archive
+or filesystem writer import. This revision contains only the independent
+project foundation; no Abuild writer, helper, test or fixture has been copied.
+Third-party tools and dependencies retain their own terms.
 
-The current Abuild grant is `GPL-2.0-or-later`. A repository move or package
-rename does not change that grant. Before including its code in the BSD
-library, record an explicit additional BSD grant from the relevant rights
-holders and review the provenance of every imported source, helper, test and
-fixture. Git authorship alone does not establish authority to relicense.
+## Additional grant for planned imports
+
+On 2026-10-22, the owner confirmed authority to grant additional
+`LGPL-2.1-or-later` licensing for the previously identified CPIO/TAR sources,
+their shared helpers, tests and fixtures. The
+[provenance record](provenance/cpio-tar.md) and its file manifest identify
+the accepted revision and exact candidate scope. The owner's confirmation,
+translated into English, was:
+
+> I also grant permission to license this material under the LGPL.
+
+This confirmation applies to material owned by the represented rights holder.
+It does not relicense third-party source, unrelated writers or future source
+revisions. Each import must record its exact accepted source revision, file
+scope, modifications and applicable grant before introducing the material.
+The original `GPL-2.0-or-later` availability is preserved.
+
+The upstream licence alone does not authorize replacing GPL terms with LGPL
+terms. A repository move or namespace change does not establish such a grant.
+Git authorship alone does not establish authority to relicense.
 
 For each import, retain a record of:
 
@@ -21,18 +41,36 @@ For each import, retain a record of:
 - original licence and copyright notices;
 - any third-party origin, adaptations and fixture-generation terms;
 - the applicable additional grant and its scope; and
-- the destination paths and any semantic changes.
+- destination paths and semantic changes.
 
-The CPIO source describes inspiration from `gen_init_cpio`. That is a reason
-to check its provenance, not proof that a particular source was copied.
+The CPIO source describes inspiration from `gen_init_cpio`. Check that
+provenance rather than treating inspiration as proof of copied source.
 Apply the same review to TAR, binary helpers and their test infrastructure.
+Keep material without a sufficient grant outside the LGPL library.
 
-If a grant cannot be established, keep the affected material outside the BSD
-library. A separately labelled GPL extraction is possible under the original
-terms, but must not be represented as BSD-covered by this repository's root
-licence. Choose and record that alternative before importing such files.
+## Distribution and static linking
+
+Retain copyright and licence notices. When distributing the library, make
+its complete corresponding source, including distributed modifications and
+build/install scripts, available under the applicable LGPL terms.
+Purely internal modifications do not require public release.
+
+Applications may use Arca under other licences subject to LGPL section 6.
+For a statically linked executable, provide the library source and the
+application's suitable object code and/or source code, together with the
+material needed to modify Arca and relink the executable. The application
+terms must permit the modification and reverse engineering required there.
+Providing only Arca's static archive does not provide a relinkable application.
+Ada consumers must retain the binder, linker and build inputs needed by their
+chosen toolchain. A complete, rebuildable application source distribution is
+one way to supply the application material; dynamic linking has a separate
+compliance option in section 6(b).
+
+GPRinstall includes `LICENSE` and `COPYRIGHT` under `<prefix>/share/doc/arca`.
+That installation notice is not a substitute for providing complete source
+and the application material required when distributing linked binaries.
+See the [LGPL 2.1 text](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html),
+especially sections 1, 2, 4 and 6.
 
 Optional compression and hashing dependencies keep their own licences.
-Adding a native format writer does not imply a dependency-free compression
-implementation. Review those dependencies when their concrete consumers are
-introduced.
+Review their concrete consumers before introducing those dependencies.

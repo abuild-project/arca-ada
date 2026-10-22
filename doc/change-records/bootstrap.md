@@ -19,8 +19,9 @@ Make recipes quote every direct GPR executable selection, preserving paths
 containing spaces for builds, installation and cleanup.
 
 The bootstrap contains no archive or filesystem writer. Existing Abuild
-behavior, dependencies and documentation remain unchanged. The new files use
-BSD-3-Clause; importing the existing GPL-covered writers requires the separate
+behavior, dependencies and documentation remain unchanged. Current project
+licensing is LGPL-2.1-or-later under the owner's 2026-10-22 decision; see the
+[licensing change](lgpl-licensing.md). Writer imports require the separate
 provenance and additional-grant work described in `doc/licensing.md`.
 
 The README serves as the bootstrap user guide and identifies the absence of
@@ -85,7 +86,7 @@ included.
 
 - Claims are scoped to project packaging; no format, performance or coverage
   claim is made by the client check.
-- Existing GPL code and fixtures are excluded from the BSD bootstrap.
+- Existing writer code and fixtures are excluded from the bootstrap.
 - The installed consumer clears inherited Ada and GPR search paths.
 - Hiding its installed GPR file verifies the test's project-discovery
   sensitivity; the failure must name the missing Arca import.

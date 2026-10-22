@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: BSD-3-Clause
+-- SPDX-License-Identifier: LGPL-2.1-or-later
 
 library project Arca is
 
@@ -14,5 +14,9 @@ library project Arca is
       for Default_Switches ("Ada") use
         ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato");
    end Compiler;
+
+   package Install is
+      for Artifacts ("share/doc/arca") use ("LICENSE", "COPYRIGHT");
+   end Install;
 
 end Arca;
