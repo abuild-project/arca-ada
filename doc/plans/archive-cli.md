@@ -25,9 +25,9 @@ manifests and additional platforms remain future work.
 
 Keep the writers and library GPR unchanged. The CLI owns argument policy,
 filesystem discovery and adapter state. GNAT's existing path normalization
-is reused. Its public filesystem interfaces do not supply lstat's complete
-numeric metadata and readlink targets, so a small CLI-only POSIX C bridge
-provides these plus private staging and atomic publication.
+is reused. A small CLI-only C wrapper converts lstat metadata to a fixed-width
+record. Simple system calls use direct Ada bindings, and signal handling uses
+an Ada protected object. Library APIs have no dependency on this OS boundary.
 
 Inventory inputs before creating a private staging directory in the output
 parent. Exclude the destination when it is inside the input tree. Publish
@@ -99,3 +99,9 @@ Extend the existing cancellation checks to SIGINT as well as SIGTERM, retain
 late-destination/error cleanup assertions and run normal checks plus complete
 coverage in the supported Trixie environment. Refresh Ada MCP, documentation
 and final review after the implementation is stable.
+
+The expanded signal/staging tests pass against both the previous C-backed
+executable and the new Ada-backed executable. They are committed before the
+adapter change to pin its existing observable behavior. The new adapter
+compiles warning-free; CLI checks, complete normal checks and production
+coverage pass.

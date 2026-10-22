@@ -94,11 +94,16 @@ platform is 64-bit Linux; the reference validation uses AMD64 Trixie.
 GNAT supplies path normalization and a raw directory-name iterator. The
 higher-level Ada.Directories search also queries modification times through
 an API that rejects dangling links and special nodes. The raw iterator lets
-the CLI inspect every name with lstat. Public GNAT APIs do not expose all the
-required numeric metadata or symlink target text, so `cli/src/posix_bridge.c`
-supplies these through a fixed-width record, plus mkdtemp, atomic publication
-and signal flags. No Abuild OS helper is imported. See the [CLI guide](cli.md)
-for the stable-input contract, format limits and cancellation boundaries.
+the CLI inspect every name with lstat. The only C wrapper,
+`cli/src/posix_bridge.c`, converts lstat metadata to a fixed-width record and
+keeps platform stat layout and type/device macros behind that boundary.
+readlink, mkdtemp, rename and renameat2 are direct Ada bindings; errno is
+captured before allocating diagnostic strings, and readlink's returned byte
+count determines the target slice without assuming a NUL terminator.
+SIGINT/SIGTERM handlers and their shared signal state use an Ada protected
+object, following the existing Abuild pattern through independently authored
+CLI code. No Abuild helper is imported. See the [CLI guide](cli.md) for the
+stable-input contract, format limits and cancellation boundaries.
 
 `examples/client/client.gpr` imports the project by name. The installation
 check copies this client, including its CPIO and TAR type use, into a private

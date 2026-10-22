@@ -1,13 +1,39 @@
 -- SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Directories;
+with Ada.Interrupts;
+with Ada.Interrupts.Names;
 with GNAT.OS_Lib;
 with Interfaces.C.Strings;
 
 package body Archive_CLI.Filesystem is
    package C renames Interfaces.C;
    use type C.int;
+   use type C.long;
+   use type C.Strings.chars_ptr;
    use type Interfaces.Unsigned_32;
+
+   --  Linux fcntl/stdio constants; the CLI targets the 64-bit Linux ABI.
+   Current_Directory_FD : constant C.int := -100; --  AT_FDCWD
+   Rename_No_Replace : constant C.unsigned := 1; --  RENAME_NOREPLACE
+
+   protected Cancellation is
+      procedure Handle_Interrupt;
+      --  Record SIGINT without filesystem work or exception propagation.
+      pragma Interrupt_Handler (Handle_Interrupt);
+
+      procedure Handle_Termination;
+      --  Record SIGTERM for cleanup at the next command boundary.
+      pragma Interrupt_Handler (Handle_Termination);
+
+      function Number return Natural;
+      --  Read the process-owned signal state through protected access.
+
+   private
+      pragma Interrupt_State (Ada.Interrupts.Names.SIGINT, User);
+      pragma Interrupt_State (Ada.Interrupts.Names.SIGTERM, User);
+      Last_Signal : Natural := 0;
+   end Cancellation;
 
    function C_Stat (Name : C.char_array; Item : access Metadata) return C.int;
    --  Return an errno value and an explicitly sized metadata record.
@@ -15,33 +41,66 @@ package body Archive_CLI.Filesystem is
 
    function C_Readlink
      (Name : C.char_array; Buffer : out C.char_array; Capacity : C.size_t)
-      return C.int;
-   --  Return a complete NUL-terminated target or an errno value.
-   pragma Import (C, C_Readlink, "arca_readlink");
+      return C.long;
+   --  Return a byte count without a NUL, or -1; Linux64 ssize_t is long.
+   pragma Import (C, C_Readlink, "readlink");
 
-   function C_Mkdtemp (Buffer : in out C.char_array) return C.int;
+   function C_Mkdtemp
+     (Buffer : in out C.char_array) return C.Strings.chars_ptr;
    --  Atomically create the private directory described by the template.
-   pragma Import (C, C_Mkdtemp, "arca_mkdtemp");
+   --  Success points into Buffer and must not be freed; null reports failure.
+   pragma Import (C, C_Mkdtemp, "mkdtemp");
 
-   function C_Publish
-     (Source, Target : C.char_array; Replace : C.int) return C.int;
-   --  Rename within one filesystem without unlinking the destination first.
-   pragma Import (C, C_Publish, "arca_publish");
+   function C_Rename (Source, Target : C.char_array) return C.int;
+   --  Atomically replace Target on the same filesystem; return zero or -1.
+   pragma Import (C, C_Rename, "rename");
+
+   function C_Renameat2
+     (Source_FD : C.int; Source : C.char_array;
+      Target_FD : C.int; Target : C.char_array; Flags : C.unsigned)
+      return C.int;
+   --  Apply Linux rename flags and return zero or -1 with errno on failure.
+   pragma Import (C, C_Renameat2, "renameat2");
 
    function C_Strerror (Code : C.int) return C.Strings.chars_ptr;
    --  Read libc's static diagnostic for an errno value; do not free it.
    pragma Import (C, C_Strerror, "strerror");
 
-   function C_Install_Signals return C.int;
-   --  Install the command-owned signal handlers.
-   pragma Import (C, C_Install_Signals, "arca_install_signals");
-
-   function C_Cancelled return C.int;
-   --  Read the signal-safe flag without mutating it.
-   pragma Import (C, C_Cancelled, "arca_cancelled");
+   function Errno_On_Failure (Result : C.int) return C.int;
+   --  Capture a zero/-1 call's errno before allocating diagnostic strings.
 
    procedure Require (Code : C.int; Context : String);
-   --  Map a bridge error to a contextual command diagnostic.
+   --  Map a captured errno value to a contextual command diagnostic.
+
+   protected body Cancellation is
+      procedure Handle_Interrupt is
+      begin
+         Last_Signal := Natural (Ada.Interrupts.Names.SIGINT);
+      end Handle_Interrupt;
+
+      ----------------------------------------------------------------------
+
+      procedure Handle_Termination is
+      begin
+         Last_Signal := Natural (Ada.Interrupts.Names.SIGTERM);
+      end Handle_Termination;
+
+      ----------------------------------------------------------------------
+
+      function Number return Natural is
+      begin
+         return Last_Signal;
+      end Number;
+   end Cancellation;
+
+   -------------------------------------------------------------------------
+
+   function Errno_On_Failure (Result : C.int) return C.int is
+   begin
+      return (if Result = 0 then 0 else C.int (GNAT.OS_Lib.Errno));
+   end Errno_On_Failure;
+
+   -------------------------------------------------------------------------
 
    procedure Require (Code : C.int; Context : String) is
    begin
@@ -102,25 +161,39 @@ package body Archive_CLI.Filesystem is
 
    function Link_Target (Name : String) return String is
       Buffer : C.char_array (0 .. Path_Capacity - 1);
+      Length : C.long;
    begin
-      Require
-        (C_Readlink (C.To_C (Name), Buffer, Buffer'Length),
-         "cannot read symlink '" & Name & "'");
-      return C.To_Ada (Buffer);
+      Length := C_Readlink (C.To_C (Name), Buffer, Buffer'Length);
+      if Length < 0 then
+         declare
+            Code : constant C.int := C.int (GNAT.OS_Lib.Errno);
+         begin
+            Require (Code, "cannot read symlink '" & Name & "'");
+         end;
+      elsif Length >= C.long (Buffer'Length) then
+         raise Command_Error with "symlink target is too long: '" & Name & "'";
+      elsif Length = 0 then
+         return "";
+      end if;
+      return C.To_Ada
+        (Buffer (0 .. C.size_t (Length) - 1), Trim_Nul => False);
    end Link_Target;
 
    -------------------------------------------------------------------------
 
    procedure Install_Signals is
    begin
-      Require (C_Install_Signals, "cannot install signal handlers");
+      Ada.Interrupts.Attach_Handler
+        (Cancellation.Handle_Interrupt'Access, Ada.Interrupts.Names.SIGINT);
+      Ada.Interrupts.Attach_Handler
+        (Cancellation.Handle_Termination'Access, Ada.Interrupts.Names.SIGTERM);
    end Install_Signals;
 
    -------------------------------------------------------------------------
 
    procedure Check_Interrupted is
    begin
-      if C_Cancelled /= 0 then
+      if Cancellation.Number /= 0 then
          raise Interrupted;
       end if;
    end Check_Interrupted;
@@ -129,7 +202,7 @@ package body Archive_CLI.Filesystem is
 
    function Signal_Number return Natural is
    begin
-      return Natural (C_Cancelled);
+      return Cancellation.Number;
    end Signal_Number;
 
    -------------------------------------------------------------------------
@@ -142,7 +215,9 @@ package body Archive_CLI.Filesystem is
             raise Command_Error with "output path is too long";
          end if;
          Result.Buffer (Template'Range) := Template;
-         Require (C_Mkdtemp (Result.Buffer), "cannot create output staging");
+         if C_Mkdtemp (Result.Buffer) = C.Strings.Null_Ptr then
+            Require (C.int (GNAT.OS_Lib.Errno), "cannot create output staging");
+         end if;
          Result.Active := True;
       end return;
    end Begin_Output;
@@ -159,12 +234,19 @@ package body Archive_CLI.Filesystem is
    procedure Publish
      (Item : Transaction; Target : String; Replace : Boolean)
    is
+      Code : C.int;
    begin
       Check_Interrupted;
-      Require
-        (C_Publish (C.To_C (Staging_Name (Item)), C.To_C (Target),
-                    Boolean'Pos (Replace)),
-         "cannot publish '" & Target & "'");
+      if Replace then
+         Code := Errno_On_Failure
+           (C_Rename (C.To_C (Staging_Name (Item)), C.To_C (Target)));
+      else
+         Code := Errno_On_Failure
+           (C_Renameat2
+              (Current_Directory_FD, C.To_C (Staging_Name (Item)),
+               Current_Directory_FD, C.To_C (Target), Rename_No_Replace));
+      end if;
+      Require (Code, "cannot publish '" & Target & "'");
    end Publish;
 
    -------------------------------------------------------------------------

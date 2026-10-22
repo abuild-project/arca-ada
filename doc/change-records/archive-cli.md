@@ -23,9 +23,10 @@ ownership and handled SIGINT/SIGTERM clean up ordinary incomplete output;
 the previous destination survives errors before publication.
 
 The library, public interfaces and source imports are unchanged. Only the
-CLI project uses C: a small fixed-width lstat/readlink bridge supplies metadata
-not exposed by GNAT's public interfaces, plus private staging, rename and
-signal flags. GNAT's existing normalization and raw directory-name iterator
+CLI project uses C only to convert lstat metadata to a fixed-width record.
+Simple readlink, mkdtemp, rename and renameat2 calls use direct Ada bindings;
+signal handlers and their shared state use an Ada protected object. GNAT's
+existing normalization and raw directory-name iterator
 are reused. The higher-level Ada.Directories iterator is unsuitable here:
 its modification-time query rejects FIFOs and dangling links. New CLI code
 is independently authored under LGPL-2.1-or-later; no further Abuild source
@@ -50,7 +51,7 @@ Source maps belong to one sequential invocation; parallel commands share
 only immutable input data and own separate outputs.
 
 Phase-controlled checks stop the command after staging opens, then test
-SIGTERM cleanup, changed source metadata and a late-created destination.
+SIGINT/SIGTERM cleanup, changed source metadata and a late-created destination.
 Readiness is asserted so an early process exit cannot pass these checks.
 An unreadable-source fixture uses a private native Linux temporary directory
 because Docker Desktop's host sharing can allow reads of host mode-000 files
@@ -60,9 +61,26 @@ cleanup. Failure checks preserve the old output and reject staging leaks.
 The reserved-name regression failed before its guard: the command returned
 success for a CPIO member readers interpret as the end marker. It passes
 after the guard and still accepts the same filename in TAR. A private
-mutation replacing no-clobber rename with ordinary rename makes the late
-destination test fail at its success/error assertion. The real bridge passes
+mutation replacing no-clobber publication with ordinary rename makes the late
+destination test fail at its success/error assertion. The production adapter passes
 the same test and preserves the competing output bytes.
+
+The owner-requested C-boundary reduction keeps only the lstat wrapper. Ada
+interrupt handlers record both termination signals in protected state;
+filesystem and container work remains on the sequential command path. Simple
+system calls import libc directly. Linux constants and the ssize_t binding
+match the reference headers and 64-bit ABI. readlink's actual byte count bounds
+the returned string without relying on a NUL terminator. Each failed call's
+errno is captured before building a diagnostic, preserving contextual errors.
+The unwritable-parent fixture checks mkdtemp failure before staging ownership
+starts and preserves both existing outputs without leaving a directory.
+
+The expanded signal/staging checks pass with the previous C-backed executable
+and the replacement Ada-backed executable. Their commit precedes the adapter
+change, pinning observable behavior across the refactor. Warning-free CLI
+compilation, complete normal checks and production coverage pass with the new
+bindings. The production-body inventory is unchanged; its C entry now contains
+only the metadata wrapper. Library code, APIs and format fixtures are unchanged.
 
 Final author review found two fixture weaknesses, also confirmed by the
 independent validation finder. The trailing-output-slash check now removes
