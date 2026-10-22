@@ -38,6 +38,9 @@ def main():
                     "--driver", str(root / "tests/bin-coverage/cpio_driver"),
                     "--copy-driver", str(root / "tests/bin-coverage/arca-copy_checks")],
                    cwd=root, check=True)
+    subprocess.run([sys.executable, str(root / "tests/check-tar.py"),
+                    "--driver", str(root / "tests/bin-coverage/tar_driver")],
+                   cwd=root, check=True)
     report = {}
     with tempfile.TemporaryDirectory(prefix="gcov.", dir=scratch_parent) as name:
         scratch = Path(name)

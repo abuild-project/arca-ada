@@ -10,10 +10,12 @@ copyright holder and grant. Source SPDX identifiers use the same expression.
 New project-owned contributions use that licence as well.
 
 The owner authorized this project licence on 2026-10-22, before any archive
-or filesystem writer is accepted. The CPIO and stream-copy units are now
+or filesystem writer is accepted. The CPIO, TAR and stream-copy units are now
 imported under the additional LGPL grant with original attribution. The
-[CPIO change record](change-records/cpio-extraction.md) identifies the actual
-subset; TAR and inventoried fixtures are not imported. The unmodified
+[CPIO change record](change-records/cpio-extraction.md) and
+[TAR change record](change-records/tar-extraction.md) identify the actual
+subsets and imported GNU ustar fixture. Other inventoried fixtures are not
+imported. The unmodified
 upstream GPL text is retained in `LICENSES/GPL-2.0-or-later.txt` as provenance.
 Third-party tools and dependencies retain their own terms.
 

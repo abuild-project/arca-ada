@@ -7,13 +7,14 @@ Archive and filesystem image writers for Ada.
 ## Status
 
 Arca is being bootstrapped in a private repository. It provides an independent
-[CPIO `newc` writer](doc/cpio.md), a minimal client, installation checks and
-development infrastructure. The client verifies project discovery and
+[CPIO `newc` writer](doc/cpio.md), a [TAR writer](doc/tar.md), a minimal client,
+installation checks and development infrastructure. The client verifies
+project discovery and
 linking; format tests create and independently inspect archives. There is
 no stable format API or published release yet.
 
-CPIO retains Abuild's format behaviour and adds standalone resource ownership.
-TAR is the next writer. VFAT, EXT2 and ISO are later candidates. OCI requires
+CPIO and TAR retain Abuild's format behaviour and add standalone resource
+ownership. VFAT, EXT2 and ISO are later candidates. OCI requires
 additional infrastructure decoupling. A native SquashFS writer remains
 subject to its separate backend decision.
 
@@ -65,12 +66,12 @@ entries across the isolated client's directory change.
 Make recipe regressions cover selected executable paths containing spaces.
 These are packaging checks, not format-conformance tests.
 
-The same target separately runs CPIO raw-layout, payload, external-reader,
+The same target separately runs CPIO and TAR raw-layout, payload, external-reader,
 reproducibility, error and lifecycle checks. `make -j8 coverage NUM_CPUS=8`
 checks the production-body inventory and records executed lines. It also runs
 from a fresh checkout before `make check`; it creates its scratch parent.
-The [CPIO guide](doc/cpio.md) describes the API and optional predecessor
-comparison.
+The [CPIO guide](doc/cpio.md) and [TAR guide](doc/tar.md) describe the APIs,
+format profiles and optional predecessor comparisons.
 
 Select alternative GPR executables with the Make variables `GPRBUILD`,
 `GPRINSTALL` and `GPRCLEAN`. Each value is one executable name or path,
@@ -84,9 +85,9 @@ is `Arca`. See the [development guide](doc/development.md).
 ## Licence
 
 Arca uses [LGPL-2.1-or-later](LICENSE); [COPYRIGHT](COPYRIGHT) identifies
-project attribution and the grant. Imported CPIO and copy-helper units retain
-upstream attribution under the recorded additional LGPL grant. TAR is
-inventoried but not imported yet. See [licensing and provenance](doc/licensing.md)
+project attribution and the grant. Imported CPIO, TAR and copy-helper units
+and the historical ustar fixture retain upstream attribution under the
+recorded additional LGPL grant. See [licensing and provenance](doc/licensing.md)
 for the grant scope and static-linking distribution requirements.
 
 ## Roadmap

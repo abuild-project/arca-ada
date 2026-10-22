@@ -13,6 +13,7 @@ RUN apt-get update \
         libarchive-tools \
         make \
         python3 \
+        tar \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /work

@@ -3,6 +3,7 @@
 | Plan | Status |
 | --- | --- |
 | [Repository bootstrap](bootstrap.md) | Implemented |
-| [LGPL licensing](lgpl-licensing.md) | Implemented and locally validated; separate PR before writer imports |
-| [CPIO extraction](cpio-extraction.md) | Implemented and locally validated, including the final Ada MCP pass |
-| [Writer extraction](writer-extraction.md) | CPIO implemented locally; TAR and integration pending |
+| [CPIO extraction](cpio-extraction.md) | Accepted in PR #3 |
+| [LGPL licensing](lgpl-licensing.md) | Accepted in PR #2 before writer imports |
+| [TAR extraction](tar-extraction.md) | Locally validated and author-reviewed; ready for external review |
+| [Writer extraction](writer-extraction.md) | CPIO accepted; TAR external review and Abuild integration pending |

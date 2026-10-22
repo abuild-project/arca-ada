@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add the standalone TAR writer with retained ustar/GNU bytes, controlled
+  output ownership, independent format/reader checks and predecessor parity.
+- Preserve the historical GNU ustar fixture and verify the installed TAR API.
 - Adopt LGPL-2.1-or-later before writer imports, record the additional import
   grant and install the complete licence and project copyright notice.
 - Add the independent CPIO `newc` writer and private stream-copy helper.

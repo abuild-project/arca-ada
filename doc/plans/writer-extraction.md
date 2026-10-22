@@ -1,7 +1,8 @@
 # Writer extraction
 
 Status: Accepted direction as discussed on 2026-10-21. The source inventory
-and additional LGPL grant are recorded; CPIO is implemented locally.
+and additional LGPL grant are recorded. CPIO is accepted; TAR is implemented
+locally, validated and author-reviewed, ready for external review.
 
 ## Scope and order
 
@@ -74,5 +75,7 @@ step; TAR follows separately. No backend switch is included in either import.
 The [CPIO step](cpio-extraction.md) introduces the standalone writer and
 private stream-copy subset. Its successful output profile is retained;
 controlled output ownership and rejection of Create on an open writer are
-explicit lifecycle additions. TAR extraction and Abuild integration remain
-pending.
+explicit lifecycle additions. CPIO was accepted in
+[PR #3](https://github.com/mweidle73/arca-ada/pull/3). The
+[TAR step](tar-extraction.md) follows the same independent ownership boundary
+and reuses the accepted copy helper. Abuild integration remains pending.
