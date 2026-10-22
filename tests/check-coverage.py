@@ -34,6 +34,10 @@ def main():
         data.unlink()
     subprocess.run([options.builder, "-p", "-P", str(root / "tests/tests.gpr"),
                     "-XARCA_COVERAGE=enabled", "-j" + options.jobs], check=True)
+    subprocess.run([sys.executable, str(root / "tests/check-unit.py"),
+                    "--runner", str(root / "tests/bin-coverage/unit_runner"),
+                    "--probe", str(root / "tests/bin-coverage/unit_probe")],
+                   cwd=root, check=True)
     subprocess.run([sys.executable, str(root / "tests/check-cpio.py"),
                     "--driver", str(root / "tests/bin-coverage/cpio_driver"),
                     "--copy-driver", str(root / "tests/bin-coverage/arca-copy_checks")],

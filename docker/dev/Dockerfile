@@ -10,6 +10,7 @@ RUN apt-get update \
         git \
         gnat \
         gprbuild \
+        libahven-dev \
         libarchive-tools \
         make \
         python3 \

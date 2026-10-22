@@ -33,9 +33,9 @@ digest and does not promise bit-reproducible toolchains. The GitHub workflow
 builds this Dockerfile and runs the standalone coverage target before any
 other tests. It first asserts that `build/` does not exist, verifying that
 coverage creates its own scratch parent without packaging or wrapper checks.
-The normal check target follows. Python 3, GNU cpio, libarchive's
-bsdtar and gcov are supplied by the development image; the test preflight
-reports missing reader tools together.
+The normal check target follows. Python 3, GNU cpio/tar, libarchive's bsdtar,
+gcov and Ahven (`libahven-dev`) are supplied by the development image. The
+test preflight reports missing tools and an unavailable test project.
 
 With no explicit command, the launcher starts Bash and forwards standard
 input, including piped commands. It allocates a TTY only when both its input
@@ -80,8 +80,8 @@ coverage check so it cannot create coverage's scratch parent in advance.
 imports. `Arca.CPIO` and `Arca.TAR` expose format-specific APIs;
 `Arca.Binary_IO` is their private implementation helper containing only the
 used stream-copy operation. Do not add empty API promises for proposed format
-packages. Introduce each API with
-its writer, documented constraints and independent tests.
+packages. Introduce each API with its writer, documented constraints and
+independent tests.
 
 `examples/client/client.gpr` imports the project by name. The installation
 check copies this client, including its CPIO and TAR type use, into a private
@@ -105,11 +105,17 @@ parallel instances, errors, reproducibility and scope-exit cleanup. See the
 [CPIO guide](cpio.md) and [TAR guide](tar.md) for their contracts and optional
 predecessor checks. TAR also retains the historical GNU ustar fixture with
 its original producer record; it is checked without device-node privileges.
-Ada checks currently run as direct executables with assertion helpers;
-Python `unittest` orchestrates them and performs independent format checks.
+Named Ahven suites call the shared Ada assertion scenarios directly and add
+focused writer-reuse and copy tests. The small archive drivers reuse those
+scenarios for Python `unittest` and independent format checks. The
+[unit-test guide](unit-tests.md) explains the suites, source-test mapping,
+fixture ownership, XML reports and deliberate runner failure controls.
+The [predecessor-case mapping](native-test-coverage.md) identifies each original
+writer assertion and the transformation behavior intentionally left in Abuild.
 
 `tests/tests.gpr` compiles source units into its own object directory so the
 private copy helper can be tested by a private child without publishing it.
+Only this test project imports Ahven; the library and installed client do not.
 Installed-library usability is checked separately by the copied client.
 Coverage uses distinct object and executable directories, clears previous
 execution counts and checks `tests/coverage-sources.txt` against every current

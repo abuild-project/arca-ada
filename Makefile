@@ -22,6 +22,7 @@ check: all
 	GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
 		NUM_CPUS="$(NUM_CPUS)" ./tests/check-install-tools.sh
 	"$(GPRBUILD)" -p -P tests/tests.gpr -j$(NUM_CPUS)
+	./tests/check-unit.py
 	./tests/check-cpio.py
 	./tests/check-tar.py
 

@@ -9,9 +9,9 @@ Archive and filesystem image writers for Ada.
 Arca is being bootstrapped in a private repository. It provides an independent
 [CPIO `newc` writer](doc/cpio.md), a [TAR writer](doc/tar.md), a minimal client,
 installation checks and development infrastructure. The client verifies
-project discovery and
-linking; format tests create and independently inspect archives. There is
-no stable format API or published release yet.
+project discovery and linking; format tests create and independently inspect
+archives. Named [Ahven unit suites](doc/unit-tests.md) test library contracts.
+There is no stable format API or published release yet.
 
 CPIO and TAR retain Abuild's format behaviour and add standalone resource
 ownership. VFAT, EXT2 and ISO are later candidates. OCI requires
@@ -66,8 +66,9 @@ entries across the isolated client's directory change.
 Make recipe regressions cover selected executable paths containing spaces.
 These are packaging checks, not format-conformance tests.
 
-The same target separately runs CPIO and TAR raw-layout, payload, external-reader,
-reproducibility, error and lifecycle checks. `make -j8 coverage NUM_CPUS=8`
+The same target runs Ahven suites and separately checks CPIO and TAR layout,
+payloads, external readers, reproducibility, errors and lifetime behavior.
+`make -j8 coverage NUM_CPUS=8`
 checks the production-body inventory and records executed lines. It also runs
 from a fresh checkout before `make check`; it creates its scratch parent.
 The [CPIO guide](doc/cpio.md) and [TAR guide](doc/tar.md) describe the APIs,

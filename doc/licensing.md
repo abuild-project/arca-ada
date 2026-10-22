@@ -18,6 +18,8 @@ subsets and imported GNU ustar fixture. Other inventoried fixtures are not
 imported. The unmodified
 upstream GPL text is retained in `LICENSES/GPL-2.0-or-later.txt` as provenance.
 Third-party tools and dependencies retain their own terms.
+Ahven is supplied by the development image as a test-only dependency under
+its ISC licence. Its sources are not vendored or installed with Arca.
 
 ## Additional grant for planned imports
 
