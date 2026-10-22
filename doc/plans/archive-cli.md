@@ -292,3 +292,23 @@ The small-fixture signal, input-change and competing-output assertions retain
 their purpose. Final author review confirms validated-source parity and
 unchanged runtime/build/coverage inputs. The correction is ready for PR #7
 and another Copilot review.
+
+## Signal acknowledgement correction on 2026-10-22
+
+The push CI run failed the SIGINT/CPIO case with exit 0 instead of 130 while
+the parallel PR run passed. GNAT dispatches the protected handler on an
+independent signal-server task. Sending a signal and releasing the file-open
+barrier does not prove that this task has already recorded cancellation.
+
+Retain the staging-open barrier and require a separate acknowledgement of
+completed signal dispatch before releasing cancellation cases. The test-only
+shim observes the supported GNAT signal server's next sigwait call after
+SIGINT/SIGTERM; that call follows the protected handler. Keep production
+signal semantics unchanged. Prove the missing acknowledgement fails with the
+previous shim, repeat cancellation cases, run full tests and coverage, then
+verify both push and PR CI jobs on the delivered correction.
+
+The owner also noted the obsolescent foreign-interface pragmas. After the
+test-only CI correction, migrate the CLI's Import/Convention declarations to
+Ada 2012 aspects in a separate commit and verify ABI/runtime behavior with
+the same compiler and test suites.
