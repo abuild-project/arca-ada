@@ -13,7 +13,7 @@ installation checks and development infrastructure. The client verifies
 project discovery and linking; format tests create and independently inspect
 archives. Named [Ahven unit suites](doc/unit-tests.md) test library contracts.
 Finalizer regressions cover nonregular outputs and failed deletion without
-masking caller exceptions. Library/test builds enable full validity and
+masking caller exceptions. Library, CLI and test builds enable full validity and
 stack checks alongside the existing Ada checks.
 There is no stable format API or published release yet.
 
@@ -84,6 +84,9 @@ payloads, external readers, reproducibility, errors and lifetime behavior.
 CLI checks cover directory traversal, source metadata, links, atomic
 publication and cleanup after errors or handled signals. Normal tests need
 no Abuild checkout, credentials or network access.
+CLI failures retain low-level I/O diagnostics and reject incomplete directory
+reads. No-clobber publication has a hard-link fallback for filesystems without
+no-replace rename; staging cleanup is best effort and preserves command results.
 `make -j8 coverage NUM_CPUS=8`
 checks the production-body inventory and records executed lines. It also runs
 from a fresh checkout before `make check`; it creates its scratch parent.

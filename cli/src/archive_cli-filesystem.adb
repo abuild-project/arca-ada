@@ -19,6 +19,11 @@ package body Archive_CLI.Filesystem is
    Current_Directory_FD : constant C.int := -100; --  AT_FDCWD
    Rename_No_Replace    : constant C.unsigned := 1; --  RENAME_NOREPLACE
 
+   --  Linux errno values for unsupported no-replace rename operations.
+   Invalid_Argument      : constant C.int := 22; --  EINVAL
+   Not_Implemented       : constant C.int := 38; --  ENOSYS
+   Operation_Unsupported : constant C.int := 95; --  EOPNOTSUPP
+
    protected Cancellation is
 
       procedure Handle_Interrupt;
@@ -62,6 +67,10 @@ package body Archive_CLI.Filesystem is
    --  Atomically replace Target on the same filesystem; return zero or -1.
    pragma Import (C, C_Rename, "rename");
 
+   function C_Link (Source, Target : C.char_array) return C.int;
+   --  Publish another name for a closed file without replacing any target.
+   pragma Import (C, C_Link, "link");
+
    function C_Renameat2
      (Source_FD : C.int;
       Source    : C.char_array;
@@ -81,6 +90,9 @@ package body Archive_CLI.Filesystem is
 
    procedure Require (Code : C.int; Context : String);
    --  Map a captured errno value to a contextual command diagnostic.
+
+   function Published_Link (Source : Metadata; Target : String) return Boolean;
+   --  Resolve an ambiguous NFS link reply only for the same regular inode.
 
    protected body Cancellation is
 
@@ -121,6 +133,24 @@ package body Archive_CLI.Filesystem is
            Context & ": " & C.Strings.Value (C_Strerror (Code));
       end if;
    end Require;
+
+   -------------------------------------------------------------------------
+
+   function Published_Link (Source : Metadata; Target : String) return Boolean
+   is
+      Item : Metadata;
+      use type Interfaces.Unsigned_64;
+   begin
+      return Exists (Target, Item)
+        and then Kind (Item) = Regular
+        and then Item.Device = Source.Device
+        and then Item.Inode = Source.Inode;
+   exception
+      when Command_Error =>
+         --  Verification could not prove publication. Keep the captured link
+         --  error instead of replacing it with a secondary inspection error.
+         return False;
+   end Published_Link;
 
    -------------------------------------------------------------------------
 
@@ -270,6 +300,24 @@ package body Archive_CLI.Filesystem is
            (C_Renameat2
               (Current_Directory_FD, C.To_C (Staging_Name (Item)),
                Current_Directory_FD, C.To_C (Target), Rename_No_Replace));
+
+         if Code = Invalid_Argument or else Code = Not_Implemented
+           or else Code = Operation_Unsupported
+         then
+            declare
+               Source : constant String := Staging_Name (Item);
+               Info   : constant Metadata := Stat (Source);
+            begin
+               Code := Errno_On_Failure
+                 (C_Link (C.To_C (Source), C.To_C (Target)));
+
+               --  NFS can commit a link but lose its success reply. The
+               --  private staging inode identifies our complete output.
+               if Code /= 0 and then Published_Link (Info, Target) then
+                  Code := 0;
+               end if;
+            end;
+         end if;
       end if;
 
       Require (Code, "cannot publish '" & Target & "'");
@@ -282,6 +330,11 @@ package body Archive_CLI.Filesystem is
       if Item.Active then
          Ada.Directories.Delete_Tree (C.To_Ada (Item.Buffer));
       end if;
+   exception
+      when others =>
+         --  Best effort: preserve the caller's exception and a successful
+         --  publication. A cleanup fault may leave the private staging tree.
+         null;
    end Finalize;
 
 end Archive_CLI.Filesystem;

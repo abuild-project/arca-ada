@@ -158,6 +158,69 @@ commit 50/72 limits. Relevant lifecycle, metadata, concurrency, sensitivity
 and scaling review lessons retain their earlier dispositions because the
 runtime tokens and tests are unchanged. No generated artifact is committed.
 
+## Review corrections
+
+Directory inventory now resets errno before every GNAT directory read and
+distinguishes an underlying error from EOF. Entry diagnostics retain the
+original exception message, using the exception name when it has no text.
+This preserves permission and output-write causes instead of matching only
+a source filename. The CLI enables the same extra validity, stack and
+exception-information checks as the accepted library/test projects.
+
+No-clobber publication retains renameat2 as its first choice. EINVAL, ENOSYS
+or EOPNOTSUPP triggers a same-filesystem hard-link attempt. A successful link
+publishes the closed output; finalization removes its private staging name.
+NFS can create a link but return an error after losing the RPC reply. Only a
+matching regular device/inode identity converts that ambiguous failure into
+success. A late competing destination is preserved; unrelated rename errors
+do not trigger fallback. Failure of staging removal is now nonthrowing and
+cannot replace the original error or invalidate successful publication.
+Cleanup remains best effort and may leave private staging, as documented.
+
+The test-only preload library injects read, write, rename, link and rmdir
+faults without changing production interfaces or its lstat-only C boundary.
+Per-child traces prove the injected paths were exercised. Tests pin late
+targets, denied links, ambiguous link replies, stale errno, output ENOSPC and
+cleanup faults both during failure and after publication. Permission checks
+use a controlled C locale. Native Linux fixtures verify actual stored source
+timestamps, sparse sizes and special permission bits before checking output.
+The exact size maximum reaches an unreadable source; max+1 is rejected before
+emission, avoiding huge output payloads. Timestamp overrides rescue invalid
+source times. Forced FIFO outputs retain their identity; dir-x beside dir/
+distinguishes global path sorting from per-directory traversal. Existing
+byte-reproducibility checks and public library code are retained unchanged.
+
+The CLI guide, README, developer guide, changelog and active plan describe
+these corrections. Abuild integration, its manuals and release markers remain
+outside this independent CLI topic. NFS-style failures are injected locally;
+an actual NFS-server integration run is not claimed. Signal re-raising/SIGHUP,
+manifest naming and cosmetic root-output diagnostics remain follow-ups.
+
+The regression assertions fail against a freshly built pre-correction CLI:
+directory EIO returns success, original permission/ENOSPC text is absent,
+unsupported rename prevents publication, and cleanup faults mask the caller
+error or make an already published archive report failure. The corrected
+CLI passes these assertions and the expanded suite. Fresh-source complete
+coverage first and then the full normal check pass in rootless AMD64 Trixie,
+with no network or Abuild mount. All production bodies report executed lines;
+compiled CLI artifacts confirm the additional runtime-check switches.
+
+Author self-review covered the complete correction and enclosing code:
+ABI/errno ordering, no-clobber and ambiguous-reply handling, exact cleanup
+lifetime, diagnostic sensitivity, native fixture guards, reproducibility,
+invocation-owned state and scaling. The fallback adds only archive-level
+filesystem work; directory reads add one errno reset per entry. No new shared
+container state or performance improvement is claimed. Declaration contracts,
+plain body separators, blank phases, 80-column Ada/C layout, documentation
+and links, commit-message rules, unchanged public source and generated-file
+exclusion were checked before independent static review.
+
+Ada MCP provides a complete project/index, current references and empty
+changed-file diagnostics. It did not diagnose an initially ambiguous GNAT
+Errno_Message call; the Trixie compiler did. A named Err argument resolves
+that ambiguity. Semantic navigation remains useful for the call boundaries;
+compiler and runtime results supply the final validation evidence.
+
 ## Ada MCP
 
 The exact CLI project and anchored package index are complete. File-scoped

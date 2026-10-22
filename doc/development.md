@@ -145,7 +145,7 @@ production body, including the CLI's Ada and C sources. It requires a report
 with executed lines for each body; the generated counts do not promise
 complete branch coverage.
 
-Library and test compilation enable `-gnatVa`, `-fstack-check` and `-gnateE`
+Library, CLI and test compilation enable `-gnatVa`, `-fstack-check` and `-gnateE`
 in addition to the existing warnings, overflow and normal Ada checks. These
 match Abuild's extra validity/stack checks and exception-detail policy. GPR
 imports do not inherit a parent's compiler defaults automatically. Abuild's
@@ -157,6 +157,16 @@ groups, nested blocks and processing phases with blank lines; expand case
 alternatives onto separate lines; align multiline parameter declarations;
 and retain adjacent subprogram contracts and plain body separators. Keep
 manually maintained Ada lines within 80 columns.
+
+CLI regressions compile `tests/cli_faults.c` as a temporary preload library
+with the image's GCC. Only selected CLI child processes load it; its trace
+proves that each intended syscall fault was reached. Production code has no
+fault switches or dependency on this library. It is test support, outside the
+production-body coverage inventory. Native Linux temporary fixtures verify
+timestamp storage, sparse-file sizes and special permission bits before
+asserting archive behavior. Maximum-size acceptance reaches an intentionally
+unreadable source; rejection at max+1 happens during inventory, without
+creating multi-gigabyte archive payloads.
 
 ## Commands
 

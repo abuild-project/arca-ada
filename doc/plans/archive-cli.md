@@ -183,3 +183,20 @@ normal tests and coverage in rootless Trixie, then refresh Ada MCP and static
 review. Signal re-raising/SIGHUP, install-manifest naming and cosmetic root
 output diagnostics remain separate follow-ups; this step changes no CLI
 syntax or metadata normalization policy.
+
+## Review corrections implemented on 2026-10-22
+
+The requested error handling, publication fallback and CLI checking profile
+are implemented. Expanded CLI regressions pass. Against a freshly built
+pre-correction executable, directory EIO incorrectly succeeds, permission
+and ENOSPC causes disappear, unsupported rename fails publication and cleanup
+faults replace the caller error or turn published success into failure.
+The corrected executable passes the same regression assertions.
+
+Fresh-source complete coverage followed by the normal check passes in a
+rootless AMD64 Trixie container with network disabled and no Abuild mount.
+Every production body reports executed lines; the test-only preload library
+does not change the production inventory. Compiled CLI artifacts confirm
+all three added switches. Public writer sources and the production lstat
+wrapper remain byte-identical. Final author review is complete; independent
+static review follows on the committed correction.

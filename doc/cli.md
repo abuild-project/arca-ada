@@ -85,13 +85,24 @@ filesystem as the final destination.
 
 Only a successfully closed archive is published. Default publication uses
 Linux `renameat2(RENAME_NOREPLACE)`, so even a destination created after the
-initial check is preserved. `--force` uses atomic rename to replace the
+initial check is preserved. If the kernel or filesystem does not support
+that operation, a same-filesystem hard link publishes the closed staging
+file without overwriting another destination. The private staging name is
+then removed during cleanup. Filesystems must support at least one of these
+publication methods. An ambiguous NFS link error is accepted as success only
+when the destination has the same regular-file identity as the staging file.
+`--force` uses atomic rename to replace the
 destination; for an existing symlink it replaces the link itself and leaves
 its target alone. Existing directories and special nodes are rejected. Keep
 the destination stable when using `--force`.
 
-Errors before publication preserve the previous output; normal unwinding
-removes staging. SIGINT and SIGTERM request controlled cleanup at the next
+Errors before publication preserve the previous output. Directory-read
+errors abort inventory instead of being treated as its end. Entry diagnostics
+retain the underlying exception message, or its name when no message exists.
+Normal unwinding attempts staging removal. Cleanup is best effort: failure
+can leave a private staging directory, but never masks an earlier error or
+turns successful publication into failure.
+SIGINT and SIGTERM request controlled cleanup at the next
 filesystem or entry boundary;
 a synchronous payload copy may finish before the request is observed.
 SIGKILL, a process crash or power loss cannot guarantee cleanup. Atomic
@@ -114,6 +125,13 @@ a destination created just before publication. Failure tests verify old output
 and staging cleanup, including an unwritable output parent. Device emission
 is covered by native writer tests; creating device fixtures through the CLI
 is not part of the rootless test suite.
+
+Regression fixtures pin source timestamp and sparse-file size boundaries,
+timestamp override rescue, forced FIFO rejection, full-path ordering and
+special permission bits. A child-only preload library injects directory-read,
+write, publication and cleanup errors, including unsupported rename and
+ambiguous NFS-style link replies. These tests exercise local syscall behavior;
+they do not claim an integration run against an NFS server.
 
 `make coverage` instruments both Ada and C CLI bodies. The inventory gate
 requires executed lines for every production body and does not claim complete

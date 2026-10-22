@@ -6,12 +6,14 @@ with Ada.Containers.Indefinite_Ordered_Maps;
 with Ada.Containers.Indefinite_Ordered_Sets;
 with Ada.Containers.Ordered_Maps;
 with Ada.Directories;
+with Ada.Exceptions;
 with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;
 with Arca.CPIO;
 with Arca.TAR;
 with Archive_CLI.Filesystem;
 with GNAT.Directory_Operations;
+with GNAT.OS_Lib;
 with Interfaces.C;
 
 package body Archive_CLI.Writer is
@@ -78,6 +80,24 @@ package body Archive_CLI.Writer is
       Entries      : out Entry_Maps.Map;
       Groups       : out Group_Maps.Map);
    --  Walk iteratively; all maps are owned by this sequential invocation.
+
+   function Exception_Diagnostic
+     (Error : Ada.Exceptions.Exception_Occurrence) return String;
+   --  Retain a low-level message, or its exception name when no text exists.
+
+   -------------------------------------------------------------------------
+
+   function Exception_Diagnostic
+     (Error : Ada.Exceptions.Exception_Occurrence) return String
+   is
+      Message : constant String := Ada.Exceptions.Exception_Message (Error);
+   begin
+      if Message = "" then
+         return Ada.Exceptions.Exception_Name (Error);
+      end if;
+
+      return Message;
+   end Exception_Diagnostic;
 
    -------------------------------------------------------------------------
 
@@ -200,8 +220,25 @@ package body Archive_CLI.Writer is
 
             loop
                FS.Check_Interrupted;
+
+               --  GNAT maps a null readdir result to Last = 0 for both EOF
+               --  and failure. Reset errno for this call, not the whole scan.
+               GNAT.OS_Lib.Set_Errno (0);
                GNAT.Directory_Operations.Read (Search, Buffer, Last);
-               exit when Last = 0;
+
+               if Last = 0 then
+                  declare
+                     Code : constant Integer := GNAT.OS_Lib.Errno;
+                  begin
+                     if Code /= 0 then
+                        raise Command_Error with
+                          "cannot read directory: '" & Join (Root, Directory)
+                          & "': " & GNAT.OS_Lib.Errno_Message (Err => Code);
+                     end if;
+                  end;
+
+                  exit;
+               end if;
 
                if Last = Buffer'Last then
                   raise Command_Error with "directory entry name is too long";
@@ -439,17 +476,23 @@ package body Archive_CLI.Writer is
                end case;
             end if;
          exception
-            when Arca.CPIO.File_Not_Found | Arca.TAR.File_Not_Found =>
-               raise Command_Error with "source disappeared: '" & Name & "'";
+            when Error :
+              Arca.CPIO.File_Not_Found | Arca.TAR.File_Not_Found =>
+               raise Command_Error with "source disappeared: '" & Name & "': "
+                 & Exception_Diagnostic (Error);
 
-            when Arca.CPIO.File_Read_Error | Arca.TAR.File_Read_Error =>
+            when Error :
+              Arca.CPIO.File_Read_Error | Arca.TAR.File_Read_Error =>
                raise Command_Error with
-                 "source changed or could not be read: '" & Name & "'";
+                 "source changed or could not be read: '" & Name & "': "
+                 & Exception_Diagnostic (Error);
 
-            when Ada.IO_Exceptions.Name_Error | Ada.IO_Exceptions.Use_Error |
-                 Ada.IO_Exceptions.Device_Error | Ada.IO_Exceptions.End_Error =>
+            when Error :
+              Ada.IO_Exceptions.Name_Error | Ada.IO_Exceptions.Use_Error |
+              Ada.IO_Exceptions.Device_Error | Ada.IO_Exceptions.End_Error =>
                raise Command_Error with
-                 "cannot read or emit entry: '" & Name & "'";
+                 "cannot read or emit entry: '" & Name & "': "
+                 & Exception_Diagnostic (Error);
          end Emit;
 
       begin

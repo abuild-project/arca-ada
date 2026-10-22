@@ -55,6 +55,8 @@ package Archive_CLI.Filesystem is
       Target  : String;
       Replace : Boolean);
    --  Atomically publish a closed output, enforcing no-clobber by default.
+   --  Unsupported no-replace rename uses a same-filesystem hard link. Its
+   --  private staging name remains owned until nonthrowing finalization.
 
 private
 
@@ -70,6 +72,7 @@ private
    end record;
 
    overriding procedure Finalize (Item : in out Transaction);
-   --  Delete the owned staging tree after writer finalization or publication.
+   --  Attempt staging removal after writer finalization or publication;
+   --  cleanup faults may leave staging but never replace a caller exception.
 
 end Archive_CLI.Filesystem;

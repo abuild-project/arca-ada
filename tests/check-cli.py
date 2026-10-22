@@ -35,6 +35,16 @@ def records(path, format_name):
 
 
 class CLIChecks(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        (ROOT / "build").mkdir(exist_ok=True)
+        scratch = tempfile.TemporaryDirectory(prefix="cli-faults.", dir=ROOT / "build")
+        cls.addClassCleanup(scratch.cleanup)
+        cls.fault_library = Path(scratch.name).resolve() / "faults.so"
+        subprocess.run(["gcc", "-std=c11", "-Wall", "-Wextra", "-Werror",
+                        "-pedantic", "-fPIC", "-shared", "-o", str(cls.fault_library),
+                        str(ROOT / "tests/cli_faults.c"), "-ldl"], check=True)
+
     def setUp(self):
         (ROOT / "build").mkdir(exist_ok=True)
         self.scratch = tempfile.TemporaryDirectory(prefix="cli-check.", dir=ROOT / "build")
@@ -44,6 +54,7 @@ class CLIChecks(unittest.TestCase):
     def invoke(self, arguments, expected=0, cwd=None, env=None):
         environment = dict(os.environ)
         environment.pop("SOURCE_DATE_EPOCH", None)
+        environment["LC_ALL"] = "C"
         environment.update(env or {})
         result = subprocess.run([str(OPTIONS.cli), *map(str, arguments)],
                                 cwd=cwd or self.work, env=environment,
@@ -58,7 +69,9 @@ class CLIChecks(unittest.TestCase):
         root.mkdir()
         (root / "dir").mkdir()
         (root / "empty-dir").mkdir()
-        files = [("A source", PAYLOAD), ("dir/small", b"abc"),
+        # '-' sorts before '/': this distinguishes full-path order from DFS.
+        files = [("A source", PAYLOAD), ("dir-x", b"before descendants"),
+                 ("dir/small", b"abc"),
                  ("empty", b""), ("grüße.txt", b"UTF-8 filename")]
         for relative, data in reversed(files) if reverse else files:
             (root / relative).write_bytes(data)
@@ -84,6 +97,233 @@ class CLIChecks(unittest.TestCase):
 
     def command(self, format_name, root, output, *options):
         return ["create", "--format", format_name, "-C", root, "-o", output, *options]
+
+    def native_workspace(self):
+        """Use Linux storage for timestamp, sparse-file and mode assertions."""
+        scratch = tempfile.TemporaryDirectory(prefix="arca-cli-metadata-")
+        self.addCleanup(scratch.cleanup)
+        return Path(scratch.name)
+
+    def faults(self, selected, source):
+        """Return child-only injection settings and independently checked trace."""
+        log = self.work / "fault.log"
+        log.unlink(missing_ok=True)
+        return {"LD_PRELOAD": str(self.fault_library), "ARCA_TEST_FAULT": selected,
+                "ARCA_TEST_SOURCE": str(source), "ARCA_TEST_FAULT_LOG": str(log)}, log
+
+    def test_source_time_bounds_and_override_rescue(self):
+        root = self.native_workspace() / "source"
+        root.mkdir()
+        source = root / "file"
+        source.write_bytes(b"timestamp bounds")
+        for format_name, limit in (("cpio", 2**32 - 1), ("tar", 2**33 - 1)):
+            archive = self.work / ("time." + format_name)
+            os.utime(source, ns=(limit * 10**9, limit * 10**9))
+            self.assertEqual(source.stat().st_mtime_ns, limit * 10**9)
+            self.invoke(self.command(format_name, root, archive))
+            self.assertEqual(records(archive, format_name)["file"]["mtime"], limit)
+            for stamp in (-1, limit + 1):
+                os.utime(source, ns=(stamp * 10**9, stamp * 10**9))
+                self.assertEqual(source.stat().st_mtime_ns, stamp * 10**9)
+                original = archive.read_bytes()
+                result = self.invoke(self.command(format_name, root, archive, "--force"),
+                                     expected=1)
+                self.assertIn(b"mtime outside format limits: 'file'", result.stderr)
+                self.assertEqual(archive.read_bytes(), original)
+                self.assertEqual(list(self.work.glob(".arca-*")), [])
+                for options, env in ((("--mtime", "0"), {}),
+                                     ((), {"SOURCE_DATE_EPOCH": "0"})):
+                    self.invoke(self.command(format_name, root, archive,
+                                             "--force", *options), env=env)
+                    self.assertEqual(records(archive, format_name)["file"]["mtime"], 0)
+
+    def test_source_size_bounds(self):
+        self.assertNotEqual(os.geteuid(), 0, "run the documented rootless checks")
+        root = self.native_workspace() / "source"
+        root.mkdir()
+        source = root / "large"
+        self.addCleanup(os.chmod, source, 0o600)
+        # Keep an owned fd while denying CLI reads. Exact-limit acceptance
+        # reaches Open, avoiding a multi-gigabyte output; max+1 must stop sooner.
+        with source.open("wb") as stream:
+            os.chmod(source, 0)
+            for format_name, limit in (("cpio", 2**32 - 1), ("tar", 2**33 - 1)):
+                archive = self.work / ("size." + format_name)
+                archive.write_bytes(b"keep original")
+                for size, diagnostic in ((limit, b"Permission denied"),
+                                         (limit + 1, b"file exceeds format size limit")):
+                    stream.truncate(size)
+                    self.assertEqual(source.stat().st_size, size)
+                    result = self.invoke(self.command(format_name, root, archive,
+                                                      "--force", "--mtime", "0"),
+                                         expected=1)
+                    self.assertIn(diagnostic, result.stderr)
+                    self.assertEqual(archive.read_bytes(), b"keep original")
+                    self.assertEqual(list(self.work.glob(".arca-*")), [])
+
+    def test_force_preserves_fifo(self):
+        root = self.work / "source"
+        root.mkdir()
+        (root / "file").write_bytes(b"source")
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("fifo." + format_name)
+            os.mkfifo(archive, 0o600)
+            identity = archive.lstat().st_ino
+            result = self.invoke(self.command(format_name, root, archive, "--force"),
+                                 expected=1)
+            self.assertIn(b"output is not a regular file or symlink", result.stderr)
+            self.assertTrue(stat.S_ISFIFO(archive.lstat().st_mode))
+            self.assertEqual(archive.lstat().st_ino, identity)
+            self.assertEqual(list(self.work.glob(".arca-*")), [])
+
+    def test_special_permission_bits(self):
+        root = self.native_workspace() / "source"
+        root.mkdir()
+        (root / "file").write_bytes(b"mode bits")
+        (root / "directory").mkdir()
+        modes = {"file": 0o6751, "directory": 0o3770}
+        for name, mode in modes.items():
+            os.chmod(root / name, mode)
+            self.assertEqual(stat.S_IMODE((root / name).stat().st_mode), mode)
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("modes." + format_name)
+            self.invoke(self.command(format_name, root, archive))
+            entries = records(archive, format_name)
+            for name, mode in modes.items():
+                self.assertEqual(entries[name]["mode"] & 0o7777, mode)
+
+    def test_directory_read_error_and_stale_errno(self):
+        root = self.work / "source"
+        root.mkdir()
+        for name in ("first", "second", "third"):
+            (root / name).write_bytes(name.encode())
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("read." + format_name)
+            archive.write_bytes(b"keep original")
+            env, log = self.faults("read-eio", root)
+            result = self.invoke(self.command(format_name, root, archive, "--force"),
+                                 expected=1, env=env)
+            self.assertIn("read EIO", log.read_text())
+            self.assertIn(b"cannot read directory", result.stderr)
+            self.assertIn(b"Input/output error", result.stderr)
+            self.assertEqual(archive.read_bytes(), b"keep original")
+            self.assertEqual(list(self.work.glob(".arca-*")), [])
+            env, log = self.faults("read-stale", root)
+            self.invoke(self.command(format_name, root, archive, "--force"), env=env)
+            self.assertIn("read stale errno", log.read_text())
+            self.assertEqual(set(records(archive, format_name)),
+                             {"first", "second", "third"})
+
+    def test_no_replace_fallback(self):
+        root = self.tree()
+        for format_name in ("cpio", "tar"):
+            for error in ("einval", "enosys", "eopnotsupp"):
+                for extra in ("", ",link-ambiguous", ",cleanup"):
+                    with self.subTest(format=format_name, error=error, extra=extra):
+                        archive = self.work / (format_name + error + extra)
+                        env, log = self.faults("rename-" + error + extra, root)
+                        self.invoke(self.command(format_name, root, archive), env=env)
+                        self.assert_tree(archive, format_name, root)
+                        trace = log.read_text()
+                        self.assertIn("rename unsupported", trace)
+                        self.assertIn("link attempted", trace)
+                        if "ambiguous" in extra:
+                            self.assertIn("link created with EIO reply", trace)
+                        remnants = list(self.work.glob(".arca-*"))
+                        if "cleanup" in extra:
+                            self.assertIn("rmdir denied", trace)
+                            self.assertEqual(len(remnants), 1)
+                            self.assertEqual(list(remnants[0].iterdir()), [])
+                            remnants[0].rmdir()
+                        else:
+                            self.assertEqual(remnants, [])
+
+    def test_fallback_preserves_late_destination_and_errors(self):
+        root = self.tree()
+        for format_name in ("cpio", "tar"):
+            for injected, diagnostic in (("link-competitor", b"File exists"),
+                                         ("link-denied", b"Permission denied")):
+                archive = self.work / (format_name + injected)
+                env, log = self.faults("rename-einval," + injected, root)
+                result = self.invoke(self.command(format_name, root, archive),
+                                     expected=1, env=env)
+                self.assertIn("link attempted", log.read_text())
+                self.assertIn(b"cannot publish", result.stderr)
+                self.assertIn(diagnostic, result.stderr)
+                if injected == "link-competitor":
+                    self.assertIn("competitor created", log.read_text())
+                    self.assertEqual(archive.read_bytes(), b"competing output")
+                else:
+                    self.assertFalse(archive.exists())
+                self.assertEqual(list(self.work.glob(".arca-*")), [])
+
+    def test_output_write_error_keeps_diagnostic(self):
+        root = self.tree()
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("full." + format_name)
+            archive.write_bytes(b"keep original")
+            env, log = self.faults("write-full", root)
+            result = self.invoke(self.command(format_name, root, archive, "--force"),
+                                 expected=1, env=env)
+            self.assertIn("write ENOSPC", log.read_text())
+            self.assertIn(b"cannot read or emit entry", result.stderr)
+            self.assertIn(b"No space left on device", result.stderr)
+            self.assertEqual(archive.read_bytes(), b"keep original")
+            self.assertEqual(list(self.work.glob(".arca-*")), [])
+
+    def test_rename_error_does_not_fall_back(self):
+        root = self.tree()
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("rename-denied." + format_name)
+            env, log = self.faults("rename-denied", root)
+            result = self.invoke(self.command(format_name, root, archive),
+                                 expected=1, env=env)
+            self.assertIn(b"cannot publish", result.stderr)
+            self.assertIn(b"Permission denied", result.stderr)
+            self.assertEqual(log.read_text(), "rename denied\n")
+            self.assertFalse(archive.exists())
+            self.assertEqual(list(self.work.glob(".arca-*")), [])
+
+    def test_cleanup_failure_after_rename_keeps_success(self):
+        root = self.tree()
+        for format_name in ("cpio", "tar"):
+            for force in (False, True):
+                archive = self.work / (format_name + str(force))
+                if force:
+                    archive.write_bytes(b"old output")
+                env, log = self.faults("cleanup", root)
+                options = ("--force",) if force else ()
+                self.invoke(self.command(format_name, root, archive, *options), env=env)
+                self.assert_tree(archive, format_name, root)
+                self.assertIn("rmdir denied", log.read_text())
+                remnants = list(self.work.glob(".arca-*"))
+                self.assertEqual(len(remnants), 1)
+                self.assertEqual(list(remnants[0].iterdir()), [])
+                remnants[0].rmdir()
+
+    def test_cleanup_failure_keeps_original_error(self):
+        self.assertNotEqual(os.geteuid(), 0, "run the documented rootless checks")
+        root = self.native_workspace() / "source"
+        root.mkdir()
+        source = root / "private-file"
+        source.write_bytes(b"unreadable")
+        os.chmod(source, 0)
+        self.addCleanup(os.chmod, source, 0o600)
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("cleanup." + format_name)
+            archive.write_bytes(b"keep original")
+            env, log = self.faults("cleanup", root)
+            result = self.invoke(self.command(format_name, root, archive, "--force"),
+                                 expected=1, env=env)
+            self.assertIn("rmdir denied", log.read_text())
+            self.assertIn(b"private-file", result.stderr)
+            self.assertIn(b"Permission denied", result.stderr)
+            self.assertNotIn(b"PROGRAM_ERROR", result.stderr)
+            self.assertEqual(archive.read_bytes(), b"keep original")
+            remnants = list(self.work.glob(".arca-*"))
+            self.assertEqual(len(remnants), 1)
+            self.assertEqual(list(remnants[0].iterdir()), [])
+            remnants[0].rmdir()
 
     def assert_tree(self, archive, format_name, root, uid=None, gid=None, mtime=None):
         entries = records(archive, format_name)
@@ -250,6 +490,7 @@ class CLIChecks(unittest.TestCase):
             archive = workspace / ("preserved." + format_name)
             archive.write_bytes(b"keep original")
             result = self.invoke(self.command(format_name, root, archive, "--force"), expected=1)
+            self.assertIn(b"Permission denied", result.stderr)
             self.assertIn(b"denied", result.stderr)
             self.assertEqual(archive.read_bytes(), b"keep original")
             self.assertEqual(list(workspace.glob(".arca-*")), [])

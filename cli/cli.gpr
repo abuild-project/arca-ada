@@ -23,7 +23,8 @@ project CLI is
 
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato", "-g");
+        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato",
+         "-gnatVa", "-fstack-check", "-gnateE", "-g");
       for Default_Switches ("C") use
         ("-std=c11", "-Wall", "-Wextra", "-Werror", "-pedantic", "-g");
       case Coverage is
