@@ -15,7 +15,7 @@ package Arca.TAR is
    type TAR_Archive_Type is
      new Ada.Finalization.Limited_Controlled with private;
    --  Own one archive output. Close completes it; leaving scope with an open
-   --  writer removes unfinished output. Synchronize calls on one instance.
+   --  writer attempts to discard unfinished output. Synchronize shared calls.
 
    procedure TAR_Create
      (Item : in out TAR_Archive_Type;
@@ -116,6 +116,6 @@ private
    end record;
 
    overriding procedure Finalize (Item : in out TAR_Archive_Type);
-   --  Delete an open, unfinished output when its owning instance leaves scope.
+   --  Best-effort discard and closure without replacing a caller exception.
 
 end Arca.TAR;

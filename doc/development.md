@@ -79,8 +79,9 @@ coverage check so it cannot create coverage's scratch parent in advance.
 `arca.gpr` is a static Ada library with no Abuild or third-party project
 imports. `Arca.CPIO` and `Arca.TAR` expose format-specific APIs;
 `Arca.Binary_IO` is their private implementation helper containing only the
-used stream-copy operation. Do not add empty API promises for proposed format
-packages. Introduce each API with its writer, documented constraints and
+used stream-copy operation and best-effort cleanup shared by both writers.
+Do not add empty API promises for proposed format packages. Introduce each API
+with its writer, documented constraints and
 independent tests.
 
 `examples/client/client.gpr` imports the project by name. The installation
@@ -121,6 +122,13 @@ Coverage uses distinct object and executable directories, clears previous
 execution counts and checks `tests/coverage-sources.txt` against every current
 production body. It requires a report with executed lines for each body;
 the generated counts do not promise complete branch coverage.
+
+Library and test compilation enable `-gnatVa`, `-fstack-check` and `-gnateE`
+in addition to the existing warnings, overflow and normal Ada checks. These
+match Abuild's extra validity/stack checks and exception-detail policy. GPR
+imports do not inherit a parent's compiler defaults automatically. Abuild's
+separate compiler style profile is not adopted by this runtime-check change;
+Arca retains its established source-style rules.
 
 ## Commands
 

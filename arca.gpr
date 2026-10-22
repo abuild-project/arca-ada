@@ -12,7 +12,8 @@ library project Arca is
 
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato");
+        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato",
+         "-gnatVa", "-fstack-check", "-gnateE");
    end Compiler;
 
    package Install is

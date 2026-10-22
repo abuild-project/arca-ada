@@ -34,3 +34,17 @@ reviews before publishing the library topic and requesting Copilot.
 
 The Abuild roadmap/P7 reconciliation belongs to a separate documentation
 topic. The owner specified TBD because no extraction ticket exists yet.
+
+## Progress on 2026-10-22
+
+The shared cleanup routine and runtime-check profile are implemented locally.
+Both new Ahven cases failed against the unchanged finalizers in text and XML
+modes, then passed after the correction. Full normal checks and production
+coverage pass. Compiler artifacts confirm the stronger switches for library
+and test objects. The output contract, permission-fault fixture ownership and
+same-process descriptor checks are documented in the change record.
+
+Fresh-source coverage-first and complete normal checks pass without network
+or Abuild access. A mutation omitting the close fallback fails both new cases
+at their descriptor assertion. Author review and complete Ada MCP diagnostics
+are finished; independent static review is next, before publication.

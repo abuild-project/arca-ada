@@ -5,6 +5,8 @@ with Ada.Environment_Variables;
 with Ada.Exceptions;
 with Ada.Streams.Stream_IO;
 with Ahven;
+with GNAT.OS_Lib;
+with Interfaces.C.Strings;
 
 package body Unit_Support is
 
@@ -13,10 +15,19 @@ package body Unit_Support is
    use Ada.Strings.Unbounded;
    use type Ada.Directories.File_Size;
    use type SIO.Count;
+   use type Interfaces.C.Strings.chars_ptr;
+   use type Interfaces.C.size_t;
+
+   function Mkdtemp
+     (Template : in out Interfaces.C.char_array)
+      return Interfaces.C.Strings.chars_ptr;
+   --  Create a mode-0700 directory; its returned pointer aliases Template.
+   pragma Import (C, Mkdtemp, "mkdtemp");
 
    function Path (Item : Fixture) return String is
    begin
-      return To_String (Item.Directory);
+      return (if Item.Native then Interfaces.C.To_Ada (Item.Native_Path)
+              else To_String (Item.Directory));
    end Path;
 
    -------------------------------------------------------------------------
@@ -71,9 +82,31 @@ package body Unit_Support is
 
    -------------------------------------------------------------------------
 
+   function Prepare_Native (Name : String) return Fixture is
+      Template : constant Interfaces.C.char_array :=
+        Interfaces.C.To_C ("/tmp/arca-" & Name & "-XXXXXX");
+   begin
+      return Result : Fixture do
+         Result.Native := True;
+         if Template'Length > Result.Native_Path'Length then
+            raise Constraint_Error with "native fixture name is too long";
+         end if;
+         Result.Native_Path (Template'Range) := Template;
+         if Mkdtemp (Result.Native_Path) = Interfaces.C.Strings.Null_Ptr then
+            raise Program_Error with GNAT.OS_Lib.Errno_Message;
+         end if;
+         Result.Created := True;
+      end return;
+   end Prepare_Native;
+
+   -------------------------------------------------------------------------
+
    overriding procedure Finalize (Item : in out Fixture) is
    begin
       if Item.Created then
+         if Item.Native then
+            GNAT.OS_Lib.Set_Writable (Path (Item));
+         end if;
          Ada.Directories.Delete_Tree (Path (Item));
       end if;
    end Finalize;

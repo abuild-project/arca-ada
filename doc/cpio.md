@@ -56,17 +56,25 @@ releases its handle. Creating again while open raises
 Independent instances own separate streams, offsets and inode sequences;
 synchronize calls that share an instance.
 
-An open writer leaving scope normally or during exception unwinding closes
-and removes its unfinished output without inventing a trailer. This ownership
-is an intentional addition to the predecessor's low-level API, whose outer
-Abuild layer owns cleanup. Filesystem failures during finalization can still
-propagate.
+An open writer leaving scope normally or during exception unwinding attempts
+to close and remove its unfinished output without inventing a trailer. This
+ownership is an intentional addition to the predecessor's low-level API,
+whose outer Abuild layer owns cleanup. If stream deletion fails, cleanup still
+attempts Close when the stream is open. In particular, GNAT rejects deletion
+of nonregular outputs before closing; the fallback closes that stream without
+separately unlinking its pathname.
+
+Implicit cleanup is best effort and does not propagate failures or replace
+the caller's original exception. Filesystem failure can leave partial output;
+closure can also fail. Explicit Close remains the operation that completes
+the archive and reports I/O errors. Scope cleanup does not promise recovery
+from process crashes or interruption inside active I/O.
 
 Missing or oversized sources, invalid timestamps and unopened operations
 retain their typed exceptions. Validation failures before emission leave the
 writer usable, though rejected metadata can consume an inode. A copy or
 output I/O failure can have emitted partial data: abandon that writer's scope
-so finalization discards the output.
+so finalization attempts to discard the output.
 
 ## Validation
 

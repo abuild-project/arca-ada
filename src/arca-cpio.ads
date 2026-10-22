@@ -20,8 +20,8 @@ package Arca.CPIO is
 
    type CPIO_Archive_Type is tagged limited private;
    --  Own one newc output. Close completes the archive; leaving scope with
-   --  an open writer removes the unfinished output. Independent instances
-   --  have independent state; synchronize calls that share one instance.
+   --  an open writer attempts to discard its unfinished output. Independent
+   --  instances have independent state; synchronize calls on one instance.
 
    procedure CPIO_Create
      (Item : in out CPIO_Archive_Type;
@@ -175,7 +175,7 @@ private
    --  current file offset in the cpio archive and the next usable inode
 
    overriding procedure Finalize (Item : in out CPIO_Archive_Type);
-   --  Close and remove an output that was not completed by CPIO_Close.
+   --  Best-effort discard and closure without replacing a caller exception.
 
    procedure Inc_Inode
      (Item : in out CPIO_Archive_Type);

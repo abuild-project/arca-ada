@@ -1,13 +1,19 @@
 -- SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Calendar.Formatting;
+with Ada.Directories;
+with Ada.Exceptions;
 with Ada.IO_Exceptions;
+with Ada.Streams.Stream_IO;
+with Ada.Strings.Unbounded;
 with Ahven;
 with Arca.CPIO;
 with Arca.TAR;
 with CPIO_Scenarios;
 with TAR_Scenarios;
+with Test_Support;
 with Unit_Support;
+with GNAT.OS_Lib;
 
 package body Writer_Unit_Tests is
 
@@ -54,6 +60,116 @@ package body Writer_Unit_Tests is
 
    procedure TAR_Create_Failure;
    --  Recover the same instance after a nonexistent-parent Create failure.
+
+   generic
+      type Writer_Type is limited private;
+      with procedure Create_Archive (Item : in out Writer_Type; Name : String);
+      --  Open one output through the public writer API.
+
+      with procedure Close_Archive (Item : in out Writer_Type);
+      --  Complete and close the writer as a positive control.
+
+   procedure Finalizer_Failure_Checks;
+   --  Preserve caller failures and close handles when deletion is rejected.
+
+   procedure Finalizer_Failure_Checks is
+      use Ada.Strings.Unbounded;
+      use type Ada.Directories.File_Size;
+      package SIO renames Ada.Streams.Stream_IO;
+      Marker : exception;
+      Work : Unbounded_String;
+      Before : constant Natural := Test_Support.Open_Descriptor_Count;
+   begin
+      --  Explicit Close is valid for a nonregular destination too.
+      declare
+         Item : Writer_Type;
+      begin
+         Create_Archive (Item, "/dev/null");
+         Close_Archive (Item);
+      end;
+      Ahven.Assert
+        (Test_Support.Open_Descriptor_Count = Before,
+         "Explicit Close leaked a nonregular output descriptor");
+
+      for Nonregular in reverse Boolean loop
+         for Raise_Original in Boolean loop
+            declare
+               Files : constant Fixture := Prepare_Native ("writer-finalizer");
+               Output : constant String :=
+                 (if Nonregular then "/dev/null" else Path (Files) & "/part");
+               Raised : Boolean := False;
+            begin
+               Work := To_Unbounded_String (Path (Files));
+               begin
+                  declare
+                     Item : Writer_Type;
+                  begin
+                     Create_Archive (Item, Output);
+                     if not Nonregular then
+                        GNAT.OS_Lib.Set_Non_Writable (Path (Files));
+                        --  Prove that this filesystem enforces the fault.
+                        declare
+                           Probe : SIO.File_Type;
+                           Denied : Boolean := False;
+                        begin
+                           begin
+                              SIO.Create
+                                (Probe, SIO.Out_File, Path (Files) & "/probe",
+                                 "shared=no");
+                              SIO.Close (Probe);
+                           exception
+                              when Ada.IO_Exceptions.Name_Error |
+                                   Ada.IO_Exceptions.Use_Error =>
+                                 Denied := True;
+                           end;
+                           Ahven.Assert
+                             (Denied, "Native permission fault was not active");
+                        end;
+                     end if;
+                     if Raise_Original then
+                        raise Marker with "original writer caller failure";
+                     end if;
+                  end;
+               exception
+                  when Error : Marker =>
+                     Ahven.Assert
+                       (Ada.Exceptions.Exception_Message (Error) =
+                        "original writer caller failure",
+                        "Finalization changed the caller exception message");
+                     Raised := True;
+               end;
+               Ahven.Assert
+                 (Raised = Raise_Original,
+                  "Finalization changed caller exception propagation");
+               Ahven.Assert
+                 (Test_Support.Open_Descriptor_Count = Before,
+                  "Failed finalization leaked an output descriptor");
+               Ahven.Assert
+                 (Ada.Directories.Exists (Output),
+                  "Cleanup removed a nonregular or undeletable output");
+               if not Nonregular then
+                  Ahven.Assert
+                    (Ada.Directories.Size (Output) = 0,
+                     "Cleanup invented bytes in the incomplete archive");
+               end if;
+            end;
+            Ahven.Assert
+              (not Ada.Directories.Exists (To_String (Work)),
+               "Native cleanup fixture survived its owner");
+         end loop;
+      end loop;
+   end Finalizer_Failure_Checks;
+
+   -------------------------------------------------------------------------
+
+   procedure CPIO_Finalizer_Failures is new Finalizer_Failure_Checks
+     (Arca.CPIO.CPIO_Archive_Type,
+      Arca.CPIO.CPIO_Create, Arca.CPIO.CPIO_Close);
+   --  Exercise CPIO's finalizer through normal and exceptional scope exit.
+
+   procedure TAR_Finalizer_Failures is new Finalizer_Failure_Checks
+     (Arca.TAR.TAR_Archive_Type, Arca.TAR.TAR_Create, Arca.TAR.TAR_Close);
+   --  Exercise TAR's finalizer with the same independent failure fixtures.
 
    -------------------------------------------------------------------------
 
@@ -200,6 +316,8 @@ package body Writer_Unit_Tests is
       Add_Test_Routine (Item, CPIO_Errors'Access, "error contracts");
       Add_Test_Routine (Item, CPIO_State'Access, "open Create preserves state");
       Add_Test_Routine (Item, CPIO_Lifetime'Access, "owner lifetime cleanup");
+      Add_Test_Routine
+        (Item, CPIO_Finalizer_Failures'Access, "finalizer failure cleanup");
       Add_Test_Routine (Item, CPIO_Parallel'Access, "parallel instances");
       Add_Test_Routine (Item, CPIO_Reuse'Access, "closed writer reuse");
       Add_Test_Routine
@@ -214,6 +332,8 @@ package body Writer_Unit_Tests is
       Add_Test_Routine (Item, TAR_Errors'Access, "error contracts");
       Add_Test_Routine (Item, TAR_State'Access, "open Create preserves state");
       Add_Test_Routine (Item, TAR_Lifetime'Access, "owner lifetime cleanup");
+      Add_Test_Routine
+        (Item, TAR_Finalizer_Failures'Access, "finalizer failure cleanup");
       Add_Test_Routine (Item, TAR_Parallel'Access, "parallel instances");
       Add_Test_Routine (Item, TAR_Reuse'Access, "closed writer reuse");
       Add_Test_Routine (Item, TAR_Create_Failure'Access, "failed Create retry");

@@ -3,7 +3,7 @@
 | Plan | Status |
 | --- | --- |
 | [Writer cleanup and compiler checks](writer-cleanup.md) | In progress; separate library change before the CLI |
-| [Ahven unit tests](ahven-unit-tests.md) | Locally validated and author-reviewed; ready for external review |
+| [Ahven unit tests](ahven-unit-tests.md) | Accepted in PR #5 |
 | [Repository bootstrap](bootstrap.md) | Implemented |
 | [CPIO extraction](cpio-extraction.md) | Accepted in PR #3 |
 | [LGPL licensing](lgpl-licensing.md) | Accepted in PR #2 before writer imports |
