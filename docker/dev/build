@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+set -euo pipefail
+
+platform=linux/amd64
+image=arca-dev:trixie
+
+usage()
+{
+    printf '%s\n' \
+        "Usage: $0 [--platform PLATFORM] [--tag IMAGE]" \
+        "Defaults: linux/amd64 and arca-dev:trixie; linux/arm64 is also supported."
+}
+
+invalid()
+{
+    printf '%s\n' "$1" >&2
+    usage >&2
+    exit 2
+}
+
+while [[ $# -gt 0 ]]; do
+    option=$1
+    shift
+    case $option in
+        --platform|--tag)
+            if [[ $# -eq 0 || $1 == --* ]]; then
+                invalid "Expected a value after $option"
+            fi
+            value=$1
+            shift
+            if [[ $option == --platform ]]; then
+                platform=$value
+            else
+                image=$value
+            fi
+            ;;
+        --platform=*) platform=${option#*=} ;;
+        --tag=*) image=${option#*=} ;;
+        --help)
+            usage
+            exit 0
+            ;;
+        *) invalid "Unknown build option: $option" ;;
+    esac
+done
+
+case $platform in
+    linux/amd64|linux/arm64) ;;
+    *) invalid "Unsupported platform: $platform" ;;
+esac
+[[ -n $image ]] || invalid 'The image tag must not be empty'
+
+script_dir=$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+repo_root=$(CDPATH='' cd -- "$script_dir/../.." && pwd -P)
+
+exec docker build --platform "$platform" --tag "$image" \
+    --file "$script_dir/Dockerfile" "$repo_root"

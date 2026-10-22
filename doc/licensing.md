@@ -10,8 +10,11 @@ copyright holder and grant. Source SPDX identifiers use the same expression.
 New project-owned contributions use that licence as well.
 
 The owner authorized this project licence on 2026-10-22, before any archive
-or filesystem writer import. This revision contains only the independent
-project foundation; no Abuild writer, helper, test or fixture has been copied.
+or filesystem writer is accepted. The CPIO and stream-copy units are now
+imported under the additional LGPL grant with original attribution. The
+[CPIO change record](change-records/cpio-extraction.md) identifies the actual
+subset; TAR and inventoried fixtures are not imported. The unmodified
+upstream GPL text is retained in `LICENSES/GPL-2.0-or-later.txt` as provenance.
 Third-party tools and dependencies retain their own terms.
 
 ## Additional grant for planned imports

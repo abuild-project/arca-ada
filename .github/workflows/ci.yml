@@ -21,7 +21,13 @@ jobs:
         with:
           persist-credentials: false
       - name: Build the Trixie development image
-        run: docker build -t arca-dev:trixie -f docker/dev/Dockerfile .
+        run: docker/dev/build
+      - name: Check standalone coverage from a fresh checkout
+        run: |
+          test ! -e build
+          docker/dev/run arca-dev:trixie make -j8 coverage NUM_CPUS=8
+      - name: Check development wrapper arguments
+        run: python3 tests/check-dev-wrappers.py
       - name: Check development shell and batch input
         run: python3 tests/check-dev-shell.py arca-dev:trixie
       - name: Build and check as the runner user

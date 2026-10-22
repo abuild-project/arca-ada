@@ -3,6 +3,7 @@
 
 """Check the launcher's stdin and terminal behavior with real containers."""
 
+import argparse
 import errno
 import os
 from pathlib import Path
@@ -16,21 +17,26 @@ import unittest
 
 
 LAUNCHER = Path(__file__).resolve().parents[1] / "docker/dev/run"
-IMAGE = sys.argv.pop(1) if len(sys.argv) > 1 else "arca-dev:trixie"
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("--platform", choices=("linux/amd64", "linux/arm64"),
+                    default="linux/amd64")
+PARSER.add_argument("image", nargs="?", default="arca-dev:trixie")
+OPTIONS, REMAINING = PARSER.parse_known_args()
+COMMAND = [str(LAUNCHER), "--platform", OPTIONS.platform, OPTIONS.image]
 
 
 class DevelopmentShellTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         subprocess.run(
-            [str(LAUNCHER), IMAGE, "sh", "-c",
+            [*COMMAND, "sh", "-c",
              '. /etc/os-release; test "$VERSION_CODENAME" = trixie'],
             check=True, capture_output=True, timeout=30,
         )
 
     def test_default_shell_accepts_piped_input(self):
         result = subprocess.run(
-            [str(LAUNCHER), IMAGE],
+            COMMAND,
             input=b"printf 'ARCA_PIPE_OK\\n'\nexit\n",
             capture_output=True, timeout=30,
         )
@@ -39,7 +45,7 @@ class DevelopmentShellTests(unittest.TestCase):
 
     def test_explicit_command_remains_noninteractive(self):
         result = subprocess.run(
-            [str(LAUNCHER), IMAGE, "sh", "-c",
+            [*COMMAND, "sh", "-c",
              'if test -t 0 || test -t 1 || read -r line; then exit 1; fi; '
              "printf 'ARCA_BATCH_OK\\n'"],
             input=b"input must not reach the batch command\n",
@@ -57,7 +63,7 @@ class DevelopmentShellTests(unittest.TestCase):
         output = bytearray()
         try:
             process = subprocess.Popen(
-                [str(LAUNCHER), IMAGE],
+                COMMAND,
                 stdin=slave, stdout=slave, stderr=slave,
             )
             os.close(slave)
@@ -96,4 +102,4 @@ class DevelopmentShellTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(argv=[sys.argv[0], *REMAINING])

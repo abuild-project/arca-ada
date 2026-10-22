@@ -6,16 +6,16 @@ Archive and filesystem image writers for Ada.
 
 ## Status
 
-Arca is being bootstrapped in a private repository. This revision provides
-the library project, a minimal client, installation checks and development
-infrastructure. **No archive or filesystem writer has been imported yet.**
-The client demonstrates project discovery and linking; it does not create an
-archive. There is no stable format API or published release yet.
+Arca is being bootstrapped in a private repository. It provides an independent
+[CPIO `newc` writer](doc/cpio.md), a minimal client, installation checks and
+development infrastructure. The client verifies project discovery and
+linking; format tests create and independently inspect archives. There is
+no stable format API or published release yet.
 
-The first planned writers are CPIO and TAR, extracted from Abuild with their
-existing behavior and independent format tests. VFAT, EXT2 and ISO are later
-candidates. OCI requires additional infrastructure decoupling. A native
-SquashFS writer remains subject to its separate backend decision.
+CPIO retains Abuild's format behaviour and adds standalone resource ownership.
+TAR is the next writer. VFAT, EXT2 and ISO are later candidates. OCI requires
+additional infrastructure decoupling. A native SquashFS writer remains
+subject to its separate backend decision.
 
 ## Build and check
 
@@ -23,9 +23,13 @@ The reference environment is Debian 13 (Trixie), GNAT and GPRbuild. Build a
 development image once, then run the checks without installing runtime tools:
 
 ```sh
-docker build -t arca-dev:trixie -f docker/dev/Dockerfile .
+docker/dev/build
 docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
 ```
+
+These are the same wrappers used by CI. Both select `linux/amd64` by default;
+`--platform linux/arm64` selects ARM explicitly. The build wrapper also accepts
+`--tag IMAGE`. See the [development guide](doc/development.md).
 
 The launcher runs as the invoking user and supplies a writable temporary home.
 Omit the command to open a Bash development shell with forwarded input and,
@@ -61,6 +65,13 @@ entries across the isolated client's directory change.
 Make recipe regressions cover selected executable paths containing spaces.
 These are packaging checks, not format-conformance tests.
 
+The same target separately runs CPIO raw-layout, payload, external-reader,
+reproducibility, error and lifecycle checks. `make -j8 coverage NUM_CPUS=8`
+checks the production-body inventory and records executed lines. It also runs
+from a fresh checkout before `make check`; it creates its scratch parent.
+The [CPIO guide](doc/cpio.md) describes the API and optional predecessor
+comparison.
+
 Select alternative GPR executables with the Make variables `GPRBUILD`,
 `GPRINSTALL` and `GPRCLEAN`. Each value is one executable name or path,
 including paths containing spaces. The preflight checks those selected
@@ -72,12 +83,11 @@ is `Arca`. See the [development guide](doc/development.md).
 
 ## Licence
 
-Arca is licensed under [LGPL-2.1-or-later](LICENSE); see [COPYRIGHT](COPYRIGHT)
-for the project notice. The owner has granted additional LGPL licensing for
-the identified CPIO/TAR material. Existing Abuild source is not imported by
-this bootstrap. Imports must retain attribution and record their exact scope.
-See [licensing and provenance](doc/licensing.md), including the requirements
-for distributing statically linked applications.
+Arca uses [LGPL-2.1-or-later](LICENSE); [COPYRIGHT](COPYRIGHT) identifies
+project attribution and the grant. Imported CPIO and copy-helper units retain
+upstream attribution under the recorded additional LGPL grant. TAR is
+inventoried but not imported yet. See [licensing and provenance](doc/licensing.md)
+for the grant scope and static-linking distribution requirements.
 
 ## Roadmap
 
