@@ -11,6 +11,7 @@
   and completed signal dispatch instead of staging polling and delayed SIGSTOP.
 - Handle CLI signals in Ada and bind simple system calls directly, retaining
   C only for the lstat metadata wrapper.
+- Express CLI foreign interfaces with Ada 2012 aspects.
 - Preserve CLI I/O diagnostics, reject directory-read failures, make staging
   finalization nonthrowing and enable the stronger runtime checks for the CLI.
 - Add a hard-link no-clobber fallback and regression checks for publication,

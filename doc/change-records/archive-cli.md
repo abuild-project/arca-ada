@@ -26,6 +26,8 @@ Argument policy, filesystem inventory and invocation-local ordered maps
 belong to the CLI. Signals use an Ada protected object; simple system calls
 use direct Ada bindings. Production C contains only the lstat metadata
 wrapper. The library remains Ada-only and independent of the CLI and Abuild.
+CLI foreign interfaces use Ada 2012 Import/Convention/External_Name aspects
+with retained C symbol names and calling conventions.
 New CLI code is independently authored under LGPL-2.1-or-later.
 
 Make builds and installs the CLI alongside the library. The CLI enables the

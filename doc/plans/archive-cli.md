@@ -326,3 +326,18 @@ All four signal/format cases fail at the missing acknowledgement with the
 previous shim and pass with the correction. Repeated cancellation checks,
 complete coverage and normal tests pass in rootless AMD64 Trixie. Runtime
 code and production coverage inputs are unchanged by this correction.
+
+## CLI interfacing aspects on 2026-10-22
+
+The seven CLI C imports now use Import, Convention and External_Name aspects;
+the metadata record uses its Convention aspect directly. Imported symbols,
+parameter/result profiles and C representation semantics remain unchanged.
+This is a separate syntax modernization after the test-only signal fix.
+
+Fresh-source coverage first and the full normal check pass after both changes
+in rootless AMD64 Trixie without network or Abuild access. All seven external
+names are retained and every production body has executed coverage. Ada MCP
+reports a complete CLI project/index and empty diagnostics for the changed
+Ada files. Author review checked ABI/profile parity, declaration comments,
+signal-server ordering, test fixture ownership and documentation/commit
+hygiene before the independent static passes.

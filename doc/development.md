@@ -157,6 +157,9 @@ groups, nested blocks and processing phases with blank lines; expand case
 alternatives onto separate lines; align multiline parameter declarations;
 and retain adjacent subprogram contracts and plain body separators. Keep
 manually maintained Ada lines within 80 columns.
+Foreign-interface declarations in the CLI use Ada 2012 Import, Convention and
+External_Name aspects, including the C convention on the metadata record.
+Use this form for new CLI bindings instead of interfacing pragmas.
 
 CLI regressions compile `tests/cli_faults.c` as a temporary preload library
 with the image's GCC. Only selected CLI child processes load it; its trace

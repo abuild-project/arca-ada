@@ -15,8 +15,8 @@ package Archive_CLI.Filesystem is
       MTime, MTime_NS     : Interfaces.Integer_64 := 0;
       Mode, UID, GID      : Interfaces.Unsigned_32 := 0;
       Major, Minor, Kind : Interfaces.Unsigned_32 := 0;
-   end record;
-   pragma Convention (C, Metadata);
+   end record
+     with Convention => C;
 
    function Kind (Item : Metadata) return Entry_Kind;
    --  Decode the bridge's stable node-kind number, independent of mode bits.

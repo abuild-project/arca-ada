@@ -45,31 +45,31 @@ package body Archive_CLI.Filesystem is
       Last_Signal : Natural := 0;
    end Cancellation;
 
-   function C_Stat (Name : C.char_array; Item : access Metadata) return C.int;
+   function C_Stat (Name : C.char_array; Item : access Metadata) return C.int
+     with Import, Convention => C, External_Name => "arca_lstat";
    --  Return an errno value and an explicitly sized metadata record.
-   pragma Import (C, C_Stat, "arca_lstat");
 
    function C_Readlink
      (Name     :     C.char_array;
       Buffer   : out C.char_array;
       Capacity :     C.size_t)
-      return C.long;
+      return C.long
+     with Import, Convention => C, External_Name => "readlink";
    --  Return a byte count without a NUL, or -1; Linux64 ssize_t is long.
-   pragma Import (C, C_Readlink, "readlink");
 
    function C_Mkdtemp
-     (Buffer : in out C.char_array) return C.Strings.chars_ptr;
+     (Buffer : in out C.char_array) return C.Strings.chars_ptr
+     with Import, Convention => C, External_Name => "mkdtemp";
    --  Atomically create the private directory described by the template.
    --  Success points into Buffer and must not be freed; null reports failure.
-   pragma Import (C, C_Mkdtemp, "mkdtemp");
 
-   function C_Rename (Source, Target : C.char_array) return C.int;
+   function C_Rename (Source, Target : C.char_array) return C.int
+     with Import, Convention => C, External_Name => "rename";
    --  Atomically replace Target on the same filesystem; return zero or -1.
-   pragma Import (C, C_Rename, "rename");
 
-   function C_Link (Source, Target : C.char_array) return C.int;
+   function C_Link (Source, Target : C.char_array) return C.int
+     with Import, Convention => C, External_Name => "link";
    --  Publish another name for a closed file without replacing any target.
-   pragma Import (C, C_Link, "link");
 
    function C_Renameat2
      (Source_FD : C.int;
@@ -77,13 +77,13 @@ package body Archive_CLI.Filesystem is
       Target_FD : C.int;
       Target    : C.char_array;
       Flags     : C.unsigned)
-      return C.int;
+      return C.int
+     with Import, Convention => C, External_Name => "renameat2";
    --  Apply Linux rename flags and return zero or -1 with errno on failure.
-   pragma Import (C, C_Renameat2, "renameat2");
 
-   function C_Strerror (Code : C.int) return C.Strings.chars_ptr;
+   function C_Strerror (Code : C.int) return C.Strings.chars_ptr
+     with Import, Convention => C, External_Name => "strerror";
    --  Read libc's static diagnostic for an errno value; do not free it.
-   pragma Import (C, C_Strerror, "strerror");
 
    function Errno_On_Failure (Result : C.int) return C.int;
    --  Capture a zero/-1 call's errno before allocating diagnostic strings.
