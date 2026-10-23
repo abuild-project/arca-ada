@@ -75,7 +75,9 @@ The exact imported Abuild revision is now present in the owner's private
 GitHub mirror. It is not publicly verifiable there. Establish a publicly
 fetchable reference to the exact recorded material before public delivery;
 do not publish unrelated predecessor source/history to satisfy this gate.
-The [provenance manifest](../provenance/cpio-tar-sources.json) and existing
+The provenance manifest
+(`doc/provenance/cpio-tar-sources.json` at revision
+`b5c0f114cb702686908326605913ef5e8f64a6f0`) and existing
 LGPL grant remain unchanged.
 
 ## CI logs and artifacts
@@ -109,3 +111,16 @@ switch. Expired/deleted artifacts and earlier job attempts are not covered.
 
 The [publication checklist](../publication.md) makes these gates discoverable
 without depending on local scan paths or private services.
+
+## Licensing disposition on 2026-10-23
+
+The maintained project now uses GPL-2.0-or-later, matching the original
+licence of the Abuild-derived units. Their attribution and source revision
+are recorded in [licensing](../licensing.md). The additional LGPL grant is
+no longer used by the maintained project policy. The separate public
+predecessor-reference condition is retired; original-source inventories and
+snapshots are not publication requirements.
+
+The dated assessment above retains its original scope and findings. This
+licensing disposition changes no runtime behavior and does not extend or
+repeat its code review. Other publication conditions remain applicable.

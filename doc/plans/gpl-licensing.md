@@ -1,6 +1,6 @@
 # GPL licensing and documentation policy
 
-Status: In progress on `codex/gpl-licensing`.
+Status: Implemented and verified locally on `codex/gpl-licensing`.
 
 Base revision: `b5c0f114cb702686908326605913ef5e8f64a6f0`.
 
@@ -42,7 +42,20 @@ Base revision: `b5c0f114cb702686908326605913ef5e8f64a6f0`.
 
 ## Progress
 
-The implementation starts from the accepted main revision. The separate
-snapshot topic remains unchanged and unmerged.
+The licence files, SPDX identifiers and maintained guidance use the common
+GPL policy. The reviewed agent guide is installed. Predecessor-only helpers,
+options and cases are removed; independent format tests and fixture inputs
+remain unchanged. Historical claims are retained with repaired references
+and appended dispositions.
+
+Static checks confirm exact licence/notice/guide content, SPDX coverage,
+unchanged runtime/build tokens, unchanged fixture bytes and independent test
+methods, complete removal of comparison interfaces and valid relative links.
+Coverage first and the complete normal check pass on fresh sources in
+rootless AMD64 Trixie with GNAT 14.2, including installed licence checks.
+
+The separate snapshot topic remains unchanged and unmerged. The result is
+local; repository settings, transfer, visibility and hosted delivery are
+unchanged.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

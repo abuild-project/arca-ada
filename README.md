@@ -91,7 +91,7 @@ no-replace rename; staging cleanup is best effort and preserves command results.
 checks the production-body inventory and records executed lines. It also runs
 from a fresh checkout before `make check`; it creates its scratch parent.
 The [CPIO guide](doc/cpio.md) and [TAR guide](doc/tar.md) describe the APIs,
-format profiles and optional predecessor comparisons.
+format profiles and validation contracts.
 
 Select alternative GPR executables with the Make variables `GPRBUILD`,
 `GPRINSTALL` and `GPRCLEAN`. Each value is one executable name or path,
@@ -104,11 +104,11 @@ is `Arca`. See the [development guide](doc/development.md).
 
 ## Licence
 
-Arca uses [LGPL-2.1-or-later](LICENSE); [COPYRIGHT](COPYRIGHT) identifies
-project attribution and the grant. Imported CPIO, TAR and copy-helper units
-and the historical ustar fixture retain upstream attribution under the
-recorded additional LGPL grant. See [licensing and provenance](doc/licensing.md)
-for the grant scope and static-linking distribution requirements.
+Arca uses [GPL-2.0-or-later](LICENSE); [COPYRIGHT](COPYRIGHT) identifies
+project attribution and the licence terms. The CPIO, TAR and stream-copy
+units derived from Abuild retain their original licence and attribution.
+See [licensing](doc/licensing.md) for source origins, third-party terms and
+corresponding-source requirements when distributing binaries.
 
 ## Roadmap
 

@@ -1,8 +1,8 @@
 # TAR writer
 
 `Arca.TAR` writes the native Abuild TAR profile independently of Abuild types,
-configuration, logging and scheduling. It is available under LGPL-2.1-or-later
-with the [recorded additional grant](provenance/cpio-tar.md). The API is not
+configuration, logging and scheduling. It retains Abuild's
+[GPL-2.0-or-later licence](licensing.md). The API is not
 versioned as stable yet. Compression and Abuild transformation adapters are
 separate consumers.
 
@@ -115,20 +115,3 @@ successful completion of an archive containing that entire payload.
 production body in the inventory and reports executed lines. It can run first
 from a fresh source checkout. The output-limited probe redirects its own
 profiling artifacts into private scratch space.
-
-For an authorized predecessor checkout or exported source tree, after building
-the normal test drivers, run inside the reference container:
-
-```sh
-python3 tests/check-tar-parity.py /absolute/path/to/source
-```
-
-The source path must be visible inside the container. With the standard
-development wrapper, place an export of the recorded TAR/Binary_IO files below
-`build/` and pass its `/work/build/...` path. The helper verifies their hashes.
-
-The helper verifies source hashes, compiles the original TAR/copy units with
-minimal parent namespaces, and compares complete entry, boundary, fixture,
-error-recovery and empty archives. It also requires the original writer to
-fail the omitted-Close descriptor check, proving cleanup-test sensitivity.
-This is package-level parity; Abuild transformation integration is separate.

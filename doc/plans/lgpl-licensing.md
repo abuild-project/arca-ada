@@ -25,3 +25,10 @@ Implementation is isolated on `codex/lgpl-licensing`, based on the accepted
 bootstrap. The metadata-only provenance inventory is included; CPIO remains
 on its separate unpublished topic. Validation and the final author review
 pass and are recorded in the [change record](../change-records/lgpl-licensing.md).
+
+## Disposition on 2026-10-23
+
+Superseded by [GPL licensing](gpl-licensing.md). The maintained project uses
+GPL-2.0-or-later, matching its Abuild-derived code. The additional LGPL grant
+is no longer used by the maintained licensing policy; this earlier decision
+remains historical evidence.

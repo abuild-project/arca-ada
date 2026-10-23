@@ -121,11 +121,11 @@ specific missing-import diagnostic. This negative control verifies that
 the consumer cannot silently fall back to the original source project.
 
 The consumer check establishes GPR packaging and compiler/linker usability.
-The separate CPIO and TAR suites check raw layout, payloads, two external readers,
-parallel instances, errors, reproducibility and scope-exit cleanup. See the
-[CPIO guide](cpio.md) and [TAR guide](tar.md) for their contracts and optional
-predecessor checks. TAR also retains the historical GNU ustar fixture with
-its original producer record; it is checked without device-node privileges.
+The separate CPIO and TAR suites check raw layout, payloads, two external
+readers, parallel instances, errors, reproducibility and scope-exit cleanup.
+See the [CPIO guide](cpio.md) and [TAR guide](tar.md) for their contracts.
+TAR also retains the historical GNU ustar fixture with its original producer
+record; it is checked without device-node privileges.
 Named Ahven suites call the shared Ada assertion scenarios directly and add
 focused writer-reuse and copy tests. The small archive drivers reuse those
 scenarios for Python `unittest` and independent format checks. The
@@ -206,7 +206,7 @@ Tests use a fresh prefix on every run.
 
 GPRinstall copies `LICENSE` and `COPYRIGHT` to `<prefix>/share/doc/arca`.
 The installation check compares both notices byte for byte with their source
-files. Binary distributors must also provide the source and relinking material
+files. Binary distributors must also provide the corresponding source
 described in the [licensing guide](licensing.md); installing licence notices
 alone does not fulfil those requirements.
 

@@ -15,7 +15,9 @@ The existing private stream-copy helper is reused without modification.
 ## Imported material
 
 Source revision: `136ca84f0f5c49acae5fdd22f43359a32ca26e70`.
-The [inventory and grant](../provenance/cpio-tar.md) identify the source bytes,
+The inventory and grant
+(`doc/provenance/cpio-tar.md` at revision
+`b5c0f114cb702686908326605913ef5e8f64a6f0`) identify the source bytes,
 attribution and additional grant. No new source revision or unrelated writer
 is included.
 

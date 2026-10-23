@@ -10,9 +10,10 @@ Use small commits that build independently. Separate behavior-preserving
 extraction from format changes and Abuild integration. Include tests that
 would detect a violation of the documented contract.
 
-Submit new project-owned contributions under LGPL-2.1-or-later. Retain
-copyright and licence notices for imported material. Do not submit third-party
-source under that licence unless its terms or an explicit grant permit it.
+Submit new project-owned contributions under GPL-2.0-or-later. Retain
+copyright and licence notices for imported material. Code derived from Abuild
+keeps that licence and its attribution; record its origin revision in
+doc/licensing.md. Add third-party source only under compatible terms.
 
 Public releases, Alire publication and transfer to the project organization
 are separate owner decisions. Follow the [publication checklist](doc/publication.md)
