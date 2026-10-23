@@ -1,6 +1,6 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
--- Copyright (C) 2008-2026 secunet Security Networks AG
--- Additional LGPL grant and source: doc/provenance/cpio-tar.md
+--  SPDX-License-Identifier: LGPL-2.1-or-later
+--  Copyright (C) 2008-2026 secunet Security Networks AG
+--  Additional LGPL grant and source: doc/provenance/cpio-tar.md
 
 with Ada.Directories;
 with Ada.Streams;

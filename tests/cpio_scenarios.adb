@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Calendar;
 with Ada.Calendar.Formatting;
@@ -12,7 +12,8 @@ with Test_Support;
 
 package body CPIO_Scenarios is
 
-   procedure Run (Mode, Work : String) is
+   procedure Run (Mode, Work : String)
+   is
 
       use Arca.CPIO;
       use Interfaces;
@@ -39,10 +40,11 @@ package body CPIO_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Write_Entries (Name : String) is
-         Archive : CPIO_Archive_Type;
+      procedure Write_Entries (Name : String)
+      is
+         Archive    : CPIO_Archive_Type;
          Link_Inode : Inode_Type;
-         Max_Time : constant Ada.Calendar.Time :=
+         Max_Time   : constant Ada.Calendar.Time :=
            Ada.Calendar.Formatting.Time_Of
              (2106, 2, 7, Seconds => 23_295.0, Time_Zone => 0);
       begin
@@ -82,9 +84,10 @@ package body CPIO_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Write_Raw is
+      procedure Write_Raw
+      is
          Archive : CPIO_Archive_Type;
-         Epoch : constant Ada.Calendar.Time :=
+         Epoch   : constant Ada.Calendar.Time :=
            Ada.Calendar.Formatting.Time_Of
              (1970, 1, 1, Seconds => 0.0, Time_Zone => 0);
       begin
@@ -98,10 +101,11 @@ package body CPIO_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Check_Errors is
-         Archive : CPIO_Archive_Type;
-         Stamp : Ada.Calendar.Time := Fixed_Time;
-         Source : constant String := Work & "/missing.bin";
+      procedure Check_Errors
+      is
+         Archive   : CPIO_Archive_Type;
+         Stamp     : Ada.Calendar.Time := Fixed_Time;
+         Source    : constant String := Work & "/missing.bin";
          Operation : Positive := 1;
 
          procedure Close_Unopened;
@@ -122,21 +126,24 @@ package body CPIO_Scenarios is
          procedure Add_Unopened;
          --  Require an open writer for every remaining entry operation.
 
-         procedure Close_Unopened is
+         procedure Close_Unopened
+         is
          begin
             CPIO_Close (Archive);
          end Close_Unopened;
 
          ----------------------------------------------------------------------
 
-         procedure Add_Directory is
+         procedure Add_Directory
+         is
          begin
             CPIO_Make_Directory (Archive, "rejected", 8#700#, 0, 0, Stamp);
          end Add_Directory;
 
          ----------------------------------------------------------------------
 
-         procedure Missing_Source is
+         procedure Missing_Source
+         is
          begin
             CPIO_Make_File
               (Archive, "missing", Source, 8#600#, 0, 0, 1, 900, Fixed_Time);
@@ -144,7 +151,8 @@ package body CPIO_Scenarios is
 
          ----------------------------------------------------------------------
 
-         procedure Oversized_Source is
+         procedure Oversized_Source
+         is
          begin
             CPIO_Make_File
               (Archive, "oversized", Work & "/oversized.bin", 8#600#,
@@ -153,14 +161,16 @@ package body CPIO_Scenarios is
 
          ----------------------------------------------------------------------
 
-         procedure Recreate_Open is
+         procedure Recreate_Open
+         is
          begin
             CPIO_Create (Archive, Work & "/replacement.cpio");
          end Recreate_Open;
 
          ----------------------------------------------------------------------
 
-         procedure Add_Unopened is
+         procedure Add_Unopened
+         is
          begin
             case Operation is
                when 1 =>
@@ -230,25 +240,29 @@ package body CPIO_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Check_Parallel is
-         task type Writer is
-            pragma Storage_Size (131_072);
+      procedure Check_Parallel
+      is
+         task type Writer
+           with Storage_Size => 131_072
+         is
             entry Start (Number : Positive);
             entry Finish
               (Success : out Boolean;
-               Detail : out Ada.Strings.Unbounded.Unbounded_String);
+               Detail  : out Ada.Strings.Unbounded.Unbounded_String);
          end Writer;
 
-         task body Writer is
-            Index : Positive;
-            OK : Boolean := True;
+         task body Writer
+         is
+            Index      : Positive;
+            OK         : Boolean := True;
             Error_Info : Ada.Strings.Unbounded.Unbounded_String;
          begin
             accept Start (Number : Positive) do
                Index := Number;
             end Start;
             begin
-               Write_Entries (Work & "/parallel" & Index'Image & ".cpio");
+               Write_Entries
+                 (Work & "/parallel" & Natural'Image (Index) & ".cpio");
             exception
                when Error : others =>
                   Error_Info := Ada.Strings.Unbounded.To_Unbounded_String
@@ -257,15 +271,15 @@ package body CPIO_Scenarios is
             end;
             accept Finish
               (Success : out Boolean;
-               Detail : out Ada.Strings.Unbounded.Unbounded_String)
+               Detail  : out Ada.Strings.Unbounded.Unbounded_String)
             do
                Success := OK;
                Detail := Error_Info;
             end Finish;
          end Writer;
 
-         Writers : array (1 .. 8) of Writer;
-         All_OK : Boolean := True;
+         Writers    : array (1 .. 8) of Writer;
+         All_OK     : Boolean := True;
          Last_Error : Ada.Strings.Unbounded.Unbounded_String;
       begin
          for Index in Writers'Range loop
@@ -273,7 +287,7 @@ package body CPIO_Scenarios is
          end loop;
          for Index in Writers'Range loop
             declare
-               OK : Boolean;
+               OK     : Boolean;
                Detail : Ada.Strings.Unbounded.Unbounded_String;
             begin
                Writers (Index).Finish (OK, Detail);
@@ -290,8 +304,9 @@ package body CPIO_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Check_Lifetime is
-         Before : constant Natural := Open_Descriptor_Count;
+      procedure Check_Lifetime
+      is
+         Before       : constant Natural := Open_Descriptor_Count;
          Caller_Abort : exception;
       begin
          for Index in 1 .. 40 loop
@@ -300,7 +315,8 @@ package body CPIO_Scenarios is
                   Archive : CPIO_Archive_Type;
                begin
                   CPIO_Create
-                    (Archive, Work & "/unfinished" & Index'Image & ".cpio");
+                    (Archive,
+                     Work & "/unfinished" & Natural'Image (Index) & ".cpio");
                   if Index mod 3 = 0 then
                      CPIO_Make_File
                        (Archive, "missing", Work & "/missing.bin", 0, 0, 0,
@@ -310,7 +326,8 @@ package body CPIO_Scenarios is
                   end if;
                end;
             exception
-               when Caller_Abort | File_Not_Found => null;
+               when Caller_Abort | File_Not_Found =>
+                  null;
             end;
          end loop;
          Check
@@ -322,17 +339,19 @@ package body CPIO_Scenarios is
                entry Complete;
             end Owned_Writer;
 
-            task body Owned_Writer is
+            task body Owned_Writer
+            is
                Archive : CPIO_Archive_Type;
             begin
                CPIO_Create
-                 (Archive, Work & "/task-output" & Number'Image & ".cpio");
+                 (Archive,
+                  Work & "/task-output" & Positive'Image (Number) & ".cpio");
                accept Ready;
                accept Complete;
             end Owned_Writer;
 
             Normal_Exit : Owned_Writer (1);
-            Abandoned : Owned_Writer (2);
+            Abandoned   : Owned_Writer (2);
          begin
             --  A normal task exit is the positive control for the same owner.
             Normal_Exit.Ready;
@@ -343,7 +362,7 @@ package body CPIO_Scenarios is
          for Index in 1 .. 2 loop
             Check
               (not Ada.Directories.Exists
-                 (Work & "/task-output" & Index'Image & ".cpio"),
+                 (Work & "/task-output" & Natural'Image (Index) & ".cpio"),
                "Task exit retained an unfinished archive");
          end loop;
          Check
@@ -352,7 +371,7 @@ package body CPIO_Scenarios is
          for Index in 1 .. 40 loop
             Check
               (not Ada.Directories.Exists
-                 (Work & "/unfinished" & Index'Image & ".cpio"),
+                 (Work & "/unfinished" & Natural'Image (Index) & ".cpio"),
                "Omitted Close retained an unfinished archive");
          end loop;
       end Check_Lifetime;

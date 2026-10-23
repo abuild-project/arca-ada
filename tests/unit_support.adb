@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Directories;
 with Ada.Environment_Variables;
@@ -11,6 +11,7 @@ with Interfaces.C.Strings;
 package body Unit_Support is
 
    package SIO renames Ada.Streams.Stream_IO;
+
    use Ada.Streams;
    use Ada.Strings.Unbounded;
    use type Ada.Directories.File_Size;
@@ -20,11 +21,12 @@ package body Unit_Support is
 
    function Mkdtemp
      (Template : in out Interfaces.C.char_array)
-      return Interfaces.C.Strings.chars_ptr;
+      return Interfaces.C.Strings.chars_ptr
+     with Import, Convention => C, External_Name => "mkdtemp";
    --  Create a mode-0700 directory; its returned pointer aliases Template.
-   pragma Import (C, Mkdtemp, "mkdtemp");
 
-   function Path (Item : Fixture) return String is
+   function Path (Item : Fixture) return String
+   is
    begin
       return (if Item.Native then Interfaces.C.To_Ada (Item.Native_Path)
               else To_String (Item.Directory));
@@ -32,17 +34,20 @@ package body Unit_Support is
 
    -------------------------------------------------------------------------
 
-   function Prepare (Name : String) return Fixture is
-      File : SIO.File_Type;
+   function Prepare (Name : String) return Fixture
+   is
+      File  : SIO.File_Type;
       Block : Stream_Element_Array (1 .. 4093);
 
       procedure Create_Source (Filename : String; Size : Natural);
       --  Write an exact patterned source using a small reusable buffer.
 
-      procedure Create_Source (Filename : String; Size : Natural) is
+      procedure Create_Source (Filename : String; Size : Natural)
+      is
          Remaining : Natural := Size;
       begin
          SIO.Create (File, SIO.Out_File, Filename, "shared=no");
+
          while Remaining > 0 loop
             declare
                Count : constant Natural :=
@@ -52,20 +57,24 @@ package body Unit_Support is
                Remaining := Remaining - Count;
             end;
          end loop;
+
          SIO.Close (File);
       end Create_Source;
    begin
       for Index in Block'Range loop
          Block (Index) := Stream_Element (Index mod 251);
       end loop;
+
       return Result : Fixture do
          Result.Directory := To_Unbounded_String
            (Ada.Environment_Variables.Value ("ARCA_TEST_ROOT") & "/" & Name);
          Ada.Directories.Create_Directory (Path (Result));
          Result.Created := True;
+
          Create_Source (Path (Result) & "/payload.bin", 2_097_189);
          Create_Source (Path (Result) & "/empty.bin", 0);
          Create_Source (Path (Result) & "/tiny.bin", 3);
+
          SIO.Create
            (File, SIO.Out_File, Path (Result) & "/oversized.bin", "shared=no");
          SIO.Set_Index (File, 2 ** 33);
@@ -82,7 +91,8 @@ package body Unit_Support is
 
    -------------------------------------------------------------------------
 
-   function Prepare_Native (Name : String) return Fixture is
+   function Prepare_Native (Name : String) return Fixture
+   is
       Template : constant Interfaces.C.char_array :=
         Interfaces.C.To_C ("/tmp/arca-" & Name & "-XXXXXX");
    begin
@@ -91,17 +101,20 @@ package body Unit_Support is
          if Template'Length > Result.Native_Path'Length then
             raise Constraint_Error with "native fixture name is too long";
          end if;
+
          Result.Native_Path (Template'Range) := Template;
          if Mkdtemp (Result.Native_Path) = Interfaces.C.Strings.Null_Ptr then
             raise Program_Error with GNAT.OS_Lib.Errno_Message;
          end if;
+
          Result.Created := True;
       end return;
    end Prepare_Native;
 
    -------------------------------------------------------------------------
 
-   overriding procedure Finalize (Item : in out Fixture) is
+   overriding procedure Finalize (Item : in out Fixture)
+   is
    begin
       if Item.Created then
          if Item.Native then
@@ -113,8 +126,9 @@ package body Unit_Support is
 
    -------------------------------------------------------------------------
 
-   procedure Assert_Equal_Files (Left, Right : String) is
-      A, B : SIO.File_Type;
+   procedure Assert_Equal_Files (Left, Right : String)
+   is
+      A, B           : SIO.File_Type;
       Data_A, Data_B : Stream_Element_Array (1 .. 4096);
       Last_A, Last_B : Stream_Element_Offset;
    begin
@@ -123,6 +137,7 @@ package body Unit_Support is
          "File lengths differ: " & Left & " / " & Right);
       SIO.Open (A, SIO.In_File, Left, "shared=no");
       SIO.Open (B, SIO.In_File, Right, "shared=no");
+
       while not SIO.End_Of_File (A) loop
          SIO.Read (A, Data_A, Last_A);
          SIO.Read (B, Data_B, Last_B);
@@ -131,6 +146,7 @@ package body Unit_Support is
             Data_A (1 .. Last_A) = Data_B (1 .. Last_B),
             "File bytes differ: " & Left & " / " & Right);
       end loop;
+
       Ahven.Assert (SIO.End_Of_File (B), "Unexpected trailing bytes");
       SIO.Close (A);
       SIO.Close (B);
@@ -154,14 +170,15 @@ package body Unit_Support is
       Extension : String)
    is
       Files : constant Fixture := Prepare (Name);
-      Work : constant String := Path (Files);
+      Work  : constant String := Path (Files);
    begin
       Action (Mode, Work);
+
       if Mode = "parallel" then
          for Index in 2 .. 8 loop
             Assert_Equal_Files
               (Work & "/parallel 1" & Extension,
-               Work & "/parallel" & Index'Image & Extension);
+               Work & "/parallel" & Natural'Image (Index) & Extension);
          end loop;
       elsif Mode = "errors" or else Mode = "state" then
          Ahven.Assert

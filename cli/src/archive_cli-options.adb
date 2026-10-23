@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Command_Line;
 with Ada.Environment_Variables;
@@ -50,7 +50,8 @@ package body Archive_CLI.Options is
 
    -------------------------------------------------------------------------
 
-   function Parse return Settings is
+   function Parse return Settings
+   is
       type Option_Kind is
         (Format_Option, Root_Option, Output_Option,
          UID_Option, GID_Option, Time_Option, Force_Option);
@@ -214,7 +215,8 @@ package body Archive_CLI.Options is
 
    -------------------------------------------------------------------------
 
-   procedure Print_Help is
+   procedure Print_Help
+   is
       use Ada.Text_IO;
    begin
       Put_Line

@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Directories;
 with Ada.Interrupts;
@@ -26,13 +26,13 @@ package body Archive_CLI.Filesystem is
 
    protected Cancellation is
 
-      procedure Handle_Interrupt;
+      procedure Handle_Interrupt
+        with Interrupt_Handler;
       --  Record SIGINT without filesystem work or exception propagation.
-      pragma Interrupt_Handler (Handle_Interrupt);
 
-      procedure Handle_Termination;
+      procedure Handle_Termination
+        with Interrupt_Handler;
       --  Record SIGTERM for cleanup at the next command boundary.
-      pragma Interrupt_Handler (Handle_Termination);
 
       function Number return Natural;
       --  Read the process-owned signal state through protected access.
@@ -94,23 +94,27 @@ package body Archive_CLI.Filesystem is
    function Published_Link (Source : Metadata; Target : String) return Boolean;
    --  Resolve an ambiguous NFS link reply only for the same regular inode.
 
-   protected body Cancellation is
+   protected body Cancellation
+   is
 
-      procedure Handle_Interrupt is
+      procedure Handle_Interrupt
+      is
       begin
          Last_Signal := Natural (Ada.Interrupts.Names.SIGINT);
       end Handle_Interrupt;
 
       ----------------------------------------------------------------------
 
-      procedure Handle_Termination is
+      procedure Handle_Termination
+      is
       begin
          Last_Signal := Natural (Ada.Interrupts.Names.SIGTERM);
       end Handle_Termination;
 
       ----------------------------------------------------------------------
 
-      function Number return Natural is
+      function Number return Natural
+      is
       begin
          return Last_Signal;
       end Number;
@@ -119,14 +123,16 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   function Errno_On_Failure (Result : C.int) return C.int is
+   function Errno_On_Failure (Result : C.int) return C.int
+   is
    begin
       return (if Result = 0 then 0 else C.int (GNAT.OS_Lib.Errno));
    end Errno_On_Failure;
 
    -------------------------------------------------------------------------
 
-   procedure Require (Code : C.int; Context : String) is
+   procedure Require (Code : C.int; Context : String)
+   is
    begin
       if Code /= 0 then
          raise Command_Error with
@@ -154,7 +160,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   function Kind (Item : Metadata) return Entry_Kind is
+   function Kind (Item : Metadata) return Entry_Kind
+   is
    begin
       if Item.Kind > 6 then
          raise Command_Error with "invalid filesystem node classification";
@@ -165,7 +172,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   function Exists (Name : String; Item : out Metadata) return Boolean is
+   function Exists (Name : String; Item : out Metadata) return Boolean
+   is
       Value : aliased Metadata;
       Code  : constant C.int := C_Stat (C.To_C (Name), Value'Access);
    begin
@@ -182,7 +190,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   function Stat (Name : String) return Metadata is
+   function Stat (Name : String) return Metadata
+   is
       Result : Metadata;
    begin
       if not Exists (Name, Result) then
@@ -194,7 +203,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   function Canonical (Name : String) return String is
+   function Canonical (Name : String) return String
+   is
       Result : constant String := GNAT.OS_Lib.Normalize_Pathname (Name);
    begin
       if Result = "" then
@@ -206,7 +216,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   function Link_Target (Name : String) return String is
+   function Link_Target (Name : String) return String
+   is
       Buffer : C.char_array (0 .. Path_Capacity - 1);
       Length : C.long;
    begin
@@ -230,7 +241,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   procedure Install_Signals is
+   procedure Install_Signals
+   is
    begin
       Ada.Interrupts.Attach_Handler
         (Cancellation.Handle_Interrupt'Access, Ada.Interrupts.Names.SIGINT);
@@ -240,7 +252,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   procedure Check_Interrupted is
+   procedure Check_Interrupted
+   is
    begin
       if Cancellation.Number /= 0 then
          raise Interrupted;
@@ -249,14 +262,16 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   function Signal_Number return Natural is
+   function Signal_Number return Natural
+   is
    begin
       return Cancellation.Number;
    end Signal_Number;
 
    -------------------------------------------------------------------------
 
-   function Begin_Output (Parent : String) return Transaction is
+   function Begin_Output (Parent : String) return Transaction
+   is
       Template : constant C.char_array := C.To_C (Parent & "/.arca-XXXXXX");
    begin
       return Result : Transaction do
@@ -276,7 +291,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   function Staging_Name (Item : Transaction) return String is
+   function Staging_Name (Item : Transaction) return String
+   is
    begin
       return C.To_Ada (Item.Buffer) & "/archive";
    end Staging_Name;
@@ -325,7 +341,8 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
-   overriding procedure Finalize (Item : in out Transaction) is
+   overriding procedure Finalize (Item : in out Transaction)
+   is
    begin
       if Item.Active then
          Ada.Directories.Delete_Tree (C.To_Ada (Item.Buffer));

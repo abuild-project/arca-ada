@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ahven;
 with Unit_Support;
@@ -10,7 +10,8 @@ package body Harness_Unit_Tests is
    procedure Fail_Assertion;
    --  Supply a known diagnostic whose absence makes the harness check fail.
 
-   procedure Fail_Assertion is
+   procedure Fail_Assertion
+   is
       Files : constant Unit_Support.Fixture :=
         Unit_Support.Prepare ("assertion-probe");
    begin
@@ -20,7 +21,8 @@ package body Harness_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   overriding procedure Initialize (Item : in out Test_Case) is
+   overriding procedure Initialize (Item : in out Test_Case)
+   is
    begin
       Set_Name (Item, "Harness_probe");
       Add_Test_Routine

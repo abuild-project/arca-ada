@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 library project Arca is
 
@@ -13,7 +13,7 @@ library project Arca is
    package Compiler is
       for Default_Switches ("Ada") use
         ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato",
-         "-gnatVa", "-fstack-check", "-gnateE");
+         "-gnatVa", "-fstack-check", "-gnateE", "-gnatygAdISuxM80");
    end Compiler;
 
    package Install is

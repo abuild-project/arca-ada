@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with "arca";
 
@@ -12,7 +12,8 @@ project Client is
 
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato");
+        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato",
+         "-gnatygAdISuxM80");
    end Compiler;
 
 end Client;

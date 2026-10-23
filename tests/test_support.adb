@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Strings.Fixed;
 with GNAT.Directory_Operations;
@@ -7,7 +7,8 @@ package body Test_Support is
 
    use type Ada.Exceptions.Exception_Id;
 
-   procedure Check (Condition : Boolean; Message : String) is
+   procedure Check (Condition : Boolean; Message : String)
+   is
    begin
       if not Condition then
          raise Program_Error with Message;
@@ -42,13 +43,14 @@ package body Test_Support is
 
    -------------------------------------------------------------------------
 
-   function Open_Descriptor_Count return Natural is
+   function Open_Descriptor_Count return Natural
+   is
       use GNAT.Directory_Operations;
 
       Search : Dir_Type;
-      Name : String (1 .. 64);
-      Last : Natural;
-      Count : Natural := 0;
+      Name   : String (1 .. 64);
+      Last   : Natural;
+      Count  : Natural := 0;
    begin
       Open (Search, "/proc/self/fd");
       loop

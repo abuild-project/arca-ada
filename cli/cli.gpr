@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with "arca";
 
@@ -24,7 +24,8 @@ project CLI is
    package Compiler is
       for Default_Switches ("Ada") use
         ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato",
-         "-gnatVa", "-fstack-check", "-gnateE", "-g");
+         "-gnatVa", "-fstack-check", "-gnateE", "-g",
+         "-gnatygAdISuxM80");
       for Default_Switches ("C") use
         ("-std=c11", "-Wall", "-Wextra", "-Werror", "-pedantic", "-g");
       case Coverage is
@@ -35,7 +36,8 @@ project CLI is
             for Default_Switches ("C") use
               Compiler'Default_Switches ("C") &
               ("-O0", "-fprofile-arcs", "-ftest-coverage");
-         when others => null;
+         when others =>
+            null;
       end case;
    end Compiler;
 
@@ -43,7 +45,8 @@ project CLI is
       case Coverage is
          when "enabled" =>
             for Default_Switches ("Ada") use ("--coverage");
-         when others => null;
+         when others =>
+            null;
       end case;
    end Linker;
 end CLI;
