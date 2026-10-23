@@ -6,7 +6,7 @@ Archive and filesystem image writers for Ada.
 
 ## Status
 
-Arca is being bootstrapped in a private repository. It provides an independent
+Arca is a pre-release project. It provides an independent
 [CPIO `newc` writer](doc/cpio.md), a [TAR writer](doc/tar.md), an
 [archive creation CLI](doc/cli.md), a minimal library client,
 installation checks and development infrastructure. The client verifies
@@ -119,8 +119,13 @@ publication remain owner decisions. The intended later home is
 
 ## Contributing
 
-Read [AGENTS.md](AGENTS.md) and the project-wide
+Read [CONTRIBUTING.md](CONTRIBUTING.md), [AGENTS.md](AGENTS.md) and the project-wide
 [coding-style guide](doc/coding-style.md) before editing sources. Its rules
 apply to the library, CLI, tests and examples. Compiler style checks run in
 normal builds and coverage; `make check` also verifies that each project's
 gate accepts the documented line limit and rejects an overlong source.
+
+Use [SECURITY.md](SECURITY.md) for vulnerability reporting. Maintainers must
+complete the [publication checklist](doc/publication.md) before making the
+repository public; the [publication assessment](doc/assessments/publication.md)
+records the reviewed revision, evidence and remaining gates.

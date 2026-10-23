@@ -6,10 +6,13 @@ Recorded on 2026-10-21 against accepted Abuild revision
 paths, Git blob identities, SHA-256 digests, sizes and per-path history.
 It contains metadata only; no source or fixture is imported by this record.
 
-The source revision was fetched from the maintained upstream. It was not
-found in the owner's GitHub mirror on the recording date. Do not substitute
-a mirror head silently: verify the recorded blobs in an authorized source
-checkout, and establish a fetchable source reference before public delivery.
+The source revision was fetched from the maintained upstream. On 2026-10-23,
+the exact [recorded commit](https://github.com/mweidle73/abuild/commit/136ca84f0f5c49acae5fdd22f43359a32ca26e70)
+was verified in the owner's GitHub mirror. That repository is private, so
+this is an authorized source reference rather than public verification.
+Before public delivery, establish a publicly fetchable reference for this
+exact source and verify its recorded blobs. A moving mirror head is not a
+substitute. See the [publication assessment](../assessments/publication.md).
 
 ## Additional grant
 

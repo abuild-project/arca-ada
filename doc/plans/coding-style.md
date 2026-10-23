@@ -20,7 +20,7 @@ supported. Use type-prefixed Image rather than relying on newer object syntax.
    layout, contracts, aspects, imports, language baseline and review limits.
 2. Enable the Abuild-derived -gnatygAdISuxM80 profile in all four compiling
    projects, retaining Arca's explicit 80-column limit and warning-as-error
-   policy. Do not add spawn_manager's alphabetical-subprogram requirement.
+   policy. Do not require alphabetical subprogram ordering.
    Keep the copied installed client self-contained; do not introduce a build
    profile dependency on a source checkout. Verify each actual project gate
    with valid sources and a deliberately overlong source in private fixtures.
