@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add security reporting guidance, a publication checklist and a reviewed
+  publication assessment; clarify provenance and remaining release gates.
+
 - Document repository-wide Ada style and require agents to read it; enable
   compiler style checks for library, CLI, tests and examples with positive
   and negative project controls.

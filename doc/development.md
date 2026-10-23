@@ -223,4 +223,15 @@ Private repository access must be configured in every build environment.
 
 Abuild integration is a later change: transformation adapters, source-file
 inventory, coverage, dependency checkout, release licensing, manuals and
-integration tests must change together. The bootstrap does not modify Abuild.
+integration tests must change together. A separate local integration experiment
+does not become an Arca test dependency.
+
+## Publication maintenance
+
+Read the [publication checklist](publication.md) and
+[reviewed assessment](assessments/publication.md) before preparing an owner
+decision. [SECURITY.md](../SECURITY.md) defines reporting guidance; its presence
+does not enable GitHub private reporting. Keep the published documentation
+independent of local paths, private services and unrelated project material.
+Record exact revisions and evidence limits rather than claiming that an old
+audit certifies later code or repository settings.

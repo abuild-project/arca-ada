@@ -81,8 +81,8 @@ basis, byte order, padding/checksum rules and normative format references.
 
 All four compiling projects use -gnatygAdISuxM80 alongside their existing
 warning-as-error settings. This follows Abuild's profile with an explicit
-80-column limit. It does not add spawn_manager's alphabetical-subprogram
-ordering requirement. GNAT checks layout, casing, token spacing, separate
+80-column limit. It does not require alphabetical subprogram ordering.
+GNAT checks layout, casing, token spacing, separate
 specifications and the selected additional rules during normal compilation.
 Coverage builds retain the same style profile.
 

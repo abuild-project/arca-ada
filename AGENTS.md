@@ -3,6 +3,9 @@
 - Read `README.md`, `doc/development.md`, `doc/coding-style.md`,
   `doc/licensing.md` and the active plan under `doc/plans/` before substantive
   work. The coding-style guide applies to library, CLI, tests and examples.
+- Read `SECURITY.md` before security-related work and `doc/publication.md`
+  before publication preparation. Preserve the assessment's revision scope;
+  rerun affected checks after changes and never infer publication approval.
 - Use `codex/<topic>` for Codex working branches. Preserve unrelated changes.
 - Use `apply_patch` for hand-written edits. Keep Ada sources within 80 columns
   and document the observable contract beside every subprogram declaration.

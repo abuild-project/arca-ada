@@ -34,8 +34,13 @@ Arca tests remain independent of that checkout.
 - The owner approved the exact SECURITY.md proposal; it is applied.
 - History inspection completed: 63 reachable commits and 468 distinct blobs;
   no credential or private-infrastructure disclosure was identified.
-- All 58 available workflow job logs were read. Nineteen retained Ahven ZIP
-  artifacts are inventoried; their contents still require inspection.
+- All 58 available workflow job logs and 19 retained Ahven ZIP artifacts were
+  read; ZIP sizes/digests match GitHub and no sensitive material was found.
 - The recorded source revision exists in the owner's private Abuild mirror.
   A publicly fetchable provenance reference remains a publication gate.
-- Static code audit and the independent Abuild integration are in progress.
+- Static code audit completed with one medium staging-identity finding. It
+  blocks publication and has a separately authorized remediation.
+- Rootless Trixie normal checks and coverage pass; all nine production bodies
+  are reported. Documentation and author review are complete.
+- Independent static review and PR delivery follow. The local Abuild
+  integration is a separate active experiment and remains a publication gate.
