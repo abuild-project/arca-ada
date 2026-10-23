@@ -148,18 +148,21 @@ complete branch coverage.
 Library, CLI and test compilation enable `-gnatVa`, `-fstack-check` and `-gnateE`
 in addition to the existing warnings, overflow and normal Ada checks. These
 match Abuild's extra validity/stack checks and exception-detail policy. GPR
-imports do not inherit a parent's compiler defaults automatically. Abuild's
-separate compiler style profile is not adopted by this runtime-check change;
-Arca retains its established source-style rules.
+imports do not inherit a parent's compiler defaults automatically.
 
-CLI Ada sources follow the same readability conventions: separate declaration
-groups, nested blocks and processing phases with blank lines; expand case
-alternatives onto separate lines; align multiline parameter declarations;
-and retain adjacent subprogram contracts and plain body separators. Keep
-manually maintained Ada lines within 80 columns.
-Foreign-interface declarations in the CLI use Ada 2012 Import, Convention and
-External_Name aspects, including the C convention on the metadata record.
-Use this form for new CLI bindings instead of interfacing pragmas.
+The [coding-style guide](coding-style.md) is the normative standalone source
+reference for library, CLI, tests and examples. AGENTS.md requires agents to
+read it before editing code. All four compiling GPR projects enable
+`-gnatygAdISuxM80` alongside warnings as errors; coverage retains the profile.
+The guide explains layout, declaration contracts, modern aspect forms and
+the Ada 2012 baseline with deliberate GNAT runtime dependencies.
+
+`make check` runs `tests/check-style.py` against private source copies through
+each actual project. Forced semantic compilations must accept an 80-column
+comment and reject an 81-column comment with the exact style diagnostic.
+These controls detect a missing project profile without changing checkout
+sources or relying on existing objects. The installed client remains
+self-contained and does not import a source-checkout style project.
 
 CLI regressions compile `tests/cli_faults.c` as a temporary preload library
 with the image's GCC. Only selected CLI child processes load it; its trace

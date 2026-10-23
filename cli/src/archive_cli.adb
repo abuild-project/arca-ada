@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Command_Line;
 with Ada.Exceptions;
@@ -9,7 +9,8 @@ with Archive_CLI.Writer;
 
 package body Archive_CLI is
 
-   procedure Run is
+   procedure Run
+   is
    begin
       declare
          Config : constant Options.Settings := Options.Parse;

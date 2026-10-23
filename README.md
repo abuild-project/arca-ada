@@ -116,3 +116,11 @@ See the [plan index](doc/plans/README.md) and
 [change records](doc/change-records/README.md). Repository visibility and
 publication remain owner decisions. The intended later home is
 `abuild-project/arca-ada`; the initial home is `mweidle73/arca-ada`.
+
+## Contributing
+
+Read [AGENTS.md](AGENTS.md) and the project-wide
+[coding-style guide](doc/coding-style.md) before editing sources. Its rules
+apply to the library, CLI, tests and examples. Compiler style checks run in
+normal builds and coverage; `make check` also verifies that each project's
+gate accepts the documented line limit and rejects an overlong source.

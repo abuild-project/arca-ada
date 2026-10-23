@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Calendar;
 with Ada.Calendar.Formatting;
@@ -12,7 +12,8 @@ with Test_Support;
 
 package body TAR_Scenarios is
 
-   procedure Run (Mode, Work : String) is
+   procedure Run (Mode, Work : String)
+   is
 
       use Arca.TAR;
       use Interfaces;
@@ -28,7 +29,7 @@ package body TAR_Scenarios is
       Max_Time : constant Ada.Calendar.Time :=
         Ada.Calendar.Formatting.Time_Of
           (2242, 3, 16, Seconds => 46_591.0, Time_Zone => 0);
-      Max_Field : constant Unsigned_32 := 2 ** 21 - 1;
+      Max_Field   : constant Unsigned_32 := 2 ** 21 - 1;
       Deep_Prefix : constant String :=
         "directory/directory/directory/directory/" &
         "directory/directory/directory/directory/" &
@@ -93,7 +94,8 @@ package body TAR_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Write_Entries (Name : String) is
+      procedure Write_Entries (Name : String)
+      is
          Archive : TAR_Archive_Type;
       begin
          TAR_Create (Archive, Name);
@@ -139,7 +141,8 @@ package body TAR_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Write_Golden is
+      procedure Write_Golden
+      is
          Archive : TAR_Archive_Type;
       begin
          TAR_Create (Archive, Work & "/golden.tar");
@@ -163,11 +166,12 @@ package body TAR_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Write_Edges is
-         Archive : TAR_Archive_Type;
+      procedure Write_Edges
+      is
+         Archive     : TAR_Archive_Type;
          Offset_Name : constant String (7 .. 106) := (others => 'i');
          Offset_Link : constant String (11 .. 110) := (others => 'j');
-         Sizes : constant array (Positive range <>) of Natural :=
+         Sizes       : constant array (Positive range <>) of Natural :=
            (0, 1, 511, 512, 513, 1_048_576, 1_048_577, 1_049_088);
       begin
          TAR_Create (Archive, Work & "/edges.tar");
@@ -192,13 +196,13 @@ package body TAR_Scenarios is
             8#644#, 0, 0, Fixed_Time);
          for Length in 511 .. 513 loop
             TAR_Make_Symlink
-              (Archive, "target" & Length'Image, (1 .. Length => 'x'),
+              (Archive, "target" & Natural'Image (Length), (1 .. Length => 'x'),
                8#777#, 0, 0, Fixed_Time);
          end loop;
          for Size of Sizes loop
             TAR_Make_File
-              (Archive, "size" & Size'Image,
-               Work & "/size" & Size'Image & ".bin", 8#644#,
+              (Archive, "size" & Natural'Image (Size),
+               Work & "/size" & Natural'Image (Size) & ".bin", 8#644#,
                0, 0, Fixed_Time);
          end loop;
          TAR_Make_File
@@ -209,7 +213,8 @@ package body TAR_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Write_Aligned is
+      procedure Write_Aligned
+      is
          Archive : TAR_Archive_Type;
       begin
          TAR_Create (Archive, Work & "/aligned.tar");
@@ -221,7 +226,8 @@ package body TAR_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Write_Owners is
+      procedure Write_Owners
+      is
          Archive : TAR_Archive_Type;
       begin
          TAR_Create (Archive, Work & "/owners.tar");
@@ -233,13 +239,14 @@ package body TAR_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Check_Errors is
-         Archive : TAR_Archive_Type;
-         Stamp : Ada.Calendar.Time := Fixed_Time;
-         UID : Unsigned_32 := 17;
-         GID : Unsigned_32 := 23;
-         Major : Unsigned_32 := 5;
-         Minor : Unsigned_32 := 12;
+      procedure Check_Errors
+      is
+         Archive   : TAR_Archive_Type;
+         Stamp     : Ada.Calendar.Time := Fixed_Time;
+         UID       : Unsigned_32 := 17;
+         GID       : Unsigned_32 := 23;
+         Major     : Unsigned_32 := 5;
+         Minor     : Unsigned_32 := 12;
          Operation : Positive := 1;
 
          procedure Close_Unopened;
@@ -260,14 +267,16 @@ package body TAR_Scenarios is
          procedure Add_Unopened;
          --  Require initialization for every public entry operation.
 
-         procedure Close_Unopened is
+         procedure Close_Unopened
+         is
          begin
             TAR_Close (Archive);
          end Close_Unopened;
 
          ----------------------------------------------------------------------
 
-         procedure Add_Metadata is
+         procedure Add_Metadata
+         is
          begin
             TAR_Make_Char_Device
               (Archive, "metadata", 8#644#, UID, GID, Major, Minor, Stamp);
@@ -275,7 +284,8 @@ package body TAR_Scenarios is
 
          ----------------------------------------------------------------------
 
-         procedure Missing_Source is
+         procedure Missing_Source
+         is
          begin
             TAR_Make_File
               (Archive, "missing", Work & "/missing.bin", 0, 0, 0, Fixed_Time);
@@ -283,7 +293,8 @@ package body TAR_Scenarios is
 
          ----------------------------------------------------------------------
 
-         procedure Oversized_Source is
+         procedure Oversized_Source
+         is
          begin
             TAR_Make_File
               (Archive, "oversized", Work & "/oversized.bin",
@@ -292,14 +303,16 @@ package body TAR_Scenarios is
 
          ----------------------------------------------------------------------
 
-         procedure Recreate_Open is
+         procedure Recreate_Open
+         is
          begin
             TAR_Create (Archive, Work & "/replacement.tar");
          end Recreate_Open;
 
          ----------------------------------------------------------------------
 
-         procedure Add_Unopened is
+         procedure Add_Unopened
+         is
          begin
             case Operation is
                when 1 =>
@@ -365,8 +378,9 @@ package body TAR_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Check_Lifetime is
-         Before : constant Natural := Open_Descriptor_Count;
+      procedure Check_Lifetime
+      is
+         Before       : constant Natural := Open_Descriptor_Count;
          Caller_Abort : exception;
       begin
          for Index in 1 .. 40 loop
@@ -375,7 +389,8 @@ package body TAR_Scenarios is
                   Archive : TAR_Archive_Type;
                begin
                   TAR_Create
-                    (Archive, Work & "/unfinished" & Index'Image & ".tar");
+                    (Archive,
+                     Work & "/unfinished" & Natural'Image (Index) & ".tar");
                   case Index mod 4 is
                      when 0 =>
                         TAR_Make_File
@@ -387,7 +402,8 @@ package body TAR_Scenarios is
                         TAR_Make_Directory
                           (Archive, (1 .. 120 => 'q'), 0,
                            Max_Field + 1, 0, Fixed_Time);
-                     when others => null;
+                     when others =>
+                        null;
                   end case;
                end;
             exception
@@ -401,7 +417,7 @@ package body TAR_Scenarios is
          for Index in 1 .. 40 loop
             Check
               (not Ada.Directories.Exists
-                 (Work & "/unfinished" & Index'Image & ".tar"),
+                 (Work & "/unfinished" & Natural'Image (Index) & ".tar"),
                "Omitted Close retained an unfinished TAR archive");
          end loop;
          declare
@@ -410,17 +426,19 @@ package body TAR_Scenarios is
                entry Complete;
             end Owned_Writer;
 
-            task body Owned_Writer is
+            task body Owned_Writer
+            is
                Archive : TAR_Archive_Type;
             begin
                TAR_Create
-                 (Archive, Work & "/task-output" & Number'Image & ".tar");
+                 (Archive,
+                  Work & "/task-output" & Positive'Image (Number) & ".tar");
                accept Ready;
                accept Complete;
             end Owned_Writer;
 
             Normal_Exit : Owned_Writer (1);
-            Abandoned : Owned_Writer (2);
+            Abandoned   : Owned_Writer (2);
          begin
             Normal_Exit.Ready;
             Normal_Exit.Complete;
@@ -430,7 +448,7 @@ package body TAR_Scenarios is
          for Index in 1 .. 2 loop
             Check
               (not Ada.Directories.Exists
-                 (Work & "/task-output" & Index'Image & ".tar"),
+                 (Work & "/task-output" & Natural'Image (Index) & ".tar"),
                "Task termination retained an unfinished TAR archive");
          end loop;
          Check
@@ -440,25 +458,29 @@ package body TAR_Scenarios is
 
       -------------------------------------------------------------------------
 
-      procedure Check_Parallel is
-         task type Writer is
-            pragma Storage_Size (131_072);
+      procedure Check_Parallel
+      is
+         task type Writer
+           with Storage_Size => 131_072
+         is
             entry Start (Number : Positive);
             entry Finish
               (Success : out Boolean;
-               Detail : out Ada.Strings.Unbounded.Unbounded_String);
+               Detail  : out Ada.Strings.Unbounded.Unbounded_String);
          end Writer;
 
-         task body Writer is
-            Index : Positive;
-            OK : Boolean := True;
+         task body Writer
+         is
+            Index      : Positive;
+            OK         : Boolean := True;
             Error_Info : Ada.Strings.Unbounded.Unbounded_String;
          begin
             accept Start (Number : Positive) do
                Index := Number;
             end Start;
             begin
-               Write_Entries (Work & "/parallel" & Index'Image & ".tar");
+               Write_Entries
+                 (Work & "/parallel" & Natural'Image (Index) & ".tar");
             exception
                when Error : others =>
                   Error_Info := Ada.Strings.Unbounded.To_Unbounded_String
@@ -467,15 +489,15 @@ package body TAR_Scenarios is
             end;
             accept Finish
               (Success : out Boolean;
-               Detail : out Ada.Strings.Unbounded.Unbounded_String)
+               Detail  : out Ada.Strings.Unbounded.Unbounded_String)
             do
                Success := OK;
                Detail := Error_Info;
             end Finish;
          end Writer;
 
-         Writers : array (1 .. 8) of Writer;
-         All_OK : Boolean := True;
+         Writers    : array (1 .. 8) of Writer;
+         All_OK     : Boolean := True;
          Last_Error : Ada.Strings.Unbounded.Unbounded_String;
       begin
          for Index in Writers'Range loop
@@ -483,7 +505,7 @@ package body TAR_Scenarios is
          end loop;
          for Index in Writers'Range loop
             declare
-               OK : Boolean;
+               OK     : Boolean;
                Detail : Ada.Strings.Unbounded.Unbounded_String;
             begin
                Writers (Index).Finish (OK, Detail);

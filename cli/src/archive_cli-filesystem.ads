@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Finalization;
 with Interfaces;
@@ -14,7 +14,7 @@ package Archive_CLI.Filesystem is
       Device, Inode, Size : Interfaces.Unsigned_64 := 0;
       MTime, MTime_NS     : Interfaces.Integer_64 := 0;
       Mode, UID, GID      : Interfaces.Unsigned_32 := 0;
-      Major, Minor, Kind : Interfaces.Unsigned_32 := 0;
+      Major, Minor, Kind  : Interfaces.Unsigned_32 := 0;
    end record
      with Convention => C;
 

@@ -1,8 +1,9 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
--- Copyright (C) 2008-2026 secunet Security Networks AG
--- Additional LGPL grant and source: doc/provenance/cpio-tar.md
+--  SPDX-License-Identifier: LGPL-2.1-or-later
+--  Copyright (C) 2008-2026 secunet Security Networks AG
+--  Additional LGPL grant and source: doc/provenance/cpio-tar.md
 
 with Ada.Calendar.Conversions;
+with Ada.Characters.Latin_1;
 with Ada.IO_Exceptions;
 with Interfaces.C;
 with GNAT.Formatted_String;
@@ -47,7 +48,8 @@ package body Arca.CPIO is
 
    -------------------------------------------------------------------------
 
-   overriding procedure Finalize (Item : in out CPIO_Archive_Type) is
+   overriding procedure Finalize (Item : in out CPIO_Archive_Type)
+   is
    begin
       Arca.Binary_IO.Discard_Output (Item.File);
    end Finalize;
@@ -143,8 +145,8 @@ package body Arca.CPIO is
       begin
          if Header'Length /= CPIO_Header_Length then
             raise Wrong_Header_Length with "CPIO header length should be "
-              & CPIO_Header_Length'Img & " but found  "
-              & Header'Length'Img & " instead";
+              & Offset_Type'Image (CPIO_Header_Length) & " but found  "
+              & Integer'Image (Header'Length) & " instead";
          end if;
 
          String'Write (Stream (Item.File), Header);
@@ -162,7 +164,7 @@ package body Arca.CPIO is
       Name_Length : constant Offset_Type := Name'Length + 1;
    begin
       --  write name string with trailing nul byte
-      String'Write (Stream (Item.File), Name & ASCII.NUL);
+      String'Write (Stream (Item.File), Name & Ada.Characters.Latin_1.NUL);
       Item.Inc_Offset (Offset => Name_Length);
    end CPIO_Write_String;
 
@@ -176,7 +178,7 @@ package body Arca.CPIO is
       --  make the current offset n byte aligned
       while Item.Offset mod Align /= 0
       loop
-         Character'Write (Stream (Item.File), ASCII.NUL);
+         Character'Write (Stream (Item.File), Ada.Characters.Latin_1.NUL);
          Item.Inc_Offset (Offset => 1);
       end loop;
    end CPIO_Write_Padding;

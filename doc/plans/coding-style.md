@@ -34,3 +34,25 @@ supported. Use type-prefixed Image rather than relying on newer object syntax.
 
 Compiler checks enforce their configured syntactic rules. Semantic contracts,
 useful grouping and justified GNAT dependencies also require source review.
+
+## Implementation on 2026-10-23
+
+The standalone guide and agent/README/developer links are in place. All four
+compiling projects enable the explicit style profile. Equivalent aspects,
+Latin_1 control bytes and type-prefixed Image replace the inventoried older
+spellings, retaining public names, ABI, signal lifecycle and test stack sizes.
+Declarations, body layout, comment prefixes and processing groups follow the
+project-wide guide. No production body or runtime dependency is added.
+
+The project controls accept 80 columns and reject 81 with forced compilation
+and exact diagnostic checks. Disabling the profile in each private project
+copy makes that control fail at the intended missing-style-error assertion.
+Complete normal checks and fresh-source coverage-first plus normal checks
+pass rootless in AMD64 Trixie without network or an Abuild mount. Every
+production body is covered. Final column/parameter-alignment corrections
+preserve the validated token stream and do not alter statement locations.
+
+Author review covered the complete source and documentation range, profile
+scope and consumer isolation, syntax/ABI and serialization equivalence,
+fixture sensitivity/ownership and unchanged concurrency/scaling. Source,
+commit and publication hygiene are checked before independent static review.

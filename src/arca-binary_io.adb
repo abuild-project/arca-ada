@@ -1,6 +1,6 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
--- Copyright (C) 2008-2026 secunet Security Networks AG
--- Additional LGPL grant and source: doc/provenance/cpio-tar.md
+--  SPDX-License-Identifier: LGPL-2.1-or-later
+--  Copyright (C) 2008-2026 secunet Security Networks AG
+--  Additional LGPL grant and source: doc/provenance/cpio-tar.md
 
 with Ada.IO_Exceptions;
 with Ada.Unchecked_Deallocation;
@@ -18,7 +18,8 @@ package body Arca.Binary_IO is
 
    -------------------------------------------------------------------------
 
-   procedure Discard_Output (File : in out Ada.Streams.Stream_IO.File_Type) is
+   procedure Discard_Output (File : in out Ada.Streams.Stream_IO.File_Type)
+   is
       package SIO renames Ada.Streams.Stream_IO;
    begin
       if SIO.Is_Open (File) then
@@ -50,6 +51,7 @@ package body Arca.Binary_IO is
         := Default_Copy_Buffer_Size)
    is
       package SIO renames Ada.Streams.Stream_IO;
+
       use type Ada.Directories.File_Size;
 
       Source_File : SIO.File_Type;

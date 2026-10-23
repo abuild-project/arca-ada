@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Document repository-wide Ada style and require agents to read it; enable
+  compiler style checks for library, CLI, tests and examples with positive
+  and negative project controls.
+- Replace remaining older aspect pragmas, ASCII and numeric image spellings;
+  align declarations and separate logical phases without changing writer APIs.
 - Add a Linux CLI for creating uncompressed CPIO and TAR archives, preserving
   metadata and links with deterministic ordering and atomic publication.
 - Test installed CLI execution, independent readers, metadata overrides,

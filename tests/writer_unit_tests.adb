@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Calendar.Formatting;
 with Ada.Directories;
@@ -72,12 +72,16 @@ package body Writer_Unit_Tests is
    procedure Finalizer_Failure_Checks;
    --  Preserve caller failures and close handles when deletion is rejected.
 
-   procedure Finalizer_Failure_Checks is
+   procedure Finalizer_Failure_Checks
+   is
+      package SIO renames Ada.Streams.Stream_IO;
+
       use Ada.Strings.Unbounded;
       use type Ada.Directories.File_Size;
-      package SIO renames Ada.Streams.Stream_IO;
+
       Marker : exception;
-      Work : Unbounded_String;
+
+      Work   : Unbounded_String;
       Before : constant Natural := Test_Support.Open_Descriptor_Count;
    begin
       --  Explicit Close is valid for a nonregular destination too.
@@ -94,7 +98,7 @@ package body Writer_Unit_Tests is
       for Nonregular in reverse Boolean loop
          for Raise_Original in Boolean loop
             declare
-               Files : constant Fixture := Prepare_Native ("writer-finalizer");
+               Files  : constant Fixture := Prepare_Native ("writer-finalizer");
                Output : constant String :=
                  (if Nonregular then "/dev/null" else Path (Files) & "/part");
                Raised : Boolean := False;
@@ -109,7 +113,7 @@ package body Writer_Unit_Tests is
                         GNAT.OS_Lib.Set_Non_Writable (Path (Files));
                         --  Prove that this filesystem enforces the fault.
                         declare
-                           Probe : SIO.File_Type;
+                           Probe  : SIO.File_Type;
                            Denied : Boolean := False;
                         begin
                            begin
@@ -173,21 +177,24 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure CPIO_Errors is
+   procedure CPIO_Errors
+   is
    begin
       Exercise (CPIO_Scenarios.Run'Access, "errors", "cpio-errors", ".cpio");
    end CPIO_Errors;
 
    -------------------------------------------------------------------------
 
-   procedure CPIO_State is
+   procedure CPIO_State
+   is
    begin
       Exercise (CPIO_Scenarios.Run'Access, "state", "cpio-state", ".cpio");
    end CPIO_State;
 
    -------------------------------------------------------------------------
 
-   procedure CPIO_Lifetime is
+   procedure CPIO_Lifetime
+   is
    begin
       Exercise
         (CPIO_Scenarios.Run'Access, "lifetime", "cpio-lifetime", ".cpio");
@@ -195,7 +202,8 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure CPIO_Parallel is
+   procedure CPIO_Parallel
+   is
    begin
       Exercise
         (CPIO_Scenarios.Run'Access, "parallel", "cpio-parallel", ".cpio");
@@ -203,10 +211,11 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure CPIO_Reuse is
-      Files : constant Fixture := Prepare ("cpio-reuse");
+   procedure CPIO_Reuse
+   is
+      Files   : constant Fixture := Prepare ("cpio-reuse");
       Archive : Arca.CPIO.CPIO_Archive_Type;
-      First : Arca.CPIO.Inode_Type;
+      First   : Arca.CPIO.Inode_Type;
    begin
       Arca.CPIO.CPIO_Create (Archive, Path (Files) & "/first.cpio");
       First := Arca.CPIO.CPIO_Get_Next_Inode (Archive);
@@ -224,15 +233,17 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure CPIO_Create_Failure is
-      Files : constant Fixture := Prepare ("cpio-create-failure");
+   procedure CPIO_Create_Failure
+   is
+      Files   : constant Fixture := Prepare ("cpio-create-failure");
       Archive : Arca.CPIO.CPIO_Archive_Type;
    begin
       begin
          Arca.CPIO.CPIO_Create (Archive, Path (Files) & "/absent/out.cpio");
          Ahven.Fail ("Create accepted a nonexistent parent");
       exception
-         when Ada.IO_Exceptions.Name_Error => null;
+         when Ada.IO_Exceptions.Name_Error =>
+            null;
       end;
       Arca.CPIO.CPIO_Create (Archive, Path (Files) & "/retry.cpio");
       Arca.CPIO.CPIO_Close (Archive);
@@ -244,21 +255,24 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure TAR_Errors is
+   procedure TAR_Errors
+   is
    begin
       Exercise (TAR_Scenarios.Run'Access, "errors", "tar-errors", ".tar");
    end TAR_Errors;
 
    -------------------------------------------------------------------------
 
-   procedure TAR_State is
+   procedure TAR_State
+   is
    begin
       Exercise (TAR_Scenarios.Run'Access, "state", "tar-state", ".tar");
    end TAR_State;
 
    -------------------------------------------------------------------------
 
-   procedure TAR_Lifetime is
+   procedure TAR_Lifetime
+   is
    begin
       Exercise
         (TAR_Scenarios.Run'Access, "lifetime", "tar-lifetime", ".tar");
@@ -266,7 +280,8 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure TAR_Parallel is
+   procedure TAR_Parallel
+   is
    begin
       Exercise
         (TAR_Scenarios.Run'Access, "parallel", "tar-parallel", ".tar");
@@ -274,8 +289,9 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure TAR_Reuse is
-      Files : constant Fixture := Prepare ("tar-reuse");
+   procedure TAR_Reuse
+   is
+      Files   : constant Fixture := Prepare ("tar-reuse");
       Archive : Arca.TAR.TAR_Archive_Type;
    begin
       Arca.TAR.TAR_Create (Archive, Path (Files) & "/first.tar");
@@ -290,15 +306,17 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure TAR_Create_Failure is
-      Files : constant Fixture := Prepare ("tar-create-failure");
+   procedure TAR_Create_Failure
+   is
+      Files   : constant Fixture := Prepare ("tar-create-failure");
       Archive : Arca.TAR.TAR_Archive_Type;
    begin
       begin
          Arca.TAR.TAR_Create (Archive, Path (Files) & "/absent/out.tar");
          Ahven.Fail ("Create accepted a nonexistent parent");
       exception
-         when Ada.IO_Exceptions.Name_Error => null;
+         when Ada.IO_Exceptions.Name_Error =>
+            null;
       end;
       Arca.TAR.TAR_Create (Archive, Path (Files) & "/retry.tar");
       Arca.TAR.TAR_Close (Archive);
@@ -310,7 +328,8 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   overriding procedure Initialize (Item : in out CPIO_Case) is
+   overriding procedure Initialize (Item : in out CPIO_Case)
+   is
    begin
       Set_Name (Item, "CPIO");
       Add_Test_Routine (Item, CPIO_Errors'Access, "error contracts");
@@ -326,7 +345,8 @@ package body Writer_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   overriding procedure Initialize (Item : in out TAR_Case) is
+   overriding procedure Initialize (Item : in out TAR_Case)
+   is
    begin
       Set_Name (Item, "TAR");
       Add_Test_Routine (Item, TAR_Errors'Access, "error contracts");

@@ -1,9 +1,10 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
--- Copyright (C) 2008-2026 secunet Security Networks AG
--- Additional LGPL grant and source: doc/provenance/cpio-tar.md
+--  SPDX-License-Identifier: LGPL-2.1-or-later
+--  Copyright (C) 2008-2026 secunet Security Networks AG
+--  Additional LGPL grant and source: doc/provenance/cpio-tar.md
 
 with Ada.Calendar.Conversions;
 with Ada.Calendar.Formatting;
+with Ada.Characters.Latin_1;
 with Ada.Directories;
 with Ada.IO_Exceptions;
 with Ada.Streams;
@@ -26,7 +27,8 @@ package body Arca.TAR is
    Long_Name_Type  : constant Character := 'L';
    Long_Link_Type  : constant Character := 'K';
 
-   USTAR_Magic     : constant String := "ustar" & ASCII.NUL;
+   USTAR_Magic     : constant String :=
+     "ustar" & Ada.Characters.Latin_1.NUL;
    USTAR_Version   : constant String := "00";
    GNU_Long_Name   : constant String := "././@LongLink";
 
@@ -231,7 +233,8 @@ package body Arca.TAR is
 
    ----------------------------------------------------------------------
 
-   overriding procedure Finalize (Item : in out TAR_Archive_Type) is
+   overriding procedure Finalize (Item : in out TAR_Archive_Type)
+   is
    begin
       Arca.Binary_IO.Discard_Output (Item.File);
    end Finalize;
@@ -355,7 +358,7 @@ package body Arca.TAR is
             Last     => Digit_Last,
             Value    => Value,
             Overflow => Overflow);
-         Header (Last - 1) := ASCII.NUL;
+         Header (Last - 1) := Ada.Characters.Latin_1.NUL;
          Header (Last) := ' ';
       else
          Put_Octal_Digits
@@ -364,7 +367,7 @@ package body Arca.TAR is
             Last     => Last - 1,
             Value    => Value,
             Overflow => Overflow);
-         Header (Last) := ASCII.NUL;
+         Header (Last) := Ada.Characters.Latin_1.NUL;
       end if;
    end Put_Octal;
 
@@ -405,7 +408,7 @@ package body Arca.TAR is
       if Padding > 0 then
          String'Write
            (Stream (Item.File),
-            String'(1 .. Integer (Padding) => ASCII.NUL));
+            String'(1 .. Integer (Padding) => Ada.Characters.Latin_1.NUL));
       end if;
    end Write_Padding;
 
@@ -465,7 +468,8 @@ package body Arca.TAR is
                     GID       => 0,
                     Size      => Long_Long_Integer (Value'Length + 1),
                     MTime     => Unix_Epoch);
-      Write_Block (Item => Item, Data => Value & ASCII.NUL);
+      Write_Block
+        (Item => Item, Data => Value & Ada.Characters.Latin_1.NUL);
       Write_Padding
         (Item      => Item,
          Data_Size => Ada.Directories.File_Size (Value'Length + 1));
@@ -486,7 +490,8 @@ package body Arca.TAR is
       Major      :        Unsigned_32 := 0;
       Minor      :        Unsigned_32 := 0)
    is
-      Header        : Header_Block := (others => ASCII.NUL);
+      Header        : Header_Block :=
+        (others => Ada.Characters.Latin_1.NUL);
       --  Write source slices directly in this per-entry hot path. Bounded
       --  header fields only need indexes, so avoid heap-backed temporaries.
       Stored_Name   : Optional_String_Slice :=
@@ -494,8 +499,8 @@ package body Arca.TAR is
       Stored_Link   : Optional_String_Slice :=
         Make_Slice (Link_Name'First, Link_Name'Last);
       Use_Long_Link_Marker : Boolean := False;
-      Stored_Prefix : Optional_String_Slice := No_Slice (Name'First);
-      Header_Time   : constant Long_Long_Integer
+      Stored_Prefix        : Optional_String_Slice := No_Slice (Name'First);
+      Header_Time          : constant Long_Long_Integer
         := Long_Long_Integer (Ada.Calendar.Conversions.To_Unix_Time (MTime));
    begin
       if Name'Length > Name_Field_Length then
@@ -661,7 +666,8 @@ package body Arca.TAR is
 
    procedure TAR_Close (Item : in out TAR_Archive_Type)
    is
-      Zero_Block : constant Header_Block := (others => ASCII.NUL);
+      Zero_Block : constant Header_Block :=
+        (others => Ada.Characters.Latin_1.NUL);
    begin
       Require_Initialized (Item);
       Write_Block (Item => Item, Data => Zero_Block);

@@ -1,10 +1,14 @@
 # Arca agent instructions
 
-- Read `README.md`, `doc/development.md`, `doc/licensing.md` and the active
-  plan under `doc/plans/` before substantive work.
+- Read `README.md`, `doc/development.md`, `doc/coding-style.md`,
+  `doc/licensing.md` and the active plan under `doc/plans/` before substantive
+  work. The coding-style guide applies to library, CLI, tests and examples.
 - Use `codex/<topic>` for Codex working branches. Preserve unrelated changes.
 - Use `apply_patch` for hand-written edits. Keep Ada sources within 80 columns
   and document the observable contract beside every subprogram declaration.
+- Follow the [coding-style guide](doc/coding-style.md), including blank-line
+  grouping, declaration alignment, separate body `is` lines and aspect forms.
+  Keep compiler style checks enabled; review comments and grouping manually.
 - Use the documented Trixie container for build evidence. Run builds with
   `make -j8 <one target> NUM_CPUS=8`; do not race independent GPRbuild processes
   against the same object directory.

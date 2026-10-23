@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.IO_Exceptions;
 with Ada.Streams.Stream_IO;
@@ -11,6 +11,7 @@ with Unit_Support;
 package body Arca.Copy_Unit_Tests is
 
    package SIO renames Ada.Streams.Stream_IO;
+
    use Ahven.Framework;
    use Unit_Support;
    use type SIO.Count;
@@ -32,7 +33,8 @@ package body Arca.Copy_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure Shared_Checks is
+   procedure Shared_Checks
+   is
       Files : constant Fixture := Prepare ("copy-shared");
    begin
       Copy_Scenarios.Run (Path (Files));
@@ -42,8 +44,9 @@ package body Arca.Copy_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure Exact_Buffer is
-      Files : constant Fixture := Prepare ("copy-exact");
+   procedure Exact_Buffer
+   is
+      Files  : constant Fixture := Prepare ("copy-exact");
       Target : SIO.File_Type;
    begin
       SIO.Create
@@ -63,8 +66,9 @@ package body Arca.Copy_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure Empty_Source is
-      Files : constant Fixture := Prepare ("copy-empty");
+   procedure Empty_Source
+   is
+      Files  : constant Fixture := Prepare ("copy-empty");
       Target : SIO.File_Type;
       Before : Natural;
    begin
@@ -88,8 +92,9 @@ package body Arca.Copy_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure Missing_Source is
-      Files : constant Fixture := Prepare ("copy-missing");
+   procedure Missing_Source
+   is
+      Files  : constant Fixture := Prepare ("copy-missing");
       Target : SIO.File_Type;
       Before : Natural;
    begin
@@ -101,7 +106,8 @@ package body Arca.Copy_Unit_Tests is
            (Path (Files) & "/missing.bin", 0, Target, 1);
          Ahven.Fail ("Missing source was accepted");
       exception
-         when Ada.IO_Exceptions.Name_Error => null;
+         when Ada.IO_Exceptions.Name_Error =>
+            null;
       end;
       Ahven.Assert
         (Test_Support.Open_Descriptor_Count = Before,
@@ -121,8 +127,9 @@ package body Arca.Copy_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   procedure Comparison_Sensitivity is
-      Files : constant Fixture := Prepare ("copy-comparison");
+   procedure Comparison_Sensitivity
+   is
+      Files  : constant Fixture := Prepare ("copy-comparison");
       Target : SIO.File_Type;
       Before : Natural;
 
@@ -132,7 +139,8 @@ package body Arca.Copy_Unit_Tests is
       procedure Changed_Length;
       --  Compare empty and nonempty sources to pin the length guard.
 
-      procedure Changed_Bytes is
+      procedure Changed_Bytes
+      is
       begin
          Assert_Equal_Files
            (Path (Files) & "/tiny.bin", Path (Files) & "/changed.bin");
@@ -140,7 +148,8 @@ package body Arca.Copy_Unit_Tests is
 
       ----------------------------------------------------------------------
 
-      procedure Changed_Length is
+      procedure Changed_Length
+      is
       begin
          Assert_Equal_Files
            (Path (Files) & "/tiny.bin", Path (Files) & "/empty.bin");
@@ -170,7 +179,8 @@ package body Arca.Copy_Unit_Tests is
 
    -------------------------------------------------------------------------
 
-   overriding procedure Initialize (Item : in out Test_Case) is
+   overriding procedure Initialize (Item : in out Test_Case)
+   is
    begin
       Set_Name (Item, "Binary_IO");
       Add_Test_Routine (Item, Shared_Checks'Access, "copy error contracts");

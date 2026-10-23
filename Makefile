@@ -17,6 +17,7 @@ cli: preflight
 
 check: all
 	./scripts/check-test-tools.sh
+	./tests/check-style.py --builder "$(GPRBUILD)" --jobs "$(NUM_CPUS)"
 	+MAKE="$(MAKE)" ./tests/check-preflight.sh
 	+MAKE="$(MAKE)" NUM_CPUS="$(NUM_CPUS)" ./tests/check-make-tools.sh
 	"$(GPRBUILD)" -p -P examples/client/client.gpr -aP. -j$(NUM_CPUS)

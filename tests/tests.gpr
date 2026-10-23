@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with "test_dependencies";
 
@@ -23,13 +23,15 @@ project Tests is
    package Compiler is
       for Default_Switches ("Ada") use
         ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato",
-         "-gnatVa", "-fstack-check", "-gnateE", "-g");
+         "-gnatVa", "-fstack-check", "-gnateE", "-g",
+         "-gnatygAdISuxM80");
       case Coverage is
          when "enabled" =>
             for Default_Switches ("Ada") use
               Compiler'Default_Switches ("Ada") &
               ("-O0", "-fprofile-arcs", "-ftest-coverage");
-         when others => null;
+         when others =>
+            null;
       end case;
    end Compiler;
 
@@ -37,7 +39,8 @@ project Tests is
       case Coverage is
          when "enabled" =>
             for Default_Switches ("Ada") use ("--coverage");
-         when others => null;
+         when others =>
+            null;
       end case;
    end Linker;
 

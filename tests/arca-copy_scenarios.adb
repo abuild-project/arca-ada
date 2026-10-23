@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Directories;
 with Ada.IO_Exceptions;
@@ -8,20 +8,23 @@ with Test_Support;
 
 package body Arca.Copy_Scenarios is
 
-   procedure Run (Work : String) is
+   procedure Run (Work : String)
+   is
 
       package SIO renames Ada.Streams.Stream_IO;
+
       use Test_Support;
       use type Ada.Streams.Stream_Element_Offset;
 
-      Target : SIO.File_Type;
+      Target        : SIO.File_Type;
       Expected_Size : Ada.Directories.File_Size := 0;
-      Buffer_Size : Ada.Streams.Stream_Element_Offset := 1;
+      Buffer_Size   : Ada.Streams.Stream_Element_Offset := 1;
 
       procedure Bad_Copy;
       --  Use a tiny source to exercise changed-size and buffer failures.
 
-      procedure Bad_Copy is
+      procedure Bad_Copy
+      is
       begin
          Binary_IO.Copy_File_To_Stream
            (Work & "/tiny.bin", Expected_Size, Target, Buffer_Size);
@@ -29,6 +32,7 @@ package body Arca.Copy_Scenarios is
 
    begin
       SIO.Create (Target, SIO.Out_File, Work & "/discard.bin", "shared=no");
+
       declare
          Before : constant Natural := Open_Descriptor_Count;
       begin
@@ -50,6 +54,7 @@ package body Arca.Copy_Scenarios is
            (Open_Descriptor_Count = Before,
             "Failed copy leaked source descriptors");
       end;
+
       Buffer_Size := 0;
       Expect_Failure
         (Bad_Copy'Access, Constraint_Error'Identity,
@@ -59,6 +64,7 @@ package body Arca.Copy_Scenarios is
         (Bad_Copy'Access, Constraint_Error'Identity,
          "copy buffer size must be positive");
       SIO.Close (Target);
+
       SIO.Create (Target, SIO.Out_File, Work & "/copy.bin", "shared=no");
       Binary_IO.Copy_File_To_Stream
         (Work & "/payload.bin", Ada.Directories.Size (Work & "/payload.bin"),

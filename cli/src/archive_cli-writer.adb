@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: LGPL-2.1-or-later
+--  SPDX-License-Identifier: LGPL-2.1-or-later
 
 with Ada.Calendar;
 with Ada.Calendar.Conversions;
@@ -44,7 +44,8 @@ package body Archive_CLI.Writer is
    function "<" (Left, Right : File_Key) return Boolean;
    --  Compare physical identities only for lookup, never for output order.
 
-   function "<" (Left, Right : File_Key) return Boolean is
+   function "<" (Left, Right : File_Key) return Boolean
+   is
    begin
       return Left.Device < Right.Device or else
         (Left.Device = Right.Device and then Left.Inode < Right.Inode);
@@ -101,7 +102,8 @@ package body Archive_CLI.Writer is
 
    -------------------------------------------------------------------------
 
-   function Join (Parent, Name : String) return String is
+   function Join (Parent, Name : String) return String
+   is
    begin
       if Parent = "" then
          return Name;
@@ -116,7 +118,8 @@ package body Archive_CLI.Writer is
 
    -------------------------------------------------------------------------
 
-   function Same (Left, Right : FS.Metadata) return Boolean is
+   function Same (Left, Right : FS.Metadata) return Boolean
+   is
    begin
       if Left.Device /= Right.Device or else Left.Inode /= Right.Inode
         or else Left.Kind /= Right.Kind or else Left.Mode /= Right.Mode
@@ -314,7 +317,8 @@ package body Archive_CLI.Writer is
 
    -------------------------------------------------------------------------
 
-   procedure Create (Config : Options.Settings) is
+   procedure Create (Config : Options.Settings)
+   is
       Root        : constant String := FS.Canonical
         (To_String (Config.Directory));
       Output_Name : constant String := To_String (Config.Output);
@@ -364,7 +368,8 @@ package body Archive_CLI.Writer is
          procedure Emit (Name : String; Value : Entry_Info);
          --  Recheck identity and emit one explicit entry through the library.
 
-         procedure Emit (Name : String; Value : Entry_Info) is
+         procedure Emit (Name : String; Value : Entry_Info)
+         is
             Info   : constant FS.Metadata := Value.Info;
             Source : constant String := Join (Root, Name);
 
