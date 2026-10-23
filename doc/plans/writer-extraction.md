@@ -74,7 +74,9 @@ No extraction or Abuild backend switch has been performed by this bootstrap.
 
 On 2026-10-22, the owner confirmed authority and granted additional
 LGPL-2.1-or-later licensing for the inventoried CPIO/TAR material. The
-[provenance record](../provenance/cpio-tar.md) pins the accepted source
+provenance record
+(`doc/provenance/cpio-tar.md` at revision
+`b5c0f114cb702686908326605913ef5e8f64a6f0`) pins the accepted source
 revision, separates direct writer tests from transformation tests and records
 the fixture and third-party boundaries. CPIO is the first implementation
 step; TAR follows separately. No backend switch is included in either import.

@@ -26,7 +26,9 @@ TTY when appropriate. No runtime step installs missing tools.
 ## Imported material
 
 Source revision: `136ca84f0f5c49acae5fdd22f43359a32ca26e70`.
-The [inventory and grant](../provenance/cpio-tar.md) identify original bytes
+The inventory and grant
+(`doc/provenance/cpio-tar.md` at revision
+`b5c0f114cb702686908326605913ef5e8f64a6f0`) identify original bytes
 and contribution history. Original notices are retained; imported units
 carry the additional LGPL grant. The GPL text is reproduced unchanged.
 

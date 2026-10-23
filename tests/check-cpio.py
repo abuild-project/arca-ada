@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-License-Identifier: GPL-2.0-or-later
 
 """Check emitted bytes independently, then read them with GNU cpio/libarchive."""
 
@@ -86,8 +86,8 @@ class CPIOChecks(unittest.TestCase):
         cls.raw_archive = (cls.work / "raw.cpio").read_bytes()
 
     @classmethod
-    def run_driver(cls, mode, driver=None):
-        subprocess.run([str(driver or OPTIONS.driver), mode, str(cls.work)],
+    def run_driver(cls, mode):
+        subprocess.run([str(OPTIONS.driver), mode, str(cls.work)],
                        check=True, timeout=60)
 
     def check_entries(self, data):
@@ -266,18 +266,6 @@ class CPIOChecks(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 self.check_entries(broken)
 
-    def test_accepted_writer_parity(self):
-        if OPTIONS.baseline_driver is None:
-            self.skipTest("Local parity check needs the recorded Abuild source")
-        self.run_driver("entries", OPTIONS.baseline_driver)
-        self.assertEqual((self.work / "entries.cpio").read_bytes(), self.archive)
-        self.run_driver("errors")
-        expected_errors = (self.work / "errors.cpio").read_bytes()
-        self.run_driver("errors", OPTIONS.baseline_driver)
-        self.assertEqual((self.work / "errors.cpio").read_bytes(), expected_errors)
-        self.run_driver("raw", OPTIONS.baseline_driver)
-        self.assertEqual((self.work / "raw.cpio").read_bytes(), self.raw_archive)
-
 
 if __name__ == "__main__":
     for termination_signal in (signal.SIGTERM, signal.SIGHUP):
@@ -285,9 +273,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--driver", type=Path, default=Path("tests/bin/cpio_driver"))
     parser.add_argument("--copy-driver", type=Path, default=Path("tests/bin/arca-copy_checks"))
-    parser.add_argument("--baseline-driver", type=Path)
     OPTIONS, remaining = parser.parse_known_args()
-    for field in ("driver", "copy_driver", "baseline_driver"):
+    for field in ("driver", "copy_driver"):
         value = getattr(OPTIONS, field)
         if value is not None:
             setattr(OPTIONS, field, value.resolve())

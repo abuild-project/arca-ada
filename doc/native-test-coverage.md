@@ -3,8 +3,7 @@
 This maps every registered CPIO/TAR test and the shared-helper tests at Abuild
 revision `136ca84f0f5c49acae5fdd22f43359a32ca26e70` to Arca checks. It records
 equivalent assertions rather than requiring identical method names, fixtures
-or Ahven grouping. Normal checks use only committed Arca inputs; the original
-source is needed only by the optional predecessor-comparison helpers.
+or Ahven grouping. Normal checks use only committed Arca inputs.
 
 The source units are `tests-abuild_transformations_cpio`,
 `tests-abuild_file_formats_tar` and `tests-abuild_file_formats_binary_io`.

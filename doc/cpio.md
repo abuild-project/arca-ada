@@ -1,8 +1,8 @@
 # CPIO writer
 
 `Arca.CPIO` emits uncompressed ASCII `newc` archives. Its implementation is
-extracted from the inventoried Abuild writer under the
-[additional grant](provenance/cpio-tar.md). Public operation names and
+derived from the Abuild writer under
+[GPL-2.0-or-later](licensing.md). Public operation names and
 metadata arguments retain the predecessor's API without Abuild dependencies.
 
 ## Format and inputs
@@ -88,15 +88,3 @@ controls corrupt magic, padding and payload bytes and truncate an archive.
 every production body to be inventoried and executed, and writes line counts
 to `build/coverage.json`. This does not imply exhaustive branch coverage or
 complete I/O fault injection.
-
-The optional predecessor check takes an authorized Git checkout or an export
-of the four recorded CPIO/Binary_IO files, accessible inside Trixie:
-
-```sh
-python3 tests/check-cpio-parity.py /path/to/accepted/source
-```
-
-It verifies source hashes, builds the unchanged predecessor privately and
-compares the entry matrix and validation-recovery output byte for byte. The
-predecessor must also fail the omitted-Close descriptor check. CI uses only
-this repository and skips that optional comparison.

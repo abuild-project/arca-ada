@@ -1,83 +1,62 @@
-# Licensing and provenance
+# Licensing
 
 ## Project licence
 
-Arca's project-owned source, examples, build files, tests and documentation
-use `LGPL-2.1-or-later`: GNU Lesser General Public License version 2.1 or, at
-the recipient's option, any later version. [LICENSE](../LICENSE) contains the
-unmodified version 2.1 text; [COPYRIGHT](../COPYRIGHT) identifies the project
-copyright holder and grant. Source SPDX identifiers use the same expression.
-New project-owned contributions use that licence as well.
+Project-owned Arca source, scripts, build files, tests and documentation use
+GPL-2.0-or-later: GNU General Public License version 2 or, at the recipient's
+option, any later version. [LICENSE](../LICENSE) contains the unmodified
+version 2 text; [COPYRIGHT](../COPYRIGHT) identifies the copyright holders and
+the project grant. New project-owned contributions use the same licence.
 
-The owner authorized this project licence on 2026-10-22, before any archive
-or filesystem writer is accepted. The CPIO, TAR and stream-copy units are now
-imported under the additional LGPL grant with original attribution. The
-[CPIO change record](change-records/cpio-extraction.md) and
-[TAR change record](change-records/tar-extraction.md) identify the actual
-subsets and imported GNU ustar fixture. Other inventoried fixtures are not
-imported. The unmodified
-upstream GPL text is retained in `LICENSES/GPL-2.0-or-later.txt` as provenance.
-Third-party tools and dependencies retain their own terms.
-Ahven is supplied by the development image as a test-only dependency under
-its ISC licence. Its sources are not vendored or installed with Arca.
+Maintained source, script and build files carry matching SPDX identifiers
+where their syntax supports comments. Standard licence texts and binary or
+byte-sensitive fixtures retain their original bytes. JSON metadata has no
+comment syntax; the project-wide grant covers it without an inserted header.
 
-## Additional grant for planned imports
+## Code derived from Abuild
 
-On 2026-10-22, the owner confirmed authority to grant additional
-`LGPL-2.1-or-later` licensing for the previously identified CPIO/TAR sources,
-their shared helpers, tests and fixtures. The
-[provenance record](provenance/cpio-tar.md) and its file manifest identify
-the accepted revision and exact candidate scope. The owner's confirmation,
-translated into English, was:
+The following units derive from Abuild revision
+`136ca84f0f5c49acae5fdd22f43359a32ca26e70`. Their original attribution and
+GPL-2.0-or-later licence are retained. The copyright holder for this material
+is secunet Security Networks AG, as recorded in each unit.
 
-> I also grant permission to license this material under the LGPL.
+| Arca file | Original Abuild file | Revision | Copyright | Licence |
+| --- | --- | --- | --- | --- |
+| `src/arca-cpio.ads` | `src/abuild-file_formats-cpio.ads` | `136ca84f` | secunet Security Networks AG | GPL-2.0-or-later |
+| `src/arca-cpio.adb` | `src/abuild-file_formats-cpio.adb` | `136ca84f` | secunet Security Networks AG | GPL-2.0-or-later |
+| `src/arca-tar.ads` | `src/abuild-file_formats-tar.ads` | `136ca84f` | secunet Security Networks AG | GPL-2.0-or-later |
+| `src/arca-tar.adb` | `src/abuild-file_formats-tar.adb` | `136ca84f` | secunet Security Networks AG | GPL-2.0-or-later |
+| `src/arca-binary_io.ads` | `src/abuild-file_formats-binary_io.ads` | `136ca84f` | secunet Security Networks AG | GPL-2.0-or-later |
+| `src/arca-binary_io.adb` | `src/abuild-file_formats-binary_io.adb` | `136ca84f` | secunet Security Networks AG | GPL-2.0-or-later |
 
-This confirmation applies to material owned by the represented rights holder.
-It does not relicense third-party source, unrelated writers or future source
-revisions. Each import must record its exact accepted source revision, file
-scope, modifications and applicable grant before introducing the material.
-The original `GPL-2.0-or-later` availability is preserved.
+Only the stream-copy operation and its supporting declarations were taken
+from Binary_IO; the original endian helpers are not part of Arca. Later
+imports must add their paths, exact origin revision, attribution and licence
+to this table before introducing the material.
 
-The upstream licence alone does not authorize replacing GPL terms with LGPL
-terms. A repository move or namespace change does not establish such a grant.
-Git authorship alone does not establish authority to relicense.
+The GNU ustar reference fixture also comes from the Abuild test data at that
+revision under GPL-2.0-or-later. Its original GNU tar producer command, bounded
+format scope and checksum remain in [tests/fixtures/tar](../tests/fixtures/tar/README.md).
+The GNU tar program itself retains its own licence.
 
-For each import, retain a record of:
+## Third-party components
 
-- source repository, accepted revision and original paths;
-- original licence and copyright notices;
-- any third-party origin, adaptations and fixture-generation terms;
-- the applicable additional grant and its scope; and
-- destination paths and semantic changes.
+Ahven is a test-only dependency supplied by the development image under its
+ISC licence; it is not vendored or installed with Arca. The GNAT runtime,
+compiler, build tools and external format readers retain their own licences.
+Review compatible terms before adding any third-party source to the project.
 
-The CPIO source describes inspiration from `gen_init_cpio`. Check that
-provenance rather than treating inspiration as proof of copied source.
-Apply the same review to TAR, binary helpers and their test infrastructure.
-Keep material without a sufficient grant outside the LGPL library.
+## Distribution
 
-## Distribution and static linking
+Retain copyright and licence notices when distributing Arca. Distribution
+of binary forms, including the statically linked CLI, must satisfy the GPL's
+corresponding-source requirements for the version actually distributed.
+Provide complete source, associated interface definitions and the scripts
+used to control compilation and installation, including the Makefile, GPR
+projects and applicable docker/dev/ build inputs. A reference to unrelated
+or older source is not the corresponding source of a distributed binary.
 
-Retain copyright and licence notices. When distributing the library, make
-its complete corresponding source, including distributed modifications and
-build/install scripts, available under the applicable LGPL terms.
-Purely internal modifications do not require public release.
-
-Applications may use Arca under other licences subject to LGPL section 6.
-For a statically linked executable, provide the library source and the
-application's suitable object code and/or source code, together with the
-material needed to modify Arca and relink the executable. The application
-terms must permit the modification and reverse engineering required there.
-Providing only Arca's static archive does not provide a relinkable application.
-Ada consumers must retain the binder, linker and build inputs needed by their
-chosen toolchain. A complete, rebuildable application source distribution is
-one way to supply the application material; dynamic linking has a separate
-compliance option in section 6(b).
-
-GPRinstall includes `LICENSE` and `COPYRIGHT` under `<prefix>/share/doc/arca`.
-That installation notice is not a substitute for providing complete source
-and the application material required when distributing linked binaries.
-See the [LGPL 2.1 text](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html),
-especially sections 1, 2, 4 and 6.
-
-Optional compression and hashing dependencies keep their own licences.
-Review their concrete consumers before introducing those dependencies.
+GPRinstall copies LICENSE and COPYRIGHT to the installed documentation
+directory. Those notices accompany the installed files; they do not replace
+the required corresponding-source delivery. See [GPL version 2](../LICENSE),
+especially sections 1, 2 and 3, for the applicable terms and delivery options.

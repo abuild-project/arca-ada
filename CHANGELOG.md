@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+- Use GPL-2.0-or-later for the whole project; the CPIO, TAR and stream-copy
+  units derived from Abuild keep their original licence and attribution.
+- Use tool-neutral agent guidance and platform-independent change records.
 - Add security reporting guidance, a publication checklist and a reviewed
   publication assessment; clarify provenance and remaining release gates.
-
 - Document repository-wide Ada style and require agents to read it; enable
   compiler style checks for library, CLI, tests and examples with positive
   and negative project controls.
@@ -33,14 +35,12 @@
 - Pin the remaining predecessor CPIO/TAR raw-field, padding, long-metadata
   and reader assertions with an individual test-case mapping.
 - Add the standalone TAR writer with retained ustar/GNU bytes, controlled
-  output ownership, independent format/reader checks and predecessor parity.
+  output ownership and independent format/reader checks.
 - Preserve the historical GNU ustar fixture and verify the installed TAR API.
-- Adopt LGPL-2.1-or-later before writer imports, record the additional import
-  grant and install the complete licence and project copyright notice.
 - Add the independent CPIO `newc` writer and private stream-copy helper.
 - Remove unfinished CPIO outputs on scope exit and preserve writer state when
   a second Create is rejected.
-- Add raw-layout, reader, parity, lifecycle and coverage checks.
+- Add raw-layout, reader, lifecycle and coverage checks.
 - Run standalone coverage from a fresh checkout and check that order in CI.
 - Use shared development build/run wrappers locally and in CI, with explicit
   architecture selection and consistent AMD64 defaults.

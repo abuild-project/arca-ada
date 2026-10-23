@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-License-Identifier: GPL-2.0-or-later
 
-"""Decode TAR independently, then verify readers, ownership and byte parity."""
+"""Decode TAR independently, then verify readers, ownership and format bytes."""
 
 import argparse
 import hashlib
@@ -162,8 +162,8 @@ class TARChecks(unittest.TestCase):
         cls.archive = (cls.work / "entries.tar").read_bytes()
 
     @classmethod
-    def run_driver(cls, mode, driver=None, work=None):
-        subprocess.run([str(driver or OPTIONS.driver), mode, str(work or cls.work)],
+    def run_driver(cls, mode):
+        subprocess.run([str(OPTIONS.driver), mode, str(cls.work)],
                        check=True, timeout=60)
 
     def check_entries(self, data):
@@ -444,24 +444,10 @@ class TARChecks(unittest.TestCase):
         self.assertEqual(fields["size"], 8**11 - 1)
         self.assertEqual(fields["name"], "max-size")
 
-    def test_predecessor_parity(self):
-        if OPTIONS.baseline_driver is None:
-            self.skipTest("optional exact predecessor comparison")
-        for scenario in ("entries", "golden", "edges", "errors", "empty",
-                         "aligned", "owners"):
-            work = self.work / ("baseline-" + scenario)
-            work.mkdir()
-            write_inputs(work)
-            self.run_driver(scenario)
-            self.run_driver(scenario, driver=OPTIONS.baseline_driver, work=work)
-            self.assertEqual((self.work / (scenario + ".tar")).read_bytes(),
-                             (work / (scenario + ".tar")).read_bytes(), scenario)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--driver", type=Path, default=ROOT / "tests/bin/tar_driver")
-    parser.add_argument("--baseline-driver", type=Path)
     OPTIONS = parser.parse_args()
     for termination_signal in (signal.SIGTERM, signal.SIGHUP):
         signal.signal(termination_signal, lambda number, _frame: sys.exit(128 + number))

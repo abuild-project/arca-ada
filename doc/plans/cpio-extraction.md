@@ -7,7 +7,9 @@ pass completed on 2026-10-22 through the restarted server's stdio protocol.
 
 The owner requested the next extraction step on 2026-10-21 and granted
 additional LGPL licensing on 2026-10-22; see the
-[provenance record](../provenance/cpio-tar.md).
+provenance record
+(`doc/provenance/cpio-tar.md` at revision
+`b5c0f114cb702686908326605913ef5e8f64a6f0`).
 CPIO is first; TAR and Abuild integration remain separate steps.
 
 - Retain operation names, metadata arguments, format profile and diagnostics.

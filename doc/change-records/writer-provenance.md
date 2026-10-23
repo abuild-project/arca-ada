@@ -7,7 +7,9 @@ revision, individual source and fixture bytes, and recorded contributors.
 It distinguishes candidate material from licensing context that stays
 outside the import.
 
-The [provenance record](../provenance/cpio-tar.md) records the grant, CPIO's
+The provenance record
+(`doc/provenance/cpio-tar.md` at revision
+`b5c0f114cb702686908326605913ef5e8f64a6f0`) records the grant, CPIO's
 upstream inspiration, fixture producer limits and the test split. Existing
 GPL availability is preserved; no third-party source is relicensed.
 

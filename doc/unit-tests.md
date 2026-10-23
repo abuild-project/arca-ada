@@ -93,6 +93,4 @@ acceptance and CPIO's exact short-record padding/uppercase field profile.
 Abuild's transformation-level source-path hardlink grouping, configuration,
 logging and scheduling tests stay in Abuild. Endian helpers absent from Arca
 are outside this suite. Full multi-gigabyte payload completion and exhaustive
-filesystem fault injection are not implied by these checks. Optional
-predecessor comparisons still require an explicitly supplied local source
-export and are separate from normal tests and CI.
+filesystem fault injection are not implied by these checks.
