@@ -13,6 +13,12 @@ investigation and parent source validation. Its scan identity is
 `3c3bde81-9eb6-4e93-80e4-1b802062a18b`. The sealed report is retained in the
 owner's security workbench; it is not a dependency of this repository.
 No application or exploit was executed as part of that source audit.
+The workbench marks the scan complete, but its sealed coverage metadata
+retains a partial disposition and a deferred duplicate publication candidate.
+The validated finding includes both creation and publication operations;
+this reporting inconsistency is not evidence that either operation is fixed.
+The 114-file review inventory is complete; canonical deferred metadata has
+not been rewritten or represented as a clean security clearance.
 
 One medium-severity, high-confidence finding remains open: the CLI retains
 the staging pathname rather than an owned directory/file identity. In an

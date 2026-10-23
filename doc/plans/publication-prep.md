@@ -42,5 +42,7 @@ Arca tests remain independent of that checkout.
   blocks publication and has a separately authorized remediation.
 - Rootless Trixie normal checks and coverage pass; all nine production bodies
   are reported. Documentation and author review are complete.
-- Independent static review and PR delivery follow. The local Abuild
+- Independent static review found no concrete issue; the assessment records
+  the scan's retained partial/deferred metadata inconsistency. PR delivery
+  follows. The local Abuild
   integration is a separate active experiment and remains a publication gate.
