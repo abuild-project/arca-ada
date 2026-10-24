@@ -1,8 +1,9 @@
 # Writer extraction
 
-Status: Accepted direction as discussed on 2026-10-21. The source inventory
-and additional LGPL grant are recorded. CPIO and TAR are accepted. The owner
-requested Ahven suites next, followed by a separate archive-creation CLI.
+Status: CPIO accepted in `b7d8beb` (PR #3), TAR in `3914462` (PR #4), Ahven
+suites in `6f1514a` (PR #5) and CLI in `a7c4735` (PR #7). The local Abuild
+integration experiment is complete; pinned Abuild integration and later
+writers remain open. See [publication guidance](../publication.md).
 
 ## Scope and order
 

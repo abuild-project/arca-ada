@@ -1,6 +1,7 @@
 # LGPL licensing
 
-Status: Authorized, implemented and locally validated on 2026-10-22.
+Status: Accepted in `1bca4a7` (PR #2) on 2026-10-22. Superseded by GPL
+licensing in `2091ca9`.
 
 ## Accepted decisions
 

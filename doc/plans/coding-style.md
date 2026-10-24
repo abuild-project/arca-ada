@@ -1,5 +1,7 @@
 # Repository-wide Ada coding style
 
+Status: Accepted in `03a2a07` (PR #8) on 2026-10-23.
+
 ## Scope accepted on 2026-10-22
 
 The owner requested a separate PR after the archive CLI merge: document an

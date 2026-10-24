@@ -1,7 +1,6 @@
 # Writer cleanup and compiler checks
 
-Status: Accepted in [PR #6](https://github.com/mweidle73/arca-ada/pull/6)
-on 2026-10-22 before the CLI.
+Status: Accepted in `52ead53` (PR #6) on 2026-10-22.
 
 ## Accepted scope
 

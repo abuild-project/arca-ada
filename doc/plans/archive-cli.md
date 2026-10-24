@@ -1,7 +1,6 @@
 # Archive creation CLI
 
-Status: Implemented, locally validated and submitted for review in
-[PR #7](https://github.com/mweidle73/arca-ada/pull/7) on 2026-10-22.
+Status: Accepted in `a7c4735` (PR #7) on 2026-10-22.
 
 ## Scope and interface
 

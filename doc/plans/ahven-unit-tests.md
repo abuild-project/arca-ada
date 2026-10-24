@@ -1,7 +1,6 @@
 # Ahven unit tests
 
-Status: Accepted in [PR #5](https://github.com/mweidle73/arca-ada/pull/5)
-on 2026-10-22.
+Status: Accepted in `6f1514a` (PR #5) on 2026-10-22.
 
 ## Scope
 
