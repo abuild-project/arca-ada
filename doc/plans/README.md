@@ -9,6 +9,7 @@ Entries are ordered by topic filename.
 | [Repository bootstrap](bootstrap.md) | Implemented |
 | [Repository-wide Ada coding style](coding-style.md) | Implemented |
 | [CPIO extraction](cpio-extraction.md) | Accepted in PR #3 |
+| [Documentation status and reader guidance](docs-cleanup.md) | Planned |
 | [GPL licensing and documentation policy](gpl-licensing.md) | Implemented and verified locally |
 | [LGPL licensing](lgpl-licensing.md) | Accepted in PR #2 before writer imports; superseded by GPL licensing |
 | [Publication preparation](publication-prep.md) | Prepared; security and owner gates remain |
