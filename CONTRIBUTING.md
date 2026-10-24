@@ -15,6 +15,6 @@ copyright and licence notices for imported material. Code derived from Abuild
 keeps that licence and its attribution; record its origin revision in
 doc/licensing.md. Add third-party source only under compatible terms.
 
-Public releases, Alire publication and transfer to the project organization
-are separate owner decisions. Follow the [publication checklist](doc/publication.md)
-and its recorded gates; a merged preparation PR does not authorize those actions.
+Releases, Alire publication and repository transfers are maintainer decisions
+outside normal contributions. Follow the
+[publication checklist](doc/publication.md) and its recorded gates.

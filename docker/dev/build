@@ -10,7 +10,7 @@ usage()
 {
     printf '%s\n' \
         "Usage: $0 [--platform PLATFORM] [--tag IMAGE]" \
-        "Defaults: linux/amd64 and arca-dev:trixie; linux/arm64 is also supported."
+        "Defaults: linux/amd64 and arca-dev:trixie; linux/arm64 can also be selected."
 }
 
 invalid()

@@ -1,6 +1,6 @@
 # Documentation status and reader guidance
 
-Status: Planned on `codex/docs-cleanup`.
+Status: Implemented and verified locally on `codex/docs-cleanup`.
 
 Base revision: `2091ca9118f875b5fbd65adcf23ca62ae073289e`.
 
@@ -26,12 +26,23 @@ Base revision: `2091ca9118f875b5fbd65adcf23ca62ae073289e`.
 4. Check merge/date references, unchanged historical bodies, changed-file
    scope, relative Markdown links, remaining legacy wording and whitespace.
    Run the existing host-side wrapper checks. Compiler, format, CLI and
-   coverage checks are unnecessary because their inputs remain unchanged.
+   coverage checks are unnecessary because runtime code and build
+   configuration remain unchanged.
 
 ## Progress
 
 The accepted merges match the base revision's first-parent history. The
 writer-provenance record was introduced on the maintained branch by merge
 `1bca4a7594da47016510108acb025e7929d9483f`.
+
+Status paragraphs, indexes and reader guidance now reflect those facts.
+Merge/date references, index ordering, unchanged historical bodies, protected
+files, exact help-only script changes, relative links and whitespace pass
+static checks. The existing host-side wrapper checks pass.
+
+The legacy-wording scan retains one occurrence in the unchanged historical
+GNU tar fixture producer record. Preserving fixture bytes takes precedence
+over removing that historical image reference. No compiler or runtime tests
+were run for this documentation and help-text change.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

@@ -1,6 +1,6 @@
 # GPL licensing and documentation policy
 
-Status: Implemented and verified locally on `codex/gpl-licensing`.
+Status: Accepted in `2091ca9` (PR #10) on 2026-10-23.
 
 Base revision: `b5c0f114cb702686908326605913ef5e8f64a6f0`.
 

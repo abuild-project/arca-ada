@@ -1,6 +1,6 @@
 # Repository bootstrap
 
-Status: Implemented on 2026-10-21. Authorized on 2026-10-21.
+Status: Accepted in `e2c1bd3` (PR #1) on 2026-10-21.
 
 ## Accepted decisions
 

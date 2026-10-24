@@ -1,7 +1,6 @@
 # TAR extraction
 
-Status: Accepted in [PR #4](https://github.com/mweidle73/arca-ada/pull/4)
-on 2026-10-22.
+Status: Accepted in `3914462` (PR #4) on 2026-10-22.
 
 ## Accepted scope
 

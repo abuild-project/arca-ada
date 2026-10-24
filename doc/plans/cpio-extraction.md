@@ -1,7 +1,6 @@
 # CPIO extraction
 
-Status: Implemented and locally validated on 2026-10-21; the final Ada MCP
-pass completed on 2026-10-22 through the restarted server's stdio protocol.
+Status: Accepted in `b7d8beb` (PR #3) on 2026-10-22.
 
 ## Scope and decisions
 

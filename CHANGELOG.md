@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Record accepted topics by merge commit and clarify reader, integration
+  and architecture guidance while preserving historical documentation.
 - Use GPL-2.0-or-later for the whole project; the CPIO, TAR and stream-copy
   units derived from Abuild keep their original licence and attribution.
 - Use tool-neutral agent guidance and platform-independent change records.

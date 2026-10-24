@@ -25,6 +25,9 @@ cli/bin/arca create --format cpio -C rootfs -o rootfs.cpio
 cli/bin/arca create --format tar -C contents -o contents.tar --mtime 0
 ```
 
+The writers originate from Abuild, an Ada build system that constructs
+Linux system images, packages and repositories from declarative component
+trees. Abuild is Arca's main consumer and is not yet publicly available.
 CPIO and TAR retain Abuild's format behaviour and add standalone resource
 ownership. VFAT, EXT2 and ISO are later candidates. OCI requires
 additional infrastructure decoupling. A native SquashFS writer remains
@@ -41,8 +44,9 @@ docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
 ```
 
 These are the same wrappers used by CI. Both select `linux/amd64` by default;
-`--platform linux/arm64` selects ARM explicitly. The build wrapper also accepts
-`--tag IMAGE`. See the [development guide](doc/development.md).
+`--platform linux/arm64` selects ARM explicitly; the reference validation is
+AMD64. The build wrapper also accepts `--tag IMAGE`.
+See the [development guide](doc/development.md).
 
 The launcher runs as the invoking user and supplies a writable temporary home.
 Omit the command to open a Bash development shell with forwarded input and,
@@ -54,12 +58,6 @@ docker/dev/run arca-dev:trixie
 
 Explicit commands use batch mode. The host-side shell regression checks need
 Python 3 and Docker: `python3 tests/check-dev-shell.py arca-dev:trixie`.
-
-An existing Abuild Trixie image can also run these checks:
-
-```sh
-docker/dev/run abuild-dev make -j8 check NUM_CPUS=8
-```
 
 Inside the reference environment, the individual commands are:
 
@@ -113,9 +111,8 @@ corresponding-source requirements when distributing binaries.
 ## Roadmap
 
 See the [plan index](doc/plans/README.md) and
-[change records](doc/change-records/README.md). Repository visibility and
-publication remain owner decisions. The intended later home is
-`abuild-project/arca-ada`; the initial home is `mweidle73/arca-ada`.
+[change records](doc/change-records/README.md). The next steps are pinned
+Abuild integration and additional VFAT, EXT2 and ISO writers.
 
 ## Contributing
 

@@ -10,7 +10,7 @@ usage()
 {
     printf '%s\n' \
         "Usage: $0 [--root] [--platform PLATFORM] IMAGE [COMMAND [ARGUMENT]...]" \
-        "PLATFORM defaults to linux/amd64; linux/arm64 is also supported."
+        "PLATFORM defaults to linux/amd64; linux/arm64 can also be selected."
 }
 
 invalid()
