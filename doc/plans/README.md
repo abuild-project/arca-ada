@@ -5,6 +5,7 @@ Entries are ordered by topic filename.
 | Plan | Status |
 | --- | --- |
 | [Ahven unit tests](ahven-unit-tests.md) | Accepted in `6f1514a` (PR #5) |
+| [Library API and metadata contracts](api-hardening.md) | Planned |
 | [Archive creation CLI](archive-cli.md) | Accepted in `a7c4735` (PR #7) |
 | [Repository bootstrap](bootstrap.md) | Accepted in `e2c1bd3` (PR #1) |
 | [Repository-wide Ada coding style](coding-style.md) | Accepted in `03a2a07` (PR #8) |
