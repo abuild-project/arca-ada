@@ -1,6 +1,6 @@
 # Library API and metadata contracts
 
-Status: Accepted in `089b32b766b142fff8ce5ffc1b78401789f690d9` on 2026-10-26.
+Status: Accepted in `089b32b` (PR #12) on 2026-10-26.
 
 Base revision: `0da408688b04bfc27da4cd9072c2b513a9891679`.
 

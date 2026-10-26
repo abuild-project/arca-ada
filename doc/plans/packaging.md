@@ -49,4 +49,12 @@ is byte-identical. Isolated changes to the TAR conversion message and CLI
 removal are rejected by their intended assertions. Source review, message and
 documentation checks are complete; ARM64 and newer GNAT remain untested.
 
+## CI validation on 2026-10-26
+
+CI selects validation through the explicit arguments in its container-side
+Make targets. The launcher does not forward the host build-mode environment,
+so the unused job-level variable is removed. The release-mode environment
+countercheck sets its value inside the container. Launcher behavior and
+Abuild integration remain unchanged.
+
 Co-Authored-By: GPT-6 <noreply@openai.com>

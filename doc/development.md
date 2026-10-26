@@ -172,9 +172,10 @@ and `validation`, defaulting to `release` for source consumers. Release omits
 `-gnatwe` and `-gnaty` options while retaining `-gnatwa`, `-gnato`, `-gnatVa`,
 `-fstack-check` and `-gnateE`. Unknown modes are rejected. The CLI, test and
 example projects stay strict because they are maintained with the repository.
-Every Make build and installation selects validation explicitly. CI also sets
-the scenario in its environment, and standalone style, API and coverage
-checks pass it explicitly to their builders.
+Every Make build and installation selects validation explicitly. CI invokes
+those Make targets inside the container; the launcher does not forward the
+host's build-mode environment variable. Standalone style, API and coverage
+checks also pass validation explicitly to their builders.
 The guide explains layout, declaration contracts, modern aspect forms and
 the Ada 2012 baseline with deliberate GNAT runtime dependencies.
 
