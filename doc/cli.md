@@ -8,7 +8,9 @@ The underlying Ada library has its own [CPIO](cpio.md) and [TAR](tar.md) APIs.
 Build with `make -j8 all NUM_CPUS=8` in the
 [development environment](development.md). The executable is `cli/bin/arca`;
 `make install PREFIX=/absolute/prefix` installs it as `<prefix>/bin/arca`
-alongside the library and its licence notices.
+alongside the library and its licence notices. Its installation manifest is
+`arca-cli`; `make uninstall PREFIX=/absolute/prefix` removes the CLI and
+library using their manifests while preserving unrelated prefix files.
 
 ```sh
 cli/bin/arca create --format cpio -C rootfs -o rootfs.cpio

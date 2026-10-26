@@ -360,7 +360,9 @@ package body TAR_Scenarios is
          Expect_Error (Add_Metadata'Access, Unsupported_Metadata'Identity);
          Stamp := Ada.Calendar.Formatting.Time_Of
            (2300, 1, 1, Seconds => 0.0, Time_Zone => 0);
-         Expect_Error (Add_Metadata'Access, Unsupported_Metadata'Identity);
+         Expect_Error
+           (Add_Metadata'Access, Unsupported_Metadata'Identity,
+            "TAR mtime outside supported UNIX timestamp range");
          Stamp := Fixed_Time;
          UID := Max_Field + 1;
          Expect_Error (Add_Metadata'Access, Unsupported_Metadata'Identity);

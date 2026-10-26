@@ -1,6 +1,6 @@
 # Consumer build profiles and installation
 
-Status: Planned on `codex/packaging`.
+Status: Implemented and verified locally on `codex/packaging`.
 
 Base revision: `089b32b766b142fff8ce5ffc1b78401789f690d9`.
 
@@ -36,5 +36,17 @@ Base revision: `089b32b766b142fff8ce5ffc1b78401789f690d9`.
 4. Complete author review, commit, push and open the topic pull request.
    Request Copilot review and wait. Merge remains a separate maintainer
    decision; the CLI topic starts only after this topic is accepted.
+
+## Progress
+
+Consumer, validation and extending-project compiler controls pass with
+runtime checks retained. The baseline is rejected for consumer policy,
+missing-test-dependency cleanup and CLI manifest naming. Coverage and the
+complete check pass in that order on fresh committed sources, including an
+opposite release-mode environment, installed consumers and uninstall/reinstall.
+Recursive Make keeps the outer jobserver. The preserved valid archive corpus
+is byte-identical. Isolated changes to the TAR conversion message and CLI
+removal are rejected by their intended assertions. Source review, message and
+documentation checks are complete; ARM64 and newer GNAT remain untested.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

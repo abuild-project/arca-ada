@@ -22,6 +22,7 @@ ln -s /bin/true "$scratch/project/tests/check-tar.py"
 ln -s /bin/true "$scratch/project/tests/check-unit.py"
 ln -s /bin/true "$scratch/project/tests/check-cli.py"
 ln -s /bin/true "$scratch/project/tests/check-style.py"
+ln -s /bin/true "$scratch/project/tests/check-packaging.py"
 ln -s /bin/true "$scratch/project/tests/check-api.py"
 for script in check-preflight check-make-tools check-install check-install-tools; do
     ln -s /bin/true "$scratch/project/tests/$script.sh"
@@ -48,7 +49,7 @@ export ARCA_TEST_MAKE_TOOL_LOG
 : >"$ARCA_TEST_MAKE_TOOL_LOG"
 
 failed=0
-for target in check install clean; do
+for target in check install uninstall clean; do
     if ! "$make_command" --no-print-directory -C "$scratch/project" \
         -f "$repo_root/Makefile" "$target" NUM_CPUS="$num_cpus" \
         GPRBUILD="$scratch/selected tools/selected build" \
@@ -60,20 +61,20 @@ for target in check install clean; do
 done
 
 cat >"$scratch/expected.log" <<EOF
-selected build <-p> <-P> <arca.gpr> <-j$num_cpus>
-selected build <-p> <-P> <cli/cli.gpr> <-aP.> <-j$num_cpus>
-selected build <-p> <-P> <examples/client/client.gpr> <-aP.> <-j$num_cpus>
-selected build <-p> <-P> <tests/tests.gpr> <-j$num_cpus>
-selected build <-p> <-P> <arca.gpr> <-j$num_cpus>
-selected build <-p> <-P> <cli/cli.gpr> <-aP.> <-j$num_cpus>
-selected install <-p> <-P> <arca.gpr> <--prefix=$scratch/install prefix>
-selected install <-p> <-P> <cli/cli.gpr> <-aP.> <--prefix=$scratch/install prefix> <--mode=usage> <--no-project>
-selected clean <-P> <tests/tests.gpr>
-selected clean <-P> <tests/tests.gpr> <-XARCA_COVERAGE=enabled>
-selected clean <-P> <examples/client/client.gpr> <-aP.>
-selected clean <-P> <cli/cli.gpr> <-aP.>
-selected clean <-P> <cli/cli.gpr> <-aP.> <-XARCA_CLI_COVERAGE=enabled>
-selected clean <-P> <arca.gpr>
+selected build <-p> <-P> <arca.gpr> <-j$num_cpus> <-XARCA_BUILD_MODE=validation>
+selected build <-p> <-P> <cli/cli.gpr> <-aP.> <-j$num_cpus> <-XARCA_BUILD_MODE=validation>
+selected build <-p> <-P> <examples/client/client.gpr> <-aP.> <-j$num_cpus> <-XARCA_BUILD_MODE=validation>
+selected build <-p> <-P> <tests/tests.gpr> <-j$num_cpus> <-XARCA_BUILD_MODE=validation>
+selected build <-p> <-P> <arca.gpr> <-j$num_cpus> <-XARCA_BUILD_MODE=validation>
+selected build <-p> <-P> <cli/cli.gpr> <-aP.> <-j$num_cpus> <-XARCA_BUILD_MODE=validation>
+selected install <-p> <-P> <arca.gpr> <--prefix=$scratch/install prefix> <-XARCA_BUILD_MODE=validation>
+selected install <-p> <-P> <cli/cli.gpr> <-aP.> <--prefix=$scratch/install prefix> <--mode=usage> <--no-project> <--install-name=arca-cli> <-XARCA_BUILD_MODE=validation>
+selected install <--uninstall> <--prefix=$scratch/install prefix> <arca-cli>
+selected install <--uninstall> <--prefix=$scratch/install prefix> <arca>
+selected clean <-P> <examples/client/client.gpr> <-aP.> <-XARCA_BUILD_MODE=validation>
+selected clean <-P> <cli/cli.gpr> <-aP.> <-XARCA_BUILD_MODE=validation>
+selected clean <-P> <cli/cli.gpr> <-aP.> <-XARCA_CLI_COVERAGE=enabled> <-XARCA_BUILD_MODE=validation>
+selected clean <-P> <arca.gpr> <-XARCA_BUILD_MODE=validation>
 EOF
 if [ "$(cat "$ARCA_TEST_MAKE_TOOL_LOG")" != "$(cat "$scratch/expected.log")" ]; then
     printf 'Unexpected Make tool invocations:\n' >&2

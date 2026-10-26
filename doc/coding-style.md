@@ -79,14 +79,19 @@ basis, byte order, padding/checksum rules and normative format references.
 
 ## Compiler and CI enforcement
 
-All four compiling projects use -gnatygAdISuxM80 alongside their existing
-warning-as-error settings. This follows Abuild's profile with an explicit
+All four compiling projects use -gnatygAdISuxM80 alongside warnings as errors
+under repository validation. This follows Abuild's profile with an explicit
 80-column limit. It does not require alphabetical subprogram ordering.
 GNAT checks layout, casing, token spacing, separate
 specifications and the selected additional rules during normal compilation.
-Coverage builds retain the same style profile.
+Coverage builds retain the same style profile. Source library consumers
+default to `ARCA_BUILD_MODE=release`, which omits compiler style checks and
+warnings-as-errors while retaining warnings and runtime checks. Select
+`-XARCA_BUILD_MODE=validation` to enforce the strict library profile. This
+compiler distinction does not change the source-writing rules in this guide.
 
-The option is explicit in the library, CLI, test and example projects. GPR
+The validation option is explicit in the library, CLI, test and example
+projects. Make and the standalone checks select validation explicitly. GPR
 imports do not inherit compiler defaults automatically. Keeping the copied
 client project self-contained also preserves installed-consumer isolation.
 Update all four profiles together when changing this policy.

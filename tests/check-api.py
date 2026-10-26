@@ -91,7 +91,8 @@ end Probe;
 
 def build(options, path):
     return subprocess.run(
-        [options.builder, "-f", "-p", "-P", str(path), "-j" + options.jobs],
+        [options.builder, "-f", "-p", "-P", str(path), "-j" + options.jobs,
+         "-XARCA_BUILD_MODE=validation"],
         cwd=path.parent, capture_output=True, text=True, timeout=120)
 
 
@@ -133,6 +134,7 @@ end Abuild_Like;
         prefix = directory / "prefix"
         installed = subprocess.run(
             [options.installer, "-f", "-p", "-P", str(dependency),
+             "-XARCA_BUILD_MODE=validation",
              "--install-name=arca", "--prefix=" + str(prefix),
              "--project-subdir=lib/gnat", "--sources-subdir=include",
              "--lib-subdir=lib", "--ali-subdir=lib"],
