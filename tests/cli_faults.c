@@ -104,7 +104,8 @@ int sigwait(const sigset_t *set, int *number)
        on re-entry, never merely when the kernel delivers the signal. */
     int handled = previous;
     previous = 0;
-    if (fault("phase-barrier") && (handled == SIGINT || handled == SIGTERM)) {
+    if (fault("phase-barrier") &&
+        (handled == SIGINT || handled == SIGTERM || handled == SIGHUP)) {
         int saved = errno;
         int ready = phase_fd("ARCA_TEST_READY_FD");
         unsigned char token = (unsigned char)handled;

@@ -96,6 +96,13 @@ no Abuild checkout, credentials or network access.
 CLI failures retain low-level I/O diagnostics and reject incomplete directory
 reads. No-clobber publication has a hard-link fallback for filesystems without
 no-replace rename; staging cleanup is best effort and preserves command results.
+
+Diagnostics keep complete CLI context and escape control bytes for display.
+Directory-only output spellings are argument errors. SIGHUP, SIGINT and
+SIGTERM request cleanup and return 129, 130 and 143 respectively. Help lists
+long options, value forms and exit statuses; target constants come from the
+CLI's C bridge. Source and archive names retain their original bytes.
+
 `make -j8 coverage NUM_CPUS=8`
 checks the production-body inventory and records executed lines. It also runs
 from a fresh checkout before `make check`; it creates its scratch parent.

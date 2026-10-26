@@ -1,6 +1,6 @@
 # Consumer build profiles and installation
 
-Status: Implemented and verified locally on `codex/packaging`.
+Status: Accepted in `d3f0574` (PR #13) on 2026-10-26.
 
 Base revision: `089b32b766b142fff8ce5ffc1b78401789f690d9`.
 

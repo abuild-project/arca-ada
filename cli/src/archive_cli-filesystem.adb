@@ -3,6 +3,7 @@
 with Ada.Directories;
 with Ada.Interrupts;
 with Ada.Interrupts.Names;
+with Archive_CLI.Diagnostics;
 with GNAT.OS_Lib;
 with Interfaces.C.Strings;
 
@@ -15,14 +16,36 @@ package body Archive_CLI.Filesystem is
    use type C.Strings.chars_ptr;
    use type Interfaces.Unsigned_32;
 
-   --  Linux fcntl/stdio constants; the CLI targets the 64-bit Linux ABI.
-   Current_Directory_FD : constant C.int := -100; --  AT_FDCWD
-   Rename_No_Replace    : constant C.unsigned := 1; --  RENAME_NOREPLACE
+   function C_At_FDCWD return C.int
+     with Import, Convention => C, External_Name => "arca_at_fdcwd";
+   --  Read the target header's current-directory descriptor sentinel.
 
-   --  Linux errno values for unsupported no-replace rename operations.
-   Invalid_Argument      : constant C.int := 22; --  EINVAL
-   Not_Implemented       : constant C.int := 38; --  ENOSYS
-   Operation_Unsupported : constant C.int := 95; --  EOPNOTSUPP
+   function C_Rename_Noreplace return C.unsigned
+     with Import, Convention => C, External_Name => "arca_rename_noreplace";
+   --  Read the target header's no-replace rename flag.
+
+   function C_EINVAL return C.int
+     with Import, Convention => C, External_Name => "arca_einval";
+   --  Read the target header's invalid-argument errno value.
+
+   function C_ENOSYS return C.int
+     with Import, Convention => C, External_Name => "arca_enosys";
+   --  Read the target header's unavailable-system-call errno value.
+
+   function C_EOPNOTSUPP return C.int
+     with Import, Convention => C, External_Name => "arca_eopnotsupp";
+   --  Read the target header's unsupported-operation errno value.
+
+   function C_ENOENT return C.int
+     with Import, Convention => C, External_Name => "arca_enoent";
+   --  Read the target header's absent-path errno value.
+
+   Current_Directory_FD   : constant C.int := C_At_FDCWD;
+   Rename_No_Replace      : constant C.unsigned := C_Rename_Noreplace;
+   Invalid_Argument       : constant C.int := C_EINVAL;
+   Not_Implemented        : constant C.int := C_ENOSYS;
+   Operation_Unsupported  : constant C.int := C_EOPNOTSUPP;
+   Missing_Path           : constant C.int := C_ENOENT;
 
    protected Cancellation is
 
@@ -34,6 +57,10 @@ package body Archive_CLI.Filesystem is
         with Interrupt_Handler;
       --  Record SIGTERM for cleanup at the next command boundary.
 
+      procedure Handle_Hangup
+        with Interrupt_Handler;
+      --  Record SIGHUP for cleanup at the next command boundary.
+
       function Number return Natural;
       --  Read the process-owned signal state through protected access.
 
@@ -41,6 +68,7 @@ package body Archive_CLI.Filesystem is
 
       pragma Interrupt_State (Ada.Interrupts.Names.SIGINT, User);
       pragma Interrupt_State (Ada.Interrupts.Names.SIGTERM, User);
+      pragma Interrupt_State (Ada.Interrupts.Names.SIGHUP, User);
 
       Last_Signal : Natural := 0;
    end Cancellation;
@@ -113,6 +141,14 @@ package body Archive_CLI.Filesystem is
 
       ----------------------------------------------------------------------
 
+      procedure Handle_Hangup
+      is
+      begin
+         Last_Signal := Natural (Ada.Interrupts.Names.SIGHUP);
+      end Handle_Hangup;
+
+      ----------------------------------------------------------------------
+
       function Number return Natural
       is
       begin
@@ -135,8 +171,8 @@ package body Archive_CLI.Filesystem is
    is
    begin
       if Code /= 0 then
-         raise Command_Error with
-           Context & ": " & C.Strings.Value (C_Strerror (Code));
+         Diagnostics.Fail_Command
+           (Context & ": " & C.Strings.Value (C_Strerror (Code)));
       end if;
    end Require;
 
@@ -164,7 +200,7 @@ package body Archive_CLI.Filesystem is
    is
    begin
       if Item.Kind > 6 then
-         raise Command_Error with "invalid filesystem node classification";
+         Diagnostics.Fail_Command ("invalid filesystem node classification");
       end if;
 
       return Entry_Kind'Val (Item.Kind);
@@ -177,7 +213,7 @@ package body Archive_CLI.Filesystem is
       Value : aliased Metadata;
       Code  : constant C.int := C_Stat (C.To_C (Name), Value'Access);
    begin
-      if Code = 2 then --  ENOENT on the supported Linux environment.
+      if Code = Missing_Path then
          Item := (others => <>);
          return False;
       end if;
@@ -195,7 +231,7 @@ package body Archive_CLI.Filesystem is
       Result : Metadata;
    begin
       if not Exists (Name, Result) then
-         raise Command_Error with "source does not exist: '" & Name & "'";
+         Diagnostics.Fail_Command ("source does not exist: '" & Name & "'");
       end if;
 
       return Result;
@@ -208,7 +244,7 @@ package body Archive_CLI.Filesystem is
       Result : constant String := GNAT.OS_Lib.Normalize_Pathname (Name);
    begin
       if Result = "" then
-         raise Command_Error with "cannot resolve path: '" & Name & "'";
+         Diagnostics.Fail_Command ("cannot resolve path: '" & Name & "'");
       end if;
 
       return Result;
@@ -230,7 +266,8 @@ package body Archive_CLI.Filesystem is
             Require (Code, "cannot read symlink '" & Name & "'");
          end;
       elsif Length >= C.long (Buffer'Length) then
-         raise Command_Error with "symlink target is too long: '" & Name & "'";
+         Diagnostics.Fail_Command
+           ("symlink target is too long: '" & Name & "'");
       elsif Length = 0 then
          return "";
       end if;
@@ -248,6 +285,8 @@ package body Archive_CLI.Filesystem is
         (Cancellation.Handle_Interrupt'Access, Ada.Interrupts.Names.SIGINT);
       Ada.Interrupts.Attach_Handler
         (Cancellation.Handle_Termination'Access, Ada.Interrupts.Names.SIGTERM);
+      Ada.Interrupts.Attach_Handler
+        (Cancellation.Handle_Hangup'Access, Ada.Interrupts.Names.SIGHUP);
    end Install_Signals;
 
    -------------------------------------------------------------------------
@@ -276,7 +315,7 @@ package body Archive_CLI.Filesystem is
    begin
       return Result : Transaction do
          if Template'Length > Result.Buffer'Length then
-            raise Command_Error with "output path is too long";
+            Diagnostics.Fail_Command ("output path is too long");
          end if;
 
          Result.Buffer (Template'Range) := Template;

@@ -17,6 +17,8 @@ CPIO format checks include full mode values; both writer error suites check
 out-of-range UTC times, including year 2300 and its format-specific message.
 Packaging checks cover consumer/validation compiler profiles, dependency-free
 cleanup, named installation manifests and uninstall/reinstall behavior.
+CLI checks cover complete escaped diagnostics, output argument precedence,
+header-derived constants, documented help and acknowledged SIGHUP cleanup.
 
 Build the image after changes to its packages, then use the normal check:
 

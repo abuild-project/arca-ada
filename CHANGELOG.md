@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retain complete CLI diagnostic context, escape control bytes for display
+  and reject directory-only output spellings as argument errors.
+- Read target errno and rename constants through the C bridge; handle SIGHUP
+  with cleanup and exit 129 while retaining SIGINT/SIGTERM behavior.
+- Complete CLI help with long options, value forms and exit statuses.
 - Default source-library consumers to a release compiler profile while
   retaining strict repository validation and runtime checks in both modes.
 - Clean test outputs without Ahven, retain reports and installations under

@@ -2,7 +2,9 @@
 #define _GNU_SOURCE
 #define _FILE_OFFSET_BITS 64
 #include <errno.h>
+#include <fcntl.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
 
@@ -14,6 +16,37 @@ struct arca_metadata {
 };
 _Static_assert(sizeof(struct arca_metadata) == 64, "metadata ABI size");
 _Static_assert(sizeof(long) == 8, "CLI requires a 64-bit Linux ABI");
+
+/* Keep target-specific constants beside the target-specific metadata layout. */
+int arca_at_fdcwd(void)
+{
+    return AT_FDCWD;
+}
+
+unsigned int arca_rename_noreplace(void)
+{
+    return RENAME_NOREPLACE;
+}
+
+int arca_einval(void)
+{
+    return EINVAL;
+}
+
+int arca_enosys(void)
+{
+    return ENOSYS;
+}
+
+int arca_eopnotsupp(void)
+{
+    return EOPNOTSUPP;
+}
+
+int arca_enoent(void)
+{
+    return ENOENT;
+}
 
 int arca_lstat(const char *path, struct arca_metadata *out)
 {

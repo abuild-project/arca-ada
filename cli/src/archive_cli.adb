@@ -1,8 +1,8 @@
 --  SPDX-License-Identifier: GPL-2.0-or-later
 
 with Ada.Command_Line;
-with Ada.Exceptions;
 with Ada.Text_IO;
+with Archive_CLI.Diagnostics;
 with Archive_CLI.Filesystem;
 with Archive_CLI.Options;
 with Archive_CLI.Writer;
@@ -12,6 +12,8 @@ package body Archive_CLI is
    procedure Run
    is
    begin
+      Diagnostics.Reset;
+
       declare
          Config : constant Options.Settings := Options.Parse;
       begin
@@ -31,7 +33,7 @@ package body Archive_CLI is
       when Error : Usage_Error =>
          Ada.Text_IO.Put_Line
            (Ada.Text_IO.Standard_Error,
-            "arca: " & Ada.Exceptions.Exception_Message (Error));
+            "arca: " & Diagnostics.Display (Diagnostics.Message (Error)));
          Ada.Command_Line.Set_Exit_Status (2);
 
       when Interrupted =>
@@ -49,7 +51,7 @@ package body Archive_CLI is
          else
             Ada.Text_IO.Put_Line
               (Ada.Text_IO.Standard_Error,
-               "arca: " & Ada.Exceptions.Exception_Message (Error));
+               "arca: " & Diagnostics.Display (Diagnostics.Message (Error)));
             Ada.Command_Line.Set_Exit_Status (1);
          end if;
    end Run;

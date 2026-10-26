@@ -11,6 +11,7 @@ with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;
 with Arca.CPIO;
 with Arca.TAR;
+with Archive_CLI.Diagnostics;
 with Archive_CLI.Filesystem;
 with GNAT.Directory_Operations;
 with GNAT.OS_Lib;
@@ -158,31 +159,33 @@ package body Archive_CLI.Writer is
         (if Config.GID.Present then Config.GID.Value else Info.GID);
    begin
       if FS.Kind (Info) = FS.Unsupported then
-         raise Command_Error with "unsupported filesystem node: '" & Name & "'";
+         Diagnostics.Fail_Command
+           ("unsupported filesystem node: '" & Name & "'");
       end if;
 
       if Config.Format = Options.CPIO_Format and then Name = "TRAILER!!!" then
          --  newc readers stop at this exact name, irrespective of its type.
-         raise Command_Error with "reserved CPIO name: '" & Name & "'";
+         Diagnostics.Fail_Command ("reserved CPIO name: '" & Name & "'");
       end if;
 
       if Stamp < 0 or else Stamp > Max_Time then
-         raise Command_Error with "mtime outside format limits: '" & Name & "'";
+         Diagnostics.Fail_Command
+           ("mtime outside format limits: '" & Name & "'");
       end if;
 
       if FS.Kind (Info) = FS.Regular
         and then Info.Size > Interfaces.Unsigned_64 (Max_Time)
       then
-         raise Command_Error with
-           "file exceeds format size limit: '" & Name & "'";
+         Diagnostics.Fail_Command
+           ("file exceeds format size limit: '" & Name & "'");
       end if;
 
       if Config.Format = Options.TAR_Format then
          if UID > 2 ** 21 - 1 or else GID > 2 ** 21 - 1
            or else Info.Major > 2 ** 21 - 1 or else Info.Minor > 2 ** 21 - 1
          then
-            raise Command_Error with
-              "owner/device metadata outside TAR limits: '" & Name & "'";
+            Diagnostics.Fail_Command
+              ("owner/device metadata outside TAR limits: '" & Name & "'");
          end if;
       end if;
    end Validate;
@@ -217,8 +220,8 @@ package body Archive_CLI.Writer is
                GNAT.Directory_Operations.Open (Search, Join (Root, Directory));
             exception
                when GNAT.Directory_Operations.Directory_Error =>
-                  raise Command_Error with
-                    "cannot open directory: '" & Join (Root, Directory) & "'";
+                  Diagnostics.Fail_Command
+                    ("cannot open directory: '" & Join (Root, Directory) & "'");
             end;
 
             loop
@@ -234,9 +237,9 @@ package body Archive_CLI.Writer is
                      Code : constant Integer := GNAT.OS_Lib.Errno;
                   begin
                      if Code /= 0 then
-                        raise Command_Error with
-                          "cannot read directory: '" & Join (Root, Directory)
-                          & "': " & GNAT.OS_Lib.Errno_Message (Err => Code);
+                        Diagnostics.Fail_Command
+                          ("cannot read directory: '" & Join (Root, Directory)
+                           & "': " & GNAT.OS_Lib.Errno_Message (Err => Code));
                      end if;
                   end;
 
@@ -244,7 +247,7 @@ package body Archive_CLI.Writer is
                end if;
 
                if Last = Buffer'Last then
-                  raise Command_Error with "directory entry name is too long";
+                  Diagnostics.Fail_Command ("directory entry name is too long");
                end if;
 
                declare
@@ -289,12 +292,12 @@ package body Archive_CLI.Writer is
                   Group := Groups.Element (Key);
 
                   if not Same (Info, Group.Info) then
-                     raise Command_Error with
-                       "source changed during inventory: '" & Name & "'";
+                     Diagnostics.Fail_Command
+                       ("source changed during inventory: '" & Name & "'");
                   end if;
 
                   if Group.Count = Interfaces.Unsigned_32'Last then
-                     raise Command_Error with "too many archive hardlinks";
+                     Diagnostics.Fail_Command ("too many archive hardlinks");
                   end if;
                else
                   Group.First := To_Unbounded_String (Name);
@@ -333,27 +336,26 @@ package body Archive_CLI.Writer is
       Entries  : Entry_Maps.Map;
       Groups   : Group_Maps.Map;
    begin
-      if Output_Name (Output_Name'Last) = '/' then
-         raise Command_Error with "output must name a file, not end in '/'";
-      end if;
-
       if FS.Kind (FS.Stat (Root)) /= FS.Directory then
-         raise Command_Error with "input is not a directory: '" & Root & "'";
+         Diagnostics.Fail_Command ("input is not a directory: '" & Root & "'");
       end if;
 
-      if Base = "" or else Base = "." or else Base = ".."
-        or else FS.Kind (FS.Stat (Parent)) /= FS.Directory
-      then
-         raise Command_Error with "output needs an existing parent directory";
+      if not FS.Exists (Parent, Existing) then
+         Diagnostics.Fail_Command
+           ("output parent does not exist: '" & Parent & "'");
+      elsif FS.Kind (Existing) /= FS.Directory then
+         Diagnostics.Fail_Command
+           ("output parent is not a directory: '" & Parent & "'");
       end if;
 
       if FS.Exists (Output, Existing) then
          if not Config.Force then
-            raise Command_Error with "output already exists; use --force";
+            Diagnostics.Fail_Command ("output already exists; use --force");
          elsif FS.Kind (Existing) /= FS.Regular
            and then FS.Kind (Existing) /= FS.Symlink
          then
-            raise Command_Error with "output is not a regular file or symlink";
+            Diagnostics.Fail_Command
+              ("output is not a regular file or symlink");
          end if;
       end if;
 
@@ -390,7 +392,7 @@ package body Archive_CLI.Writer is
             FS.Check_Interrupted;
 
             if not Same (Info, FS.Stat (Source)) then
-               raise Command_Error with "source changed: '" & Name & "'";
+               Diagnostics.Fail_Command ("source changed: '" & Name & "'");
             end if;
 
             if FS.Kind (Info) = FS.Regular then
@@ -449,7 +451,7 @@ package body Archive_CLI.Writer is
                         Info.Major, Info.Minor, Stamp);
 
                   when others =>
-                     raise Command_Error with "unsupported node";
+                     Diagnostics.Fail_Command ("unsupported node");
                end case;
             else
                case FS.Kind (Info) is
@@ -477,27 +479,28 @@ package body Archive_CLI.Writer is
                         Info.Major, Info.Minor, Stamp);
 
                   when others =>
-                     raise Command_Error with "unsupported node";
+                     Diagnostics.Fail_Command ("unsupported node");
                end case;
             end if;
          exception
             when Error :
               Arca.CPIO.File_Not_Found | Arca.TAR.File_Not_Found =>
-               raise Command_Error with "source disappeared: '" & Name & "': "
-                 & Exception_Diagnostic (Error);
+               Diagnostics.Fail_Command
+                 ("source disappeared: '" & Name & "': " &
+                  Exception_Diagnostic (Error));
 
             when Error :
               Arca.CPIO.File_Read_Error | Arca.TAR.File_Read_Error =>
-               raise Command_Error with
-                 "source changed or could not be read: '" & Name & "': "
-                 & Exception_Diagnostic (Error);
+               Diagnostics.Fail_Command
+                 ("source changed or could not be read: '" & Name & "': " &
+                  Exception_Diagnostic (Error));
 
             when Error :
               Ada.IO_Exceptions.Name_Error | Ada.IO_Exceptions.Use_Error |
               Ada.IO_Exceptions.Device_Error | Ada.IO_Exceptions.End_Error =>
-               raise Command_Error with
-                 "cannot read or emit entry: '" & Name & "': "
-                 & Exception_Diagnostic (Error);
+               Diagnostics.Fail_Command
+                 ("cannot read or emit entry: '" & Name & "': " &
+                  Exception_Diagnostic (Error));
          end Emit;
 
       begin
