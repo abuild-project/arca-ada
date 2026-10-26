@@ -37,7 +37,8 @@ def main():
         for data in directory.glob("*.gcda"):
             data.unlink()
     subprocess.run([options.builder, "-p", "-P", str(root / "tests/tests.gpr"),
-                    "-XARCA_COVERAGE=enabled", "-j" + options.jobs], check=True)
+                    "-XARCA_COVERAGE=enabled", "-XARCA_BUILD_MODE=validation",
+                    "-j" + options.jobs], check=True)
     subprocess.run([sys.executable, str(root / "tests/check-unit.py"),
                     "--runner", str(root / "tests/bin-coverage/unit_runner"),
                     "--probe", str(root / "tests/bin-coverage/unit_probe")],
@@ -51,6 +52,7 @@ def main():
                    cwd=root, check=True)
     subprocess.run([options.builder, "-p", "-P", str(root / "cli/cli.gpr"),
                     "-aP" + str(root), "-XARCA_CLI_COVERAGE=enabled",
+                    "-XARCA_BUILD_MODE=validation",
                     "-j" + options.jobs], cwd=root, check=True)
     subprocess.run([sys.executable, str(root / "tests/check-cli.py"),
                     "--cli", str(root / "cli/bin-coverage/arca")],

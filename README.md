@@ -70,6 +70,7 @@ Inside the reference environment, the individual commands are:
 make -j8 all NUM_CPUS=8
 make -j8 check NUM_CPUS=8
 make install PREFIX=/absolute/path/to/prefix
+make uninstall PREFIX=/absolute/path/to/prefix
 ```
 
 `all` builds the library and CLI. `check` also builds the client, installs
@@ -82,6 +83,10 @@ entries across the isolated client's directory change.
 Make recipe regressions cover selected executable paths containing spaces.
 These checks cover packaging and installed-library initialization, including
 GNU long-name metadata. Separate format suites check archive conformance.
+Installation uses the manifest names `arca` and `arca-cli`; uninstall removes
+their files while preserving unrelated contents of the prefix.
+`make clean` works without Ahven and retains `build/`, including reports and
+the default installation prefix.
 
 The same target runs Ahven suites and separately checks CPIO and TAR layout,
 payloads, external readers, reproducibility, errors and lifetime behavior.
@@ -106,6 +111,12 @@ Consumers import `arca.gpr` with `with "arca";` and add the installed
 `<prefix>/share/gpr` directory to their GPR search path. The root Ada package
 is `Arca`. See the [development guide](doc/development.md).
 
+Source consumers get `ARCA_BUILD_MODE=release` by default: warnings and runtime
+checks remain enabled, while warnings-as-errors and compiler style checks are
+omitted. Use `-XARCA_BUILD_MODE=validation` for the strict library profile.
+Make targets and CI select validation explicitly; the CLI, tests and example
+client remain strict in both modes.
+
 ## Licence
 
 Arca uses [GPL-2.0-or-later](LICENSE); [COPYRIGHT](COPYRIGHT) identifies
@@ -125,7 +136,7 @@ Abuild integration and additional VFAT, EXT2 and ISO writers.
 Read [CONTRIBUTING.md](CONTRIBUTING.md), [AGENTS.md](AGENTS.md) and the project-wide
 [coding-style guide](doc/coding-style.md) before editing sources. Its rules
 apply to the library, CLI, tests and examples. Compiler style checks run in
-normal builds and coverage; `make check` also verifies that each project's
+repository Make builds and coverage; `make check` verifies that each project's
 gate accepts the documented line limit and rejects an overlong source.
 
 Use [SECURITY.md](SECURITY.md) for vulnerability reporting. Maintainers must

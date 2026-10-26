@@ -14,7 +14,9 @@ consumer with GNU long-name metadata. Record-component clients must compile
 against the ordinary and regular static extending-project views. Explicit
 TAR lifecycle access must be rejected for the intended visibility reason.
 CPIO format checks include full mode values; both writer error suites check
-out-of-range UTC times, including year 2300.
+out-of-range UTC times, including year 2300 and its format-specific message.
+Packaging checks cover consumer/validation compiler profiles, dependency-free
+cleanup, named installation manifests and uninstall/reinstall behavior.
 
 Build the image after changes to its packages, then use the normal check:
 

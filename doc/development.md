@@ -60,6 +60,10 @@ executable identities and argument boundaries for library and client builds,
 installation and cleanup commands. The fixture replaces the consumer
 checks to avoid recursion; the normal check target runs those checks with the
 real compiler separately. It does not change the checkout's build artifacts.
+File-defined tool selections must reach installation helpers explicitly;
+unlike command-line values, GNU Make does not export them automatically.
+Those helpers resolve and forward all three selected GPR executables to their
+recursive Make calls, including the cleaner used by installation preflight.
 
 `python3 tests/check-dev-shell.py IMAGE` runs on the Docker host, where Python
 3 and Docker must already be available. It checks a default shell with piped
@@ -107,13 +111,12 @@ stable-input contract, format limits and cancellation boundaries.
 `examples/client/client.gpr` imports the project by name. The installation
 check copies this client, including CPIO and TAR writer record components,
 into a private scratch directory, removes inherited Ada/GPR search paths,
-and discovers Arca only through the installed prefix. It creates and closes
-CPIO and TAR archives
-through the installed APIs, checks the newc header/trailer and compares the
-empty TAR output with exactly two zero blocks. It also emits a GNU long-name
-record, compares the complete output with the source-built TAR driver and
-checks that the synthetic record's mtime is the UTC UNIX epoch. This exercises
-package initialization through the installed static library.
+and discovers Arca only through the installed prefix. Through the installed
+APIs it creates and closes CPIO and TAR archives, checks the newc header and
+trailer, and compares empty TAR output with exactly two zero blocks. It also
+emits GNU long-name metadata, compares the archive with the source-built TAR
+driver and checks its synthetic record's mtime against the UTC UNIX epoch.
+This exercises package initialization through the installed static library.
 It cleans that scratch directory on success, failure and handled signals.
 The selected builder is resolved to an absolute executable path in the
 caller's initial directory before entering the copied client. This preserves
@@ -123,6 +126,9 @@ the selected executable actually runs in the copied client's directory.
 After the successful build, hiding the installed project must produce the
 specific missing-import diagnostic. This negative control verifies that
 the consumer cannot silently fall back to the original source project.
+The check uses the actual Make installation recipe, verifies the `arca` and
+`arca-cli` manifests, uninstalls both and installs again. An unrelated prefix
+file must survive removal unchanged; no Arca-installed files may remain.
 
 `tests/check-api.py` builds record-component clients against the ordinary
 library and an installed regular static extending-project view, matching
@@ -164,7 +170,16 @@ imports do not inherit a parent's compiler defaults automatically.
 The [coding-style guide](coding-style.md) is the normative standalone source
 reference for library, CLI, tests and examples. AGENTS.md requires agents to
 read it before editing code. All four compiling GPR projects enable
-`-gnatygAdISuxM80` alongside warnings as errors; coverage retains the profile.
+`-gnatygAdISuxM80` alongside warnings as errors during validation; coverage
+retains the profile. The library's `ARCA_BUILD_MODE` scenario accepts `release`
+and `validation`, defaulting to `release` for source consumers. Release omits
+`-gnatwe` and `-gnaty` options while retaining `-gnatwa`, `-gnato`, `-gnatVa`,
+`-fstack-check` and `-gnateE`. Unknown modes are rejected. The CLI, test and
+example projects stay strict because they are maintained with the repository.
+Every Make build and installation selects validation explicitly. CI invokes
+those Make targets inside the container; the launcher does not forward the
+host's build-mode environment variable. Standalone style, API and coverage
+checks also pass validation explicitly to their builders.
 The guide explains layout, declaration contracts, modern aspect forms and
 the Ada 2012 baseline with deliberate GNAT runtime dependencies.
 
@@ -174,6 +189,17 @@ comment and reject an 81-column comment with the exact style diagnostic.
 These controls detect a missing project profile without changing checkout
 sources or relying on existing objects. The installed client remains
 self-contained and does not import a source-checkout style project.
+
+`tests/check-packaging.py` compiles private library copies with a harmless
+81-column comment and an unused import. Release accepts both and reports the
+warning; validation rejects the style violation. The observed compiler
+invocation must retain runtime checks and the expected warning/style policy.
+The same controls cover a regular static extending project with its own
+`-cargs:Ada` argument. Abuild's extending project inherits the selected library
+profile and can continue adding its compiler arguments; no Abuild file is
+changed. Its installed record-component consumer is checked separately.
+Cleanup is exercised with an intentionally missing imported test project,
+even though the reference image itself supplies Ahven.
 
 CLI regressions compile `tests/cli_faults.c` as a temporary preload library
 with the image's GCC. Only selected CLI child processes load it; its trace
@@ -207,10 +233,16 @@ test support and introduces no production signal hook.
 - `make -j8 check NUM_CPUS=8` runs packaging, unit, writer and CLI suites.
 - `make -j8 coverage NUM_CPUS=8` reports executed lines for all production bodies.
 - `make install PREFIX=/absolute/prefix` installs the library and CLI.
-- `make clean` removes generated GPRbuild artifacts.
+- `make uninstall PREFIX=/absolute/prefix` removes `arca-cli`, then `arca`,
+  using their GPRinstall manifests. Unrelated prefix files are retained.
+- `make clean` removes generated GPRbuild artifacts, including test objects
+  and executables without loading the Ahven-dependent test project. It keeps
+  `build/`, coverage and unit reports, and the default installation prefix.
 
 Do not run independent top-level builds concurrently against `obj/`. Install
-into an empty prefix or use GPRinstall's explicit uninstall/upgrade procedure.
+into an empty prefix or uninstall the existing installation first. Earlier
+development installations used manifest name `cli`; remove those with
+`gprinstall --uninstall --prefix=/absolute/prefix cli` before upgrading.
 Tests use a fresh prefix on every run.
 
 ## Consumers

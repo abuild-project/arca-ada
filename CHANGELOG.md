@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Default source-library consumers to a release compiler profile while
+  retaining strict repository validation and runtime checks in both modes.
+- Clean test outputs without Ahven, retain reports and installations under
+  `build/`, and support manifest-based uninstall with CLI name `arca-cli`.
+- Retain Makefile-defined tool selections in recursive installation checks.
 - Hide TAR lifecycle hooks, normalize CPIO permission bits and report
   unrepresentable timestamps through the format-specific metadata exception.
 - Check installed GNU long-name initialization and writer record components

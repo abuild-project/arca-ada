@@ -15,13 +15,40 @@ case "$gprbuild_command" in
     /*) ;;
     *) gprbuild_command="$(pwd -P)/$gprbuild_command" ;;
 esac
-gprinstall_command=${GPRINSTALL:-gprinstall}
+gprinstall_command=$(command -v "${GPRINSTALL:-gprinstall}")
+case "$gprinstall_command" in
+    /*) ;;
+    *) gprinstall_command="$(pwd -P)/$gprinstall_command" ;;
+esac
+gprclean_command=$(command -v "${GPRCLEAN:-gprclean}")
+case "$gprclean_command" in
+    /*) ;;
+    *) gprclean_command="$(pwd -P)/$gprclean_command" ;;
+esac
+make_command=${MAKE:-make}
 num_cpus=${NUM_CPUS:-8}
 
-"$gprinstall_command" -p -P "$repo_root/arca.gpr" \
-    --prefix="$scratch/prefix"
-"$gprinstall_command" -p -P "$repo_root/cli/cli.gpr" -aP"$repo_root" \
-    --prefix="$scratch/prefix" --mode=usage --no-project
+# Retain an outer Make jobserver; standalone checks use the normal job budget.
+run_make()
+{
+    case ${MAKEFLAGS:-} in
+        *--jobserver-auth=*|*--jobserver-fds=*) ;;
+        *) set -- -j8 "$@" ;;
+    esac
+    "$make_command" --no-print-directory -C "$repo_root" "$@" \
+        NUM_CPUS="$num_cpus" GPRBUILD="$gprbuild_command" \
+        GPRINSTALL="$gprinstall_command" GPRCLEAN="$gprclean_command" \
+        PREFIX="$scratch/prefix"
+}
+# Exercise the public installation recipe rather than duplicating its flags.
+run_make install
+for manifest in arca arca-cli; do
+    if [ ! -f "$scratch/prefix/share/gpr/manifests/$manifest" ]; then
+        printf 'Missing installation manifest: %s\n' "$manifest" >&2
+        exit 1
+    fi
+done
+test ! -e "$scratch/prefix/share/gpr/manifests/cli"
 # Installed notices must match the project's actual grant byte for byte.
 for notice in LICENSE COPYRIGHT; do
     cmp "$repo_root/$notice" "$scratch/prefix/share/doc/arca/$notice"
@@ -85,6 +112,28 @@ PY
         printf 'Client failed for an unexpected reason\n' >&2
         exit 1
     fi
+    mv "$scratch/prefix/share/gpr/arca.gpr.hidden" \
+        "$scratch/prefix/share/gpr/arca.gpr"
 )
 
-printf 'Installed-project consumer and isolation checks passed\n'
+# Uninstall must use manifests and retain files that Arca did not install.
+printf 'unrelated prefix content\n' >"$scratch/prefix/unrelated"
+run_make uninstall
+python3 - "$scratch/prefix" <<'PY'
+from pathlib import Path
+import sys
+
+prefix = Path(sys.argv[1])
+assert sorted(str(path.relative_to(prefix)) for path in prefix.rglob("*")
+              if path.is_file() or path.is_symlink()) == ["unrelated"]
+assert (prefix / "unrelated").read_text() == "unrelated prefix content\n"
+PY
+run_make install
+test -x "$scratch/prefix/bin/arca"
+test -f "$scratch/prefix/share/gpr/arca.gpr"
+for manifest in arca arca-cli; do
+    test -f "$scratch/prefix/share/gpr/manifests/$manifest"
+done
+test "$(cat "$scratch/prefix/unrelated")" = 'unrelated prefix content'
+
+printf 'Installed consumer, isolation and uninstall/reinstall checks passed\n'

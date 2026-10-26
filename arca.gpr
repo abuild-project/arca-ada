@@ -2,6 +2,9 @@
 
 library project Arca is
 
+   type Build_Mode_Type is ("release", "validation");
+   Build_Mode : Build_Mode_Type := external ("ARCA_BUILD_MODE", "release");
+
    for Languages use ("Ada");
    for Source_Dirs use ("src");
    for Object_Dir use "obj";
@@ -12,8 +15,16 @@ library project Arca is
 
    package Compiler is
       for Default_Switches ("Ada") use
-        ("-gnat12", "-gnatwa", "-gnatwe", "-gnatf", "-gnato",
-         "-gnatVa", "-fstack-check", "-gnateE", "-gnatygAdISuxM80");
+        ("-gnat12", "-gnatwa", "-gnatf", "-gnato", "-gnatVa",
+         "-fstack-check", "-gnateE");
+      case Build_Mode is
+         when "validation" =>
+            for Default_Switches ("Ada") use
+              Compiler'Default_Switches ("Ada") &
+              ("-gnatwe", "-gnatygAdISuxM80");
+         when "release" =>
+            null;
+      end case;
    end Compiler;
 
    package Install is

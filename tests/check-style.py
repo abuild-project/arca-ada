@@ -26,6 +26,7 @@ def check_project(root, project, source, builder, jobs):
     original = filename.read_text()
     line_number = len(original.splitlines()) + 1
     command = [str(builder), "-p", "-P", project, "-aP" + str(root),
+               "-XARCA_BUILD_MODE=validation",
                "-c", "-u", filename.name, "-f", "-j" + jobs,
                "-cargs:Ada", "-gnatc"]
     env = dict(os.environ, LC_ALL="C")
