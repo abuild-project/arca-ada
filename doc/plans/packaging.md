@@ -57,4 +57,11 @@ so the unused job-level variable is removed. The release-mode environment
 countercheck sets its value inside the container. Launcher behavior and
 Abuild integration remain unchanged.
 
+## Selected tool propagation on 2026-10-26
+
+Installation helpers receive and forward all three selected GPR tools.
+File-origin Make variables need explicit propagation because automatic export
+only covers command-line selections. The recipe control rejects the missing
+cleaner selection and checks the corrected path with spaces.
+
 Co-Authored-By: GPT-6 <noreply@openai.com>

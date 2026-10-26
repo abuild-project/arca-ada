@@ -60,6 +60,10 @@ executable identities and argument boundaries for library and client builds,
 installation and cleanup commands. The fixture replaces the consumer
 checks to avoid recursion; the normal check target runs those checks with the
 real compiler separately. It does not change the checkout's build artifacts.
+File-defined tool selections must reach installation helpers explicitly;
+unlike command-line values, GNU Make does not export them automatically.
+Those helpers resolve and forward all three selected GPR executables to their
+recursive Make calls, including the cleaner used by installation preflight.
 
 `python3 tests/check-dev-shell.py IMAGE` runs on the Docker host, where Python
 3 and Docker must already be available. It checks a default shell with piped

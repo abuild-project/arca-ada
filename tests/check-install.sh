@@ -20,6 +20,11 @@ case "$gprinstall_command" in
     /*) ;;
     *) gprinstall_command="$(pwd -P)/$gprinstall_command" ;;
 esac
+gprclean_command=$(command -v "${GPRCLEAN:-gprclean}")
+case "$gprclean_command" in
+    /*) ;;
+    *) gprclean_command="$(pwd -P)/$gprclean_command" ;;
+esac
 make_command=${MAKE:-make}
 num_cpus=${NUM_CPUS:-8}
 
@@ -32,7 +37,8 @@ run_make()
     esac
     "$make_command" --no-print-directory -C "$repo_root" "$@" \
         NUM_CPUS="$num_cpus" GPRBUILD="$gprbuild_command" \
-        GPRINSTALL="$gprinstall_command" PREFIX="$scratch/prefix"
+        GPRINSTALL="$gprinstall_command" GPRCLEAN="$gprclean_command" \
+        PREFIX="$scratch/prefix"
 }
 # Exercise the public installation recipe rather than duplicating its flags.
 run_make install

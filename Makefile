@@ -29,9 +29,9 @@ check: all
 	./tests/check-api.py --builder "$(GPRBUILD)" --installer "$(GPRINSTALL)" \
 		--jobs "$(NUM_CPUS)"
 	+MAKE="$(MAKE)" GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
-		NUM_CPUS="$(NUM_CPUS)" ./tests/check-install.sh
+		GPRCLEAN="$(GPRCLEAN)" NUM_CPUS="$(NUM_CPUS)" ./tests/check-install.sh
 	+MAKE="$(MAKE)" GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
-		NUM_CPUS="$(NUM_CPUS)" ./tests/check-install-tools.sh
+		GPRCLEAN="$(GPRCLEAN)" NUM_CPUS="$(NUM_CPUS)" ./tests/check-install-tools.sh
 	./tests/check-unit.py
 	./tests/check-cpio.py
 	./tests/check-tar.py

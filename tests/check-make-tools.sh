@@ -24,9 +24,22 @@ ln -s /bin/true "$scratch/project/tests/check-cli.py"
 ln -s /bin/true "$scratch/project/tests/check-style.py"
 ln -s /bin/true "$scratch/project/tests/check-packaging.py"
 ln -s /bin/true "$scratch/project/tests/check-api.py"
-for script in check-preflight check-make-tools check-install check-install-tools; do
+for script in check-preflight check-make-tools; do
     ln -s /bin/true "$scratch/project/tests/$script.sh"
 done
+# Installation helpers must receive file-origin selections, not just the
+# command-line values that GNU Make exports automatically.
+cat >"$scratch/project/tests/check-install.sh" <<'EOF'
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-or-later
+set -eu
+if [ "${GPRCLEAN:-}" != "$ARCA_TEST_EXPECT_CLEANER" ]; then
+    printf 'Installation helper lost the selected GPRCLEAN\n' >&2
+    exit 1
+fi
+EOF
+chmod +x "$scratch/project/tests/check-install.sh"
+ln -s check-install.sh "$scratch/project/tests/check-install-tools.sh"
 ln -s /bin/true "$scratch/project/examples/client/bin/arca_client"
 
 # Log executable identity and argument boundaries, rather than simulate GNAT.
@@ -47,15 +60,23 @@ ln -s 'selected build' "$scratch/selected tools/selected clean"
 ARCA_TEST_MAKE_TOOL_LOG=$scratch/tools.log
 export ARCA_TEST_MAKE_TOOL_LOG
 : >"$ARCA_TEST_MAKE_TOOL_LOG"
+ARCA_TEST_EXPECT_CLEANER="$scratch/selected tools/selected clean"
+export ARCA_TEST_EXPECT_CLEANER
+printf 'override GPRBUILD := %s\n' "$scratch/selected tools/selected build" \
+    >"$scratch/selected.mk"
+printf 'override GPRINSTALL := %s\n' "$scratch/selected tools/selected install" \
+    >>"$scratch/selected.mk"
+printf 'override GPRCLEAN := %s\n' "$ARCA_TEST_EXPECT_CLEANER" \
+    >>"$scratch/selected.mk"
 
 failed=0
 for target in check install uninstall clean; do
-    if ! "$make_command" --no-print-directory -C "$scratch/project" \
-        -f "$repo_root/Makefile" "$target" NUM_CPUS="$num_cpus" \
-        GPRBUILD="$scratch/selected tools/selected build" \
-        GPRINSTALL="$scratch/selected tools/selected install" \
-        GPRCLEAN="$scratch/selected tools/selected clean" \
-        PREFIX="$scratch/install prefix"; then
+    if ! (
+        unset GPRBUILD GPRINSTALL GPRCLEAN
+        "$make_command" --no-print-directory -C "$scratch/project" \
+            -f "$repo_root/Makefile" -f "$scratch/selected.mk" \
+            "$target" NUM_CPUS="$num_cpus" PREFIX="$scratch/install prefix"
+    ); then
         failed=$((failed + 1))
     fi
 done

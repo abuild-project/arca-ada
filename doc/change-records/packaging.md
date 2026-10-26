@@ -20,6 +20,10 @@ Abuild files, writer APIs, runtime bodies and archive fixtures are unchanged.
 so it no longer loads their Ahven-dependent project. Other projects use the
 selected GPRclean executable. `build/` remains intact, preserving coverage
 and unit reports and the default installation prefix.
+Installation helpers explicitly receive all three selected GPR tools and
+forward resolved executable paths to recursive Make invocations. This keeps
+Makefile-defined cleaner selections available during installation preflight,
+without depending on GNU Make's automatic export of command-line variables.
 
 The CLI installs under manifest name `arca-cli`, alongside the library's
 `arca` manifest. `make uninstall PREFIX=...` removes the CLI and then the
@@ -73,5 +77,11 @@ Removing the unused host-side CI variable retains the existing container
 commands and their explicit validation arguments. The launcher argument
 checks pass on the host. The reference compiler and runtime results above
 cover the unchanged build inputs.
+
+The selected-tool recipe control rejects baseline
+`87a9e4b0d94fed5a7ce1602de3825e18775f0ba2` when a Makefile-defined cleaner
+does not reach the installation helper. The corrected forwarding passes that
+control with executable paths containing spaces. The complete Trixie check
+also passes, including the real installation consumers.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
