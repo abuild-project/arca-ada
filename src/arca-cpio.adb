@@ -15,6 +15,8 @@ package body Arca.CPIO is
    CPIO_Max_Payload_Message : constant String :=
      "newc CPIO supports payloads up to 4 GiB - 1 byte";
 
+   Permission_Mask : constant Unsigned_32 := 8#7777#;
+
    --  Writer overview
    --
    --  This writer emits the ASCII "newc" CPIO format. Every archive entry
@@ -59,6 +61,9 @@ package body Arca.CPIO is
    function Encode_MTime (MTime : Time) return Unsigned_32;
    --  Convert Ada time to the 32-bit UNIX timestamp stored by newc headers.
 
+   function Encode_Mode (Kind, Mode : Unsigned_32) return Unsigned_32;
+   --  Select the operation's entry kind and retain only caller permissions.
+
    -------------------------------------------------------------------------
 
    procedure Inc_Offset
@@ -96,8 +101,9 @@ package body Arca.CPIO is
       use Ada.Calendar.Conversions;
       use type Interfaces.C.long;
 
-      Unix_Time : constant Interfaces.C.long := To_Unix_Time (MTime);
+      Unix_Time : Interfaces.C.long;
    begin
+      Unix_Time := To_Unix_Time (MTime);
       if Unix_Time < Interfaces.C.long'(0)
         or else Long_Long_Integer (Unix_Time)
           > Long_Long_Integer (Unsigned_32'Last)
@@ -112,6 +118,14 @@ package body Arca.CPIO is
          raise Unsupported_Metadata with
            "CPIO mtime outside supported UNIX timestamp range";
    end Encode_MTime;
+
+   -------------------------------------------------------------------------
+
+   function Encode_Mode (Kind, Mode : Unsigned_32) return Unsigned_32
+   is
+   begin
+      return Kind or (Mode and Permission_Mask);
+   end Encode_Mode;
 
    -------------------------------------------------------------------------
 
@@ -237,7 +251,7 @@ package body Arca.CPIO is
 
       Header :=
         CPIO_Header_Type'(Inode    => Unsigned_32 (Item.CPIO_Get_Next_Inode),
-                          Mode     => S_IFDIR or Mode,
+                          Mode     => Encode_Mode (S_IFDIR, Mode),
                           UID      => UID,
                           GID      => GID,
                           NLink    => 2,
@@ -289,7 +303,7 @@ package body Arca.CPIO is
 
       Header :=
         CPIO_Header_Type'(Inode    => Unsigned_32 (Inode),
-                          Mode     => S_IFREG or Mode,
+                          Mode     => Encode_Mode (S_IFREG, Mode),
                           UID      => UID,
                           GID      => GID,
                           NLink    => NLinks,
@@ -334,7 +348,7 @@ package body Arca.CPIO is
 
       Header :=
         CPIO_Header_Type'(Inode    => Unsigned_32 (Inode),
-                          Mode     => S_IFREG or Mode,
+                          Mode     => Encode_Mode (S_IFREG, Mode),
                           UID      => UID,
                           GID      => GID,
                           NLink    => NLinks,
@@ -379,7 +393,7 @@ package body Arca.CPIO is
 
       Header :=
         CPIO_Header_Type'(Inode    => Unsigned_32 (Item.CPIO_Get_Next_Inode),
-                          Mode     => S_IFLNK or Mode,
+                          Mode     => Encode_Mode (S_IFLNK, Mode),
                           UID      => UID,
                           GID      => GID,
                           NLink    => 1,
@@ -419,7 +433,7 @@ package body Arca.CPIO is
 
       Header :=
         CPIO_Header_Type'(Inode    => Unsigned_32 (Item.CPIO_Get_Next_Inode),
-                          Mode     => S_IFIFO or Mode,
+                          Mode     => Encode_Mode (S_IFIFO, Mode),
                           UID      => UID,
                           GID      => GID,
                           NLink    => 1,
@@ -455,7 +469,7 @@ package body Arca.CPIO is
 
       Header :=
         CPIO_Header_Type'(Inode    => Unsigned_32 (Item.CPIO_Get_Next_Inode),
-                          Mode     => S_IFBLK or Mode,
+                          Mode     => Encode_Mode (S_IFBLK, Mode),
                           UID      => UID,
                           GID      => GID,
                           NLink    => 1,
@@ -493,7 +507,7 @@ package body Arca.CPIO is
 
       Header :=
         CPIO_Header_Type'(Inode    => Unsigned_32 (Item.CPIO_Get_Next_Inode),
-                          Mode     => S_IFCHR or Mode,
+                          Mode     => Encode_Mode (S_IFCHR, Mode),
                           UID      => UID,
                           GID      => GID,
                           NLink    => 1,

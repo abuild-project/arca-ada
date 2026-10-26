@@ -500,9 +500,17 @@ package body Arca.TAR is
         Make_Slice (Link_Name'First, Link_Name'Last);
       Use_Long_Link_Marker : Boolean := False;
       Stored_Prefix        : Optional_String_Slice := No_Slice (Name'First);
-      Header_Time          : constant Long_Long_Integer
-        := Long_Long_Integer (Ada.Calendar.Conversions.To_Unix_Time (MTime));
+      Header_Time          : Long_Long_Integer;
    begin
+      begin
+         Header_Time :=
+           Long_Long_Integer (Ada.Calendar.Conversions.To_Unix_Time (MTime));
+      exception
+         when Constraint_Error | Ada.Calendar.Time_Error =>
+            raise Unsupported_Metadata with
+              "TAR mtime outside supported UNIX timestamp range";
+      end;
+
       if Name'Length > Name_Field_Length then
          declare
             Slash_Pos : constant Natural := Find_Split_Position (Name);

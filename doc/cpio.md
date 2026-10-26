@@ -18,6 +18,9 @@ FIFOs and character and block devices. Device entries do not create local
 device nodes.
 
 Callers provide archive paths, permission bits, UID/GID values and timestamps.
+Every entry operation retains `8#7777#` from Mode, including special permission
+bits, and selects the entry type itself. File-type bits in a full POSIX mode
+cannot change the operation's type. Permission-only inputs retain their bytes.
 The supported 64-bit Trixie build accepts UNIX timestamps from zero through
 `2**32 - 1` seconds. Regular-file and symlink payload fields have the same
 unsigned 32-bit size limit. The API does not compress, walk directories,
@@ -75,6 +78,11 @@ retain their typed exceptions. Validation failures before emission leave the
 writer usable, though rejected metadata can consume an inode. A copy or
 output I/O failure can have emitted partial data: abandon that writer's scope
 so finalization attempts to discard the output.
+
+Timestamps outside the newc range raise `Unsupported_Metadata`, including a
+calendar-conversion failure before the numeric range check. Construct UTC
+times explicitly; rejection of a timestamp such as year 2300 must not expose
+the runtime's `Ada.Calendar.Time_Error` from inside an entry operation.
 
 ## Validation
 

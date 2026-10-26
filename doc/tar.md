@@ -67,6 +67,11 @@ promise byte identity with every GNU tar output profile.
 
 ## Ownership and failures
 
+`TAR_Archive_Type` is tagged limited private. Explicit Initialize and Finalize
+calls, conversions to the controlled parent and overrides of those lifecycle
+hooks are outside the public API. Ordinary writer calls and use as a limited
+record component remain supported; implicit cleanup is unchanged.
+
 Each instance owns its output file. Close completes the archive and retains
 it. Leaving scope without Close attempts to remove unfinished output, including
 exception unwinding and owner-task termination between operations. Independent
@@ -84,8 +89,10 @@ fail. Explicit Close remains the completing operation that reports I/O errors.
 Unopened operations raise `TAR_Not_Initialized`; missing sources raise
 `File_Not_Found`, oversized payloads raise `File_Too_Big`, a shortened source
 can raise `File_Read_Error`, and unrepresentable numeric metadata raises
-`Unsupported_Metadata`. Underlying stream errors can propagate. Original
-exception identities are retained; compiler-generated locations refer to the
+`Unsupported_Metadata`. Failures while converting a supplied timestamp,
+including a UTC time in year 2300, use that metadata exception too.
+Underlying stream errors can propagate. Format-specific exception identities
+are retained; compiler-generated locations refer to the
 renamed source. Adds are not transactional: GNU metadata or payload fragments
 may already have been written when an operation fails. Leave scope to discard
 that instance and start a new archive after a failed add or close.

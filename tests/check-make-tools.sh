@@ -22,6 +22,7 @@ ln -s /bin/true "$scratch/project/tests/check-tar.py"
 ln -s /bin/true "$scratch/project/tests/check-unit.py"
 ln -s /bin/true "$scratch/project/tests/check-cli.py"
 ln -s /bin/true "$scratch/project/tests/check-style.py"
+ln -s /bin/true "$scratch/project/tests/check-api.py"
 for script in check-preflight check-make-tools check-install check-install-tools; do
     ln -s /bin/true "$scratch/project/tests/$script.sh"
 done

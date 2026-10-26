@@ -12,10 +12,10 @@ package Arca.TAR is
    use Ada.Calendar;
    use Interfaces;
 
-   type TAR_Archive_Type is
-     new Ada.Finalization.Limited_Controlled with private;
+   type TAR_Archive_Type is tagged limited private;
    --  Own one archive output. Close completes it; leaving scope with an open
    --  writer attempts to discard unfinished output. Synchronize shared calls.
+   --  Lifecycle hooks are private; use Create and Close for explicit work.
 
    procedure TAR_Create
      (Item : in out TAR_Archive_Type;

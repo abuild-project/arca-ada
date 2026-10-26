@@ -22,11 +22,13 @@ check: all
 	+MAKE="$(MAKE)" NUM_CPUS="$(NUM_CPUS)" ./tests/check-make-tools.sh
 	"$(GPRBUILD)" -p -P examples/client/client.gpr -aP. -j$(NUM_CPUS)
 	./examples/client/bin/arca_client
+	"$(GPRBUILD)" -p -P tests/tests.gpr -j$(NUM_CPUS)
+	./tests/check-api.py --builder "$(GPRBUILD)" --installer "$(GPRINSTALL)" \
+		--jobs "$(NUM_CPUS)"
 	GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
 		NUM_CPUS="$(NUM_CPUS)" ./tests/check-install.sh
 	GPRBUILD="$(GPRBUILD)" GPRINSTALL="$(GPRINSTALL)" \
 		NUM_CPUS="$(NUM_CPUS)" ./tests/check-install-tools.sh
-	"$(GPRBUILD)" -p -P tests/tests.gpr -j$(NUM_CPUS)
 	./tests/check-unit.py
 	./tests/check-cpio.py
 	./tests/check-tar.py

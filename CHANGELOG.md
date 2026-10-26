@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Hide TAR lifecycle hooks, normalize CPIO permission bits and report
+  unrepresentable timestamps through the format-specific metadata exception.
+- Check installed GNU long-name initialization and writer record components
+  through ordinary and extending library projects.
 - Record accepted topics by merge commit and clarify reader, integration
   and architecture guidance while preserving historical documentation.
 - Use GPL-2.0-or-later for the whole project; the CPIO, TAR and stream-copy

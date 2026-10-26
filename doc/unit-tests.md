@@ -9,6 +9,13 @@ dependency-only project lets preflight run before object directories exist.
 
 ## Running
 
+The complete check also runs compiler-level API controls and an installed
+consumer with GNU long-name metadata. Record-component clients must compile
+against the ordinary and regular static extending-project views. Explicit
+TAR lifecycle access must be rejected for the intended visibility reason.
+CPIO format checks include full mode values; both writer error suites check
+out-of-range UTC times, including year 2300.
+
 Build the image after changes to its packages, then use the normal check:
 
 ```sh
