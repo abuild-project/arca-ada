@@ -1,6 +1,6 @@
 # CLI diagnostics, arguments and cancellation
 
-Status: Planned on `codex/cli-polish`.
+Status: Implemented and verified locally on `codex/cli-polish`.
 
 Base revision: `d3f0574b37c68907206e59c7beff01d85b51ee88`.
 
@@ -40,5 +40,16 @@ Base revision: `d3f0574b37c68907206e59c7beff01d85b51ee88`.
 4. Complete author review, push and create a separate pull request, request
    Copilot and wait. Merge remains a maintainer action; release basics starts
    only after this topic is accepted.
+
+## Progress
+
+The focused new controls reject the baseline for the intended diagnostic,
+argument, bridge, help and SIGHUP behavior. Retained option and environment
+controls pass against both versions. Coverage and the complete check pass in
+that order on fresh committed sources. Every production body has executed
+coverage; installed consumers, compiler-style boundaries and tool-selection
+checks pass. Preserved CLI and writer archives are byte-identical. The author
+review and complete file-scoped CLI semantic checks are finished; ARM64 and
+newer GNAT are outside the observed evidence.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

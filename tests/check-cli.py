@@ -6,8 +6,11 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack, contextmanager
+import ctypes
+import json
 import os
 from pathlib import Path
+import re
 import runpy
 import select
 import signal
@@ -44,6 +47,14 @@ class CLIChecks(unittest.TestCase):
         subprocess.run(["gcc", "-std=c11", "-Wall", "-Wextra", "-Werror",
                         "-pedantic", "-fPIC", "-shared", "-o", str(cls.fault_library),
                         str(ROOT / "tests/cli_faults.c"), "-ldl"], check=True)
+        cls.bridge_library = Path(scratch.name).resolve() / "bridge.so"
+        cls.constants_probe = Path(scratch.name).resolve() / "constants"
+        subprocess.run(["gcc", "-std=c11", "-Wall", "-Wextra", "-Werror",
+                        "-pedantic", "-fPIC", "-shared", "-o", str(cls.bridge_library),
+                        str(ROOT / "cli/src/posix_bridge.c")], check=True)
+        subprocess.run(["gcc", "-std=c11", "-Wall", "-Wextra", "-Werror",
+                        "-pedantic", "-o", str(cls.constants_probe),
+                        str(ROOT / "tests/cli_constants.c")], check=True)
 
     def setUp(self):
         (ROOT / "build").mkdir(exist_ok=True)
@@ -213,6 +224,92 @@ class CLIChecks(unittest.TestCase):
             self.assertIn("read stale errno", log.read_text())
             self.assertEqual(set(records(archive, format_name)),
                              {"first", "second", "third"})
+
+    def test_complete_long_diagnostic(self):
+        root = self.work / ("a" * 90) / ("b" * 90) / ("c" * 90)
+        root.mkdir(parents=True)
+        for name in ("first", "second", "third"):
+            (root / name).write_bytes(b"input")
+        self.assertGreater(len(os.fsencode(root)), 200)
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("long." + format_name)
+            env, log = self.faults("read-eio", root)
+            result = self.invoke(self.command(format_name, root, archive),
+                                 expected=1, env=env)
+            self.assertIn("read EIO", log.read_text())
+            self.assertEqual(result.stderr, b"arca: cannot read directory: '" +
+                             os.fsencode(root) + b"': Input/output error\n")
+            self.assertFalse(archive.exists())
+
+    def test_readable_diagnostics_preserve_archive_names(self):
+        name = "".join(chr(value) for value in range(1, 32)) + "\x7f\\name"
+        root = self.work / name
+        root.mkdir()
+        for item in ("first", "second", "third"):
+            (root / item).write_bytes(b"input")
+        encoded = os.fsencode(root)
+        displayed = b"".join(
+            b"\\\\" if value == 92 else
+            ("\\x%02x" % value).encode() if value < 32 or value == 127 else
+            bytes([value]) for value in encoded)
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("readable." + format_name)
+            env, log = self.faults("read-eio", root)
+            result = self.invoke(self.command(format_name, root, archive),
+                                 expected=1, env=env)
+            self.assertIn("read EIO", log.read_text())
+            self.assertEqual(result.stderr, b"arca: cannot read directory: '" +
+                             displayed + b"': Input/output error\n")
+            # Display escaping must not alter an accepted filename or payload.
+            (root / name).write_bytes(b"unchanged name")
+            self.invoke(self.command(format_name, root, archive, "--mtime", "0"))
+            self.assertEqual(records(archive, format_name)[name]["data"],
+                             b"unchanged name")
+
+    def test_target_bridge_constants(self):
+        expected = json.loads(subprocess.check_output([str(self.constants_probe)]))
+        bridge = ctypes.CDLL(str(self.bridge_library))
+        for name, value in expected.items():
+            with self.subTest(constant=name):
+                getter = getattr(bridge, "arca_" + name)
+                getter.argtypes = []
+                getter.restype = ctypes.c_uint if name == "rename_noreplace" else ctypes.c_int
+                self.assertEqual(getter(), value)
+
+    def test_output_syntax_precedes_filesystem_access(self):
+        missing_source = self.work / "missing-source"
+        for format_name in ("cpio", "tar"):
+            for output in (".", "..", "/", "x/.", "x/..", "trailing/"):
+                with self.subTest(format=format_name, output=output):
+                    result = self.invoke(self.command(format_name, missing_source, output),
+                                         expected=2)
+                    self.assertIn(b"output must name a file", result.stderr)
+                    self.assertNotIn(b"source does not exist", result.stderr)
+        self.assertEqual(list(self.work.iterdir()), [])
+
+    def test_output_parent_diagnostics(self):
+        root = self.tree()
+        for format_name in ("cpio", "tar"):
+            for parent, diagnostic in (
+                    (self.work / "missing-parent", b"output parent does not exist"),
+                    (root / "A source", b"output parent is not a directory")):
+                result = self.invoke(self.command(format_name, root, parent / "out"),
+                                     expected=1)
+                self.assertIn(diagnostic, result.stderr)
+                self.assertNotIn(b"source does not exist", result.stderr)
+            self.assertEqual(list(self.work.glob(".arca-*")), [])
+
+    def test_help_matches_documented_options_and_statuses(self):
+        help_text = self.invoke(["--help"]).stdout
+        table = "\n".join(line for line in (ROOT / "doc/cli.md").read_text().splitlines()
+                          if line.startswith("|"))
+        options = set(re.findall(r"(?<!\w)--?[A-Za-z][A-Za-z0-9-]*", table))
+        self.assertTrue(options)
+        for option in options:
+            self.assertIn(option.encode(), help_text)
+        self.assertIn(b"=VALUE", help_text)
+        for status in (0, 1, 2, 129, 130, 143):
+            self.assertRegex(help_text, rb"\b" + str(status).encode() + rb"\b")
 
     def test_no_replace_fallback(self):
         root = self.tree()
@@ -402,15 +499,16 @@ class CLIChecks(unittest.TestCase):
         root = self.tree()
         (self.work / "output files").mkdir()
         for format_name in ("cpio", "tar"):
-            for index, (directory, output) in enumerate(
-                    (("-C", "-o"), ("--directory", "--output"))):
-                relative = Path("relative." + format_name)
+            for index, (directory, output, equal) in enumerate(
+                    (("-C", "-o", False), ("--directory", "--output", False),
+                     ("--directory", "--output", True))):
+                relative = Path("relative-" + str(index) + "." + format_name)
                 if index:
                     relative = Path("output files") / relative
                 archive = self.work / relative
-                self.invoke(["create", "--format", format_name,
-                             directory, root.name, output, str(relative)],
-                            cwd=self.work)
+                options = ([directory + "=" + root.name, output + "=" + str(relative)]
+                           if equal else [directory, root.name, output, str(relative)])
+                self.invoke(["create", "--format", format_name, *options], cwd=self.work)
                 self.assert_tree(archive, format_name, root)
                 self.assertEqual(list(archive.parent.glob(".arca-*")), [])
 
@@ -557,7 +655,7 @@ class CLIChecks(unittest.TestCase):
         # Remove the socket so it cannot mask acceptance of a trailing slash.
         (root / "socket").unlink()
         result = self.invoke(
-            self.command("tar", root, str(self.work / "trailing") + "/"), expected=1)
+            self.command("tar", root, str(self.work / "trailing") + "/"), expected=2)
         self.assertIn(b"output must name a file", result.stderr)
         self.assertFalse((self.work / "trailing").exists())
 
@@ -722,7 +820,7 @@ class CLIChecks(unittest.TestCase):
     def test_cancel_preserves_output_and_cleans_staging(self):
         root = self.phase_tree()
         for format_name in ("cpio", "tar"):
-            for number in (signal.SIGINT, signal.SIGTERM):
+            for number in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
                 with self.subTest(format=format_name, signal=number):
                     parent = self.work / (format_name + "-" + str(int(number)))
                     parent.mkdir()

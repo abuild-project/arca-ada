@@ -34,7 +34,7 @@ package Archive_CLI.Filesystem is
    --  Read the complete Linux symlink target, rejecting truncation.
 
    procedure Install_Signals;
-   --  Record SIGINT/SIGTERM for cancellation at safe command boundaries.
+   --  Record SIGHUP/SIGINT/SIGTERM for cancellation at safe command boundaries.
 
    procedure Check_Interrupted;
    --  Raise Interrupted once a termination signal has been recorded.

@@ -8,7 +8,7 @@ Entries are ordered by topic filename.
 | [Library API and metadata contracts](api-hardening.md) | Accepted in `089b32b` (PR #12) |
 | [Archive creation CLI](archive-cli.md) | Accepted in `a7c4735` (PR #7) |
 | [Repository bootstrap](bootstrap.md) | Accepted in `e2c1bd3` (PR #1) |
-| [CLI diagnostics, arguments and cancellation](cli-polish.md) | Planned |
+| [CLI diagnostics, arguments and cancellation](cli-polish.md) | Implemented and verified locally |
 | [Repository-wide Ada coding style](coding-style.md) | Accepted in `03a2a07` (PR #8) |
 | [CPIO extraction](cpio-extraction.md) | Accepted in `b7d8beb` (PR #3) |
 | [Documentation status and reader guidance](docs-cleanup.md) | Implemented and verified locally |

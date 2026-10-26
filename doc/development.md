@@ -97,16 +97,25 @@ platform is 64-bit Linux; the reference validation uses AMD64 Trixie.
 GNAT supplies path normalization and a raw directory-name iterator. The
 higher-level Ada.Directories search also queries modification times through
 an API that rejects dangling links and special nodes. The raw iterator lets
-the CLI inspect every name with lstat. The only C wrapper,
+the CLI inspect every name with lstat. The production C bridge,
 `cli/src/posix_bridge.c`, converts lstat metadata to a fixed-width record and
-keeps platform stat layout and type/device macros behind that boundary.
+keeps platform stat layout, type/device macros, errno values and rename flags
+behind that boundary. An independent C header probe checks exported constants.
 readlink, mkdtemp, rename and renameat2 are direct Ada bindings; errno is
 captured before allocating diagnostic strings, and readlink's returned byte
 count determines the target slice without assuming a NUL terminator.
-SIGINT/SIGTERM handlers and their shared signal state use an Ada protected
+SIGHUP/SIGINT/SIGTERM handlers and their signal state use an Ada protected
 object, following the existing Abuild pattern through independently authored
 CLI code. No Abuild helper is imported. See the [CLI guide](cli.md) for the
 stable-input contract, format limits and cancellation boundaries.
+
+`Archive_CLI.Diagnostics` retains CLI-generated text outside the runtime's
+bounded exception message. Run resets this process-owned state before each
+sequential invocation; interrupt handlers never access it. Stored text is
+associated with its CLI exception identity, while other exceptions use their
+runtime text or name. Only final diagnostic output escapes control bytes and
+backslash, preserving source and archive bytes. Output-basename checks run
+in the argument parser before the writer can inspect the filesystem.
 
 `examples/client/client.gpr` imports the project by name. The installation
 check copies this client, including CPIO and TAR writer record components,

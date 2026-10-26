@@ -78,6 +78,11 @@ because output staging may change an input directory's timestamp.
 
 ## Output and failure behavior
 
+The output must name a file. `.`, `..`, `/`, paths ending in `/.` or `/..`,
+and a trailing slash are argument errors (exit 2), rejected before filesystem
+access. A missing output parent or one that is not a directory remains a
+filesystem error (exit 1), with a diagnostic identifying the output parent.
+
 The output's parent directory must already exist. A destination inside the
 input tree is excluded by its resolved parent and basename. This excludes
 only the specified destination, not other archives from previous runs.
@@ -101,17 +106,24 @@ when using `--force`.
 Errors before publication preserve the previous output. Directory-read
 errors abort inventory instead of being treated as its end. Entry diagnostics
 retain the underlying exception message, or its name when no message exists.
+CLI-generated diagnostics retain their complete context beyond GNAT's bounded
+exception-message length. Output escapes bytes below 0x20 and DEL as `\xNN`,
+and backslash as `\\`, so a filename cannot split a diagnostic into lines or
+be confused with an escape. Other bytes, source names and archive names are
+unchanged.
+
 Normal unwinding attempts staging removal. Cleanup is best effort: failure
 can leave a private staging directory, but never masks an earlier error or
 turns successful publication into failure.
-SIGINT and SIGTERM request controlled cleanup at the next filesystem or entry
+SIGHUP, SIGINT and SIGTERM request cleanup at the next filesystem or entry
 boundary; a synchronous payload copy may finish before the request is observed.
 SIGKILL, a process crash or power loss cannot guarantee cleanup. Atomic
 publication does not promise durable storage after a power failure.
 
 Successful commands return 0. Argument/environment errors return 2;
-filesystem or writer errors return 1. A handled SIGINT returns 130 and
-SIGTERM returns 143. Diagnostics go to standard error. Compression, listing,
+filesystem or writer errors return 1. Handled SIGHUP, SIGINT and SIGTERM return
+129, 130 and 143 respectively. Help lists the options, `=VALUE` form and these
+exit statuses. Diagnostics go to standard error. Compression, listing,
 extraction, streaming to stdout and selection manifests are future work.
 
 ## Validation
@@ -121,7 +133,7 @@ format suites. They inspect raw output with independent decoders and extract
 it with GNU cpio/tar and libarchive's bsdtar. Fixtures cover metadata limits,
 source hardlinks, Unicode names, dangling and directory symlinks, FIFOs,
 reproducibility, empty trees, installed execution and parallel processes.
-Phase-controlled tests exercise SIGINT/SIGTERM cancellation, changed input and
+Phase-controlled tests exercise SIGHUP/SIGINT/SIGTERM, changed input and
 a destination created just before publication. A test-only child barrier
 confirms inventory completion and holds emission until explicitly released.
 Cancellation cases also confirm completed signal handling before release.
@@ -135,6 +147,10 @@ special permission bits. A child-only preload library injects directory-read,
 write, publication and cleanup errors, including unsupported rename and
 ambiguous NFS-style link replies. These tests exercise local syscall behavior;
 they do not claim an integration run against an NFS server.
+Additional controls require complete long-path diagnostics, display escaping
+without changing archive names, early output-syntax rejection and help that
+contains every documented option and exit status. Exported bridge constants
+must match an independent program compiled against the target's C headers.
 
 `make coverage` instruments both Ada and C CLI bodies. The inventory gate
 requires executed lines for every production body and does not claim complete
