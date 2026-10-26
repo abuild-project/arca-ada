@@ -15,7 +15,7 @@ archives. Named [Ahven unit suites](doc/unit-tests.md) test library contracts.
 Finalizer regressions cover nonregular outputs and failed deletion without
 masking caller exceptions. Library, CLI and test builds enable full validity and
 stack checks alongside the existing Ada checks.
-There is no stable format API or published release yet.
+The public API is in its `0.y` development phase; no release is published yet.
 
 Writers expose tagged limited private types with implicit scope cleanup.
 CPIO entry operations select the file type and retain only caller permission
@@ -37,6 +37,36 @@ CPIO and TAR retain Abuild's format behaviour and add standalone resource
 ownership. VFAT, EXT2 and ISO are later candidates. OCI requires
 additional infrastructure decoupling. A native SquashFS writer remains
 subject to its separate backend decision.
+
+## Version and compatibility
+
+Arca uses [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
+The single operative version is `Arca.Version.Value` in
+[arca-version.ads](src/arca-version.ads); `arca --version` reports it as
+`arca VERSION`. The first planned release is `0.1.0`; development sources
+carry a prerelease identifier until the release is prepared.
+
+Public library interfaces are `Arca`, `Arca.CPIO`, `Arca.TAR` and the version
+metadata in `Arca.Version`. `Arca.Binary_IO` is private; CLI implementation,
+tests and development helpers are outside the library API.
+Arca's policy for published `0.y.z` releases is source compatibility within
+one minor line: patch releases preserve documented calls, exception contracts,
+CLI options and exit statuses. Valid archive inputs retain their documented
+format semantics. Diagnostic wording and help layout are not machine-readable
+interfaces. Incompatible changes advance the minor line and appear
+under **Breaking changes** in the changelog with migration guidance.
+Development prereleases remain provisional; pin a revision for source builds.
+No binary ABI compatibility is promised: rebuild the library and consumers
+with a consistent toolchain when updating.
+
+## Supported platforms
+
+The supported reference is 64-bit Linux/AMD64, Debian 13 (Trixie), with
+GNAT 14. Library conversions require 64-bit `Long_Integer` and
+`Interfaces.C.long`; the CLI also requires the 64-bit Linux C ABI. 32-bit and
+non-Linux platforms are outside this scope. ARM64 can be selected through the
+development wrappers but has not been validated. Other compiler or target
+combinations require their own evidence before support is claimed.
 
 ## Build and check
 

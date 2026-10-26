@@ -4,6 +4,8 @@
 derived from the Abuild writer under
 [GPL-2.0-or-later](licensing.md). Public operation names and
 metadata arguments retain the predecessor's API without Abuild dependencies.
+The [compatibility and platform policy](../README.md#version-and-compatibility)
+applies to this public interface.
 
 ## Format and inputs
 

@@ -2,9 +2,9 @@
 
 `Arca.TAR` writes the native Abuild TAR profile independently of Abuild types,
 configuration, logging and scheduling. It retains Abuild's
-[GPL-2.0-or-later licence](licensing.md). The API is not
-versioned as stable yet. Compression and Abuild transformation adapters are
-separate consumers.
+[GPL-2.0-or-later licence](licensing.md). The public interface follows the
+[version and compatibility policy](../README.md#version-and-compatibility).
+Compression and Abuild transformation adapters are separate consumers.
 
 ## Use
 

@@ -16,6 +16,7 @@ Entries are ordered by topic filename.
 | [LGPL licensing](lgpl-licensing.md) | Historical project licence, additional import grant and installed notices; superseded by GPL licensing | `1bca4a7` |
 | [Consumer build profiles and installation](packaging.md) | Consumer compiler policy, Ahven-free cleanup and named uninstallable manifests | `d3f0574` |
 | [Publication preparation](publication-prep.md) | Security reporting, publication audit and explicit owner gates | `b5c0f11` |
+| [Version, compatibility and release procedure](release-basics.md) | Public version metadata, compatibility/platform policy, release workflow and diagnostic source guard | pending |
 | [Standalone TAR writer](tar-extraction.md) | Native writer extraction, ownership and independent validation | `3914462` |
 | [Writer finalization and compiler checks](writer-cleanup.md) | Best-effort discard/close, failure regressions and stronger library/test compilation | `52ead53` |
 | [Archive writer provenance](writer-provenance.md) | Historical CPIO/TAR source inventory and additional LGPL grant; superseded by GPL licensing | `1bca4a7` |

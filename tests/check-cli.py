@@ -311,6 +311,46 @@ class CLIChecks(unittest.TestCase):
         for status in (0, 1, 2, 129, 130, 143):
             self.assertRegex(help_text, rb"\b" + str(status).encode() + rb"\b")
 
+    def test_version_matches_public_package(self):
+        result = self.invoke(["--version"])
+        version = re.fullmatch(
+            rb"arca (([0-9]+\.[0-9]+\.[0-9]+)"
+            rb"(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?"
+            rb"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)\n", result.stdout)
+        self.assertIsNotNone(version, result.stdout)
+        for number in version[2].split(b"."):
+            self.assertTrue(number == b"0" or not number.startswith(b"0"))
+        for identifier in (version[3] or b"").split(b"."):
+            if identifier.isdigit():
+                self.assertTrue(identifier == b"0" or not identifier.startswith(b"0"))
+        source = (ROOT / "src/arca-version.ads").read_text()
+        values = re.findall(r'\bValue\s*:\s*constant\s+String\s*:=\s*"([^"]+)"\s*;',
+                            source, flags=re.IGNORECASE)
+        self.assertEqual(len(values), 1)
+        self.assertEqual(result.stdout, b"arca " + values[0].encode("ascii") + b"\n")
+
+    def test_cli_error_raises_are_centralized(self):
+        # Mask Ada strings, character literals and comments, preserving line
+        # positions so documentation examples cannot trigger the code guard.
+        literals = re.compile(r"\"(?:[^\"\n]|\"\")*\"|'[^\n]'|--[^\n]*")
+        raises = re.compile(
+            r"\braise\s+(?:[A-Za-z][A-Za-z0-9_]*\s*\.\s*)*"
+            r"(Command_Error|Usage_Error)\b", flags=re.IGNORECASE)
+        permitted = set()
+        violations = []
+        for path in sorted((ROOT / "cli/src").iterdir()):
+            if path.suffix not in (".ads", ".adb"):
+                continue
+            code = literals.sub(lambda item: " " * len(item[0]), path.read_text())
+            for match in raises.finditer(code):
+                if path.name == "archive_cli-diagnostics.adb":
+                    permitted.add(match[1].lower())
+                else:
+                    line = code[:match.start()].count("\n") + 1
+                    violations.append((path.name, line, match[1]))
+        self.assertEqual(permitted, {"command_error", "usage_error"})
+        self.assertEqual(violations, [], "CLI failures must use Diagnostics.Fail_*")
+
     def test_no_replace_fallback(self):
         root = self.tree()
         for format_name in ("cpio", "tar"):
@@ -661,7 +701,6 @@ class CLIChecks(unittest.TestCase):
 
     def test_help_and_invalid_options(self):
         self.assertIn(b"arca create", self.invoke(["--help"]).stdout)
-        self.assertIn(b"arca development", self.invoke(["--version"]).stdout)
         bad = [[], ["extract"], ["create"],
                ["create", "--format", "zip", "-o", "out"],
                ["create", "--format", "tar", "-o", "-"],

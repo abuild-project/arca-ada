@@ -61,6 +61,12 @@ for format in cpio tar; do
     test -s "$scratch/installed.$format"
 done
 tar -xOf "$scratch/installed.tar" payload | cmp - "$scratch/cli input/payload"
+version_output=$("$scratch/prefix/bin/arca" --version)
+case "$version_output" in
+    'arca '*) version=${version_output#'arca '} ;;
+    *) printf 'Unexpected installed CLI version: %s\n' "$version_output" >&2; exit 1 ;;
+esac
+test -n "$version"
 mkdir -p "$scratch/client"
 cp "$repo_root/examples/client/client.gpr" \
     "$repo_root/examples/client/arca_client.adb" "$scratch/client/"
@@ -73,7 +79,7 @@ cp "$repo_root/examples/client/client.gpr" \
         -aP"$scratch/prefix/share/gpr" -j"$num_cpus"
     output=$(./bin/arca_client "$scratch/client/smoke.cpio" \
         "$scratch/client/smoke.tar" "$scratch/client/long-name.tar")
-    test "$output" = 'Arca project import succeeded'
+    test "$output" = "Arca project import succeeded ($version)"
     test -s "$scratch/client/smoke.cpio"
     grep -a -q '^070701' "$scratch/client/smoke.cpio"
     grep -a -q 'TRAILER!!!' "$scratch/client/smoke.cpio"

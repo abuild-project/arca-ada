@@ -1,6 +1,6 @@
 # Version, compatibility and release procedure
 
-Status: Planned on `codex/release-basics`.
+Status: Implemented and verified locally on `codex/release-basics`.
 
 Base revision: `953a257c1fcc235eb78aeaa8fb39b938f54342c0`.
 
@@ -40,5 +40,17 @@ Base revision: `953a257c1fcc235eb78aeaa8fb39b938f54342c0`.
    consumers, mutation sensitivity and unchanged CLI/writer archive bytes.
 4. Complete author review, push and open a separate pull request; request
    Copilot and wait. Do not merge, tag, publish, transfer or change visibility.
+
+## Progress
+
+The version check rejects the baseline stub and passes with the public
+constant. Ordinary, installed and extending-project consumers report the same
+value. Valid-Ada command and usage bypasses are rejected by the source guard;
+an isolated constant change propagates to CLI and installed-client output.
+The development source archive and its checksum are verified. Coverage and
+the complete check pass in that order on freshly unpacked sources without
+Git metadata or build output. Preserved archives remain byte-identical.
+Author review and consumer-view diagnostics are complete. The version retains
+its development suffix; tagging and publication are not performed.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

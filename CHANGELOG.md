@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add a single public development-version constant and use it in CLI and
+  installed-client output; document compatibility, platforms and releases.
+- Guard centralized CLI exception raises against accidental bypasses.
 - Retain complete CLI diagnostic context, escape control bytes for display
   and reject directory-only output spellings as argument errors.
 - Read target errno and rename constants through the C bridge; handle SIGHUP

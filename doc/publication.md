@@ -42,11 +42,8 @@ treat GitHub redirects as the only permanent dependency configuration.
 
 ## First release
 
-Choose an API/version policy and supported platform scope before tagging.
-Document the 64-bit Linux CLI and the reference AMD64 Trixie validation;
-selecting an ARM wrapper is not evidence that ARM was tested. Pin the
-released source revision and review source/archive and binary inventories.
-Provide the complete corresponding source of any distributed binary,
-including the applicable build/install scripts, as described in the
-[licensing guide](licensing.md). GPRinstall notices alone do not supply it.
-Release automation and an Alire index submission are separate changes.
+Follow the [release procedure](release.md) after the publication gates and
+the maintainer's explicit release decision. It defines version promotion,
+the accepted source revision, platform evidence, annotated tags, source
+archives/checksums and corresponding-source delivery. Release automation and
+Alire submission remain separate changes.

@@ -16,7 +16,7 @@ Entries are ordered by topic filename.
 | [LGPL licensing](lgpl-licensing.md) | Accepted in `1bca4a7` (PR #2); superseded by GPL licensing in `2091ca9` |
 | [Consumer build profiles and installation](packaging.md) | Accepted in `d3f0574` (PR #13) |
 | [Publication preparation](publication-prep.md) | Accepted in `b5c0f11` (PR #9); publication gates remain open |
-| [Version, compatibility and release procedure](release-basics.md) | Planned |
+| [Version, compatibility and release procedure](release-basics.md) | Implemented and verified locally |
 | [TAR extraction](tar-extraction.md) | Accepted in `3914462` (PR #4) |
 | [Writer cleanup and compiler checks](writer-cleanup.md) | Accepted in `52ead53` (PR #6) |
 | [Writer extraction](writer-extraction.md) | CPIO `b7d8beb`, TAR `3914462`, Ahven `6f1514a` and CLI `a7c4735` accepted; local integration experiment complete; pinned Abuild integration and later writers pending |

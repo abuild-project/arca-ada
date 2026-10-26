@@ -2,9 +2,11 @@
 
 ## Reference environment
 
-Validate changes in Debian 13 (Trixie), using GNAT and GPRbuild. The development
-Dockerfile installs build tools while constructing the image. Runtime build
-and test steps do not install packages. The launcher maps the invoking user
+Validate on 64-bit AMD64 Debian 13 (Trixie), using GNAT 14 and GPRbuild. The
+supported [platform scope](../README.md#supported-platforms) requires 64-bit
+Long_Integer and Interfaces.C.long. The development Dockerfile installs build
+tools while constructing the image. Runtime build and test steps do not
+install packages. The launcher maps the invoking user
 and group into the container and supplies `HOME=/tmp`.
 
 ```sh
@@ -87,6 +89,15 @@ used stream-copy operation and best-effort cleanup shared by both writers.
 Do not add empty API promises for proposed format packages. Introduce each API
 with its writer, documented constraints and independent tests.
 
+`Arca.Version.Value` is a pure package constant and the only operative source
+of the project version. `arca.gpr` exports that unit as library metadata.
+CLI output and the example client use it directly, including copied installed
+consumers and the regular static extending-project consumer. Adding the pure
+unit preserves the extending project's empty interface override and consumer
+binder ownership. It introduces no package body or coverage-inventory entry.
+The [compatibility policy](../README.md#version-and-compatibility) defines the
+public API; [release.md](release.md) describes maintainer release actions.
+
 `cli/cli.gpr` imports the library and builds `cli/bin/arca`. Argument policy,
 filesystem inventory and hardlink maps belong to this CLI consumer. Its Ada
 containers are invocation-local and used sequentially; integration tests run
@@ -116,6 +127,10 @@ associated with its CLI exception identity, while other exceptions use their
 runtime text or name. Only final diagnostic output escapes control bytes and
 backslash, preserving source and archive bytes. Output-basename checks run
 in the argument parser before the writer can inspect the filesystem.
+Explicit raises of Command_Error and Usage_Error belong in the diagnostic
+owner. The CLI source check rejects these raise statements elsewhere, including
+qualified names, while ignoring comments and literals. This guards the named
+exception paths against bypassing full diagnostic storage.
 
 `examples/client/client.gpr` imports the project by name. The installation
 check copies this client, including CPIO and TAR writer record components,
