@@ -5,7 +5,7 @@ Entries are ordered by topic filename.
 | Record | Scope | Accepted |
 | --- | --- | --- |
 | [Ahven unit suites](ahven-unit-tests.md) | Named direct contracts, shared scenarios and runner failure controls | `6f1514a` |
-| [Library API and metadata contracts](api-hardening.md) | Private TAR lifecycle, CPIO permissions, timestamp errors and installed metadata | pending |
+| [Library API and metadata contracts](api-hardening.md) | Private TAR lifecycle, CPIO permissions, timestamp errors and installed metadata | `089b32b` |
 | [Archive creation CLI](archive-cli.md) | Filesystem inventory, metadata/link policy, atomic output and independent CLI tests | `a7c4735` |
 | [Repository bootstrap](bootstrap.md) | Independent project and development infrastructure | `e2c1bd3` |
 | [Repository-wide Ada coding style](coding-style.md) | Agent-discoverable rules, source modernization and compiler gates with sensitivity controls | `03a2a07` |
