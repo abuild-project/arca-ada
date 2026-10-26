@@ -1,6 +1,6 @@
 # Library API and metadata contracts
 
-Status: Planned on `codex/api-hardening`.
+Status: Implemented and verified locally on `codex/api-hardening`.
 
 Base revision: `0da408688b04bfc27da4cd9072c2b513a9891679`.
 
@@ -33,5 +33,16 @@ Base revision: `0da408688b04bfc27da4cd9072c2b513a9891679`.
    Packaging, CLI polish and release basics start only after this topic is
    accepted. Tags, releases and the final version change remain maintainer
    actions.
+
+## Progress
+
+Focused lifecycle, full-mode and timestamp checks reject the baseline and
+pass with the library corrections. Record-component consumers work through
+the ordinary project and the installed regular static extending-project
+view. The installed GNU metadata case already works on the baseline, so
+no library-project change is needed. Coverage and the complete check pass
+in that order on fresh committed sources. The preserved valid archive corpus
+is byte-identical and fixture files are unchanged. An isolated one-year
+epoch mutation is rejected by the installed GNU metadata check.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

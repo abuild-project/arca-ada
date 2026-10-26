@@ -17,6 +17,11 @@ masking caller exceptions. Library, CLI and test builds enable full validity and
 stack checks alongside the existing Ada checks.
 There is no stable format API or published release yet.
 
+Writers expose tagged limited private types with implicit scope cleanup.
+CPIO entry operations select the file type and retain only caller permission
+bits. Unsupported timestamps raise the writer's metadata exception, including
+calendar-conversion failures.
+
 The initial CLI targets 64-bit Linux. After building in the reference
 environment, create an archive with:
 
@@ -75,7 +80,8 @@ Preflight regression checks cover selected and missing build-tool overrides.
 Installation regressions cover relative builder paths and relative PATH
 entries across the isolated client's directory change.
 Make recipe regressions cover selected executable paths containing spaces.
-These are packaging checks, not format-conformance tests.
+These checks cover packaging and installed-library initialization, including
+GNU long-name metadata. Separate format suites check archive conformance.
 
 The same target runs Ahven suites and separately checks CPIO and TAR layout,
 payloads, external readers, reproducibility, errors and lifetime behavior.

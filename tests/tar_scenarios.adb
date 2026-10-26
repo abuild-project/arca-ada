@@ -358,6 +358,9 @@ package body TAR_Scenarios is
          Stamp := Ada.Calendar.Formatting.Time_Of
            (2242, 3, 16, Seconds => 46_592.0, Time_Zone => 0);
          Expect_Error (Add_Metadata'Access, Unsupported_Metadata'Identity);
+         Stamp := Ada.Calendar.Formatting.Time_Of
+           (2300, 1, 1, Seconds => 0.0, Time_Zone => 0);
+         Expect_Error (Add_Metadata'Access, Unsupported_Metadata'Identity);
          Stamp := Fixed_Time;
          UID := Max_Field + 1;
          Expect_Error (Add_Metadata'Access, Unsupported_Metadata'Identity);
@@ -531,6 +534,15 @@ package body TAR_Scenarios is
          Write_Aligned;
       elsif Mode = "owners" then
          Write_Owners;
+      elsif Mode = "installed-long" then
+         declare
+            Archive : TAR_Archive_Type;
+         begin
+            TAR_Create (Archive, Work & "/installed-long.tar");
+            TAR_Make_Directory
+              (Archive, (1 .. 101 => 'n'), 8#755#, 0, 0, Epoch);
+            TAR_Close (Archive);
+         end;
       elsif Mode = "errors" or else Mode = "state" then
          Check_Errors;
       elsif Mode = "parallel" then

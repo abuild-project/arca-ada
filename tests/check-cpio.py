@@ -135,6 +135,17 @@ class CPIOChecks(unittest.TestCase):
     def test_raw_entries(self):
         self.check_entries(self.archive)
 
+    def test_operation_types_and_full_modes(self):
+        self.run_driver("full-modes")
+        entries = decode_newc((self.work / "full-modes.cpio").read_bytes())
+        expected = {"dir": 0o40755, "file": 0o100640, "hard": 0o100640,
+                    "sym": 0o120777, "fifo": 0o10620, "block": 0o60600,
+                    "character": 0o20660, "all-permissions": 0o47777}
+        self.assertEqual(set(entries), set(expected))
+        for name, mode in expected.items():
+            with self.subTest(entry=name):
+                self.assertEqual(entries[name]["mode"], mode)
+
     def check_raw_records(self, data):
         """Pin the predecessor's short 512-byte record layout independently."""
         entries = decode_newc(data)

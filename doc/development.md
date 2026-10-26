@@ -105,11 +105,15 @@ CLI code. No Abuild helper is imported. See the [CLI guide](cli.md) for the
 stable-input contract, format limits and cancellation boundaries.
 
 `examples/client/client.gpr` imports the project by name. The installation
-check copies this client, including its CPIO and TAR type use, into a private
-scratch directory, removes inherited Ada/GPR search paths, and discovers Arca only
-through the installed prefix. It creates and closes CPIO and TAR archives
+check copies this client, including CPIO and TAR writer record components,
+into a private scratch directory, removes inherited Ada/GPR search paths,
+and discovers Arca only through the installed prefix. It creates and closes
+CPIO and TAR archives
 through the installed APIs, checks the newc header/trailer and compares the
-empty TAR output with exactly two zero blocks.
+empty TAR output with exactly two zero blocks. It also emits a GNU long-name
+record, compares the complete output with the source-built TAR driver and
+checks that the synthetic record's mtime is the UTC UNIX epoch. This exercises
+package initialization through the installed static library.
 It cleans that scratch directory on success, failure and handled signals.
 The selected builder is resolved to an absolute executable path in the
 caller's initial directory before entering the copied client. This preserves
@@ -119,6 +123,13 @@ the selected executable actually runs in the copied client's directory.
 After the successful build, hiding the installed project must produce the
 specific missing-import diagnostic. This negative control verifies that
 the consumer cannot silently fall back to the original source project.
+
+`tests/check-api.py` builds record-component clients against the ordinary
+library and an installed regular static extending-project view, matching
+Abuild's binder ownership without importing Abuild. Compiler negative
+controls reject direct lifecycle calls, controlled-parent conversion and
+attempted lifecycle overrides. Selected build and installation executables
+are resolved before entering the private consumer directories.
 
 The consumer check establishes GPR packaging and compiler/linker usability.
 The separate CPIO and TAR suites check raw layout, payloads, two external

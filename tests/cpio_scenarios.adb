@@ -29,6 +29,9 @@ package body CPIO_Scenarios is
       procedure Write_Raw;
       --  Emit the short symlink/file pair with all three-byte payload padding.
 
+      procedure Write_Full_Modes;
+      --  Keep operation-selected types with caller type and permission bits.
+
       procedure Check_Errors;
       --  Pin unopened, source, size and timestamp failures before continuing.
 
@@ -98,6 +101,34 @@ package body CPIO_Scenarios is
             1, CPIO_Get_Next_Inode (Archive), Epoch);
          CPIO_Close (Archive);
       end Write_Raw;
+
+      -------------------------------------------------------------------------
+
+      procedure Write_Full_Modes
+      is
+         Archive : CPIO_Archive_Type;
+         Inode   : Inode_Type;
+      begin
+         CPIO_Create (Archive, Work & "/full-modes.cpio");
+         CPIO_Make_Directory
+           (Archive, "dir", 8#100755#, 17, 23, Fixed_Time);
+         Inode := CPIO_Get_Next_Inode (Archive);
+         CPIO_Make_File
+           (Archive, "file", Work & "/empty.bin", 8#040640#, 17, 23,
+            2, Inode, Fixed_Time);
+         CPIO_Make_Link
+           (Archive, "hard", 8#040640#, 17, 23, 2, Inode, Fixed_Time);
+         CPIO_Make_Symlink
+           (Archive, "sym", "file", 8#060777#, 17, 23, Fixed_Time);
+         CPIO_Make_FIFO (Archive, "fifo", 8#100620#, 17, 23, Fixed_Time);
+         CPIO_Make_Blockdevice
+           (Archive, "block", 8#100600#, 17, 23, 21, 5, Fixed_Time);
+         CPIO_Make_Chardevice
+           (Archive, "character", 8#100660#, 17, 23, 5, 12, Fixed_Time);
+         CPIO_Make_Directory
+           (Archive, "all-permissions", Unsigned_32'Last, 17, 23, Fixed_Time);
+         CPIO_Close (Archive);
+      end Write_Full_Modes;
 
       -------------------------------------------------------------------------
 
@@ -227,6 +258,11 @@ package body CPIO_Scenarios is
             "CPIO mtime outside supported UNIX timestamp range");
          Stamp := Ada.Calendar.Formatting.Time_Of
            (2106, 2, 7, Seconds => 23_296.0, Time_Zone => 0);
+         Expect_Failure
+           (Add_Directory'Access, Unsupported_Metadata'Identity,
+            "CPIO mtime outside supported UNIX timestamp range");
+         Stamp := Ada.Calendar.Formatting.Time_Of
+           (2300, 1, 1, Seconds => 0.0, Time_Zone => 0);
          Expect_Failure
            (Add_Directory'Access, Unsupported_Metadata'Identity,
             "CPIO mtime outside supported UNIX timestamp range");
@@ -381,6 +417,8 @@ package body CPIO_Scenarios is
          Write_Entries (Work & "/entries.cpio");
       elsif Mode = "raw" then
          Write_Raw;
+      elsif Mode = "full-modes" then
+         Write_Full_Modes;
       elsif Mode = "empty" then
          declare
             Archive : CPIO_Archive_Type;

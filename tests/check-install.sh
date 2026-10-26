@@ -45,7 +45,7 @@ cp "$repo_root/examples/client/client.gpr" \
     "$gprbuild_command" -p -P client.gpr \
         -aP"$scratch/prefix/share/gpr" -j"$num_cpus"
     output=$(./bin/arca_client "$scratch/client/smoke.cpio" \
-        "$scratch/client/smoke.tar")
+        "$scratch/client/smoke.tar" "$scratch/client/long-name.tar")
     test "$output" = 'Arca project import succeeded'
     test -s "$scratch/client/smoke.cpio"
     grep -a -q '^070701' "$scratch/client/smoke.cpio"
@@ -54,6 +54,20 @@ cp "$repo_root/examples/client/client.gpr" \
     test "$(wc -c < "$scratch/client/smoke.tar")" -eq 1024
     dd if=/dev/zero bs=512 count=2 2>/dev/null | \
         cmp - "$scratch/client/smoke.tar"
+
+    # Compare the installed binder's GNU metadata with the source-built driver.
+    mkdir -p "$scratch/reference"
+    "$repo_root/tests/bin/tar_driver" installed-long "$scratch/reference"
+    cmp "$scratch/reference/installed-long.tar" "$scratch/client/long-name.tar"
+    python3 - "$scratch/client/long-name.tar" <<'PY'
+from pathlib import Path
+import sys
+
+archive = Path(sys.argv[1]).read_bytes()
+assert archive[156:157] == b"L", "installed consumer omitted GNU long name"
+assert archive[136:148] == b"00000000000\0", "GNU metadata mtime is not epoch"
+assert archive[512:615] == b"n" * 101 + b"/\0", "GNU long-name payload differs"
+PY
 
     # A missing install must fail even while the original sources exist.
     mv "$scratch/prefix/share/gpr/arca.gpr" \
