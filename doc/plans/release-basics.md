@@ -41,18 +41,6 @@ Base revision: `953a257c1fcc235eb78aeaa8fb39b938f54342c0`.
 4. Complete author review, push and open a separate pull request; request
    Copilot and wait. Do not merge, tag, publish, transfer or change visibility.
 
-## Release command clarification on 2026-10-27
-
-- Confine the copyable release commands to subshells so a failed prerequisite
-  stops the block without changing or closing the calling shell.
-- Include an explicit push of the verified release tag to the confirmed
-  origin. Each command block defines its own example version because
-  subshell variables do not survive in the caller.
-- Separate the existing TAR parent-interface break from other Unreleased
-  changes and include its migration path before version promotion.
-- Check shell failure handling and artifact/tag commands in disposable local
-  repositories with Bash and Zsh; leave the project version and tags alone.
-
 ## Progress
 
 The version check rejects the baseline stub and passes with the public
@@ -69,5 +57,17 @@ The release blocks pass Bash and Zsh syntax and execution checks in disposable
 local repositories. Failure controls preserve the caller and stop before tag
 creation; the successful path verifies the annotated tag, reproducible gzip,
 checksum and a push containing only that tag to a local bare origin.
+
+## Release command clarification on 2026-10-27
+
+- Confine the copyable release commands to subshells so a failed prerequisite
+  stops the block without changing or closing the calling shell.
+- Include an explicit push of the verified release tag to the confirmed
+  origin. Each command block defines its own example version because
+  subshell variables do not survive in the caller.
+- Separate the existing TAR parent-interface break from other Unreleased
+  changes and include its migration path before version promotion.
+- Check shell failure handling and artifact/tag commands in disposable local
+  repositories with Bash and Zsh; leave the project version and tags alone.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
