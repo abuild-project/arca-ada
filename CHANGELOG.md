@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Breaking changes
+
+- Hide the controlled parent and lifecycle hooks of `TAR_Archive_Type`.
+  Callers using parent conversions or explicit `Initialize`/`Finalize` calls
+  or overrides must use the writer API and implicit cleanup instead.
+
+### Changes
+
+- Add a single public development-version constant and use it in CLI and
+  installed-client output; document compatibility, platforms and releases.
+- Guard centralized CLI exception raises against accidental bypasses.
 - Retain complete CLI diagnostic context, escape control bytes for display
   and reject directory-only output spellings as argument errors.
 - Read target errno and rename constants through the C bridge; handle SIGHUP
@@ -12,8 +23,8 @@
 - Clean test outputs without Ahven, retain reports and installations under
   `build/`, and support manifest-based uninstall with CLI name `arca-cli`.
 - Retain Makefile-defined tool selections in recursive installation checks.
-- Hide TAR lifecycle hooks, normalize CPIO permission bits and report
-  unrepresentable timestamps through the format-specific metadata exception.
+- Normalize CPIO permission bits and report unrepresentable timestamps through
+  the format-specific metadata exception.
 - Check installed GNU long-name initialization and writer record components
   through ordinary and extending library projects.
 - Record accepted topics by merge commit and clarify reader, integration

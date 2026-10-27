@@ -19,6 +19,9 @@ Packaging checks cover consumer/validation compiler profiles, dependency-free
 cleanup, named installation manifests and uninstall/reinstall behavior.
 CLI checks cover complete escaped diagnostics, output argument precedence,
 header-derived constants, documented help and acknowledged SIGHUP cleanup.
+Version controls compare CLI output with the public package constant and
+require matching installed-client metadata. A source guard keeps explicit
+CLI exception raises in the diagnostic owner, ignoring comments and literals.
 
 Build the image after changes to its packages, then use the normal check:
 

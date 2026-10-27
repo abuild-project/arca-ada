@@ -2,6 +2,7 @@
 
 with Ada.Command_Line;
 with Ada.Text_IO;
+with Arca.Version;
 with Archive_CLI.Diagnostics;
 with Archive_CLI.Filesystem;
 with Archive_CLI.Options;
@@ -22,7 +23,7 @@ package body Archive_CLI is
                Options.Print_Help;
 
             when Options.Version_Command =>
-               Ada.Text_IO.Put_Line ("arca development");
+               Ada.Text_IO.Put_Line ("arca " & Arca.Version.Value);
 
             when Options.Create_Command =>
                Filesystem.Install_Signals;

@@ -30,7 +30,7 @@ cli/bin/arca --help
 | `--mtime SECONDS` | Override all entry times with UNIX epoch seconds |
 | `--force` | Allow replacement of an existing regular file or symlink |
 | `--help`, `-h` | Display help |
-| `--version` | Display the development version |
+| `--version` | Print the project version as `arca VERSION` |
 
 Value options accept either a separate argument or `=VALUE`. Repeating an
 option is an error. Numeric options accept ASCII decimal digits only, without

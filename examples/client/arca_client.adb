@@ -7,8 +7,9 @@ with Arca.CPIO;
 pragma Elaborate_All (Arca.CPIO);
 with Arca.TAR;
 pragma Elaborate_All (Arca.TAR);
+with Arca.Version;
 
---  Verify that an independent client can import and link the Arca project.
+--  Verify project import, writer ownership and public version metadata.
 procedure Arca_Client
 is
    type Writer_Record is limited record
@@ -37,5 +38,6 @@ begin
       Arca.TAR.TAR_Close (Writers.TAR);
    end if;
 
-   Ada.Text_IO.Put_Line ("Arca project import succeeded");
+   Ada.Text_IO.Put_Line
+     ("Arca project import succeeded (" & Arca.Version.Value & ")");
 end Arca_Client;

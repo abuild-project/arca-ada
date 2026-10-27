@@ -1,6 +1,6 @@
 # CLI diagnostics, arguments and cancellation
 
-Status: Implemented and verified locally on `codex/cli-polish`.
+Status: Accepted in `953a257` (PR #14) on 2026-10-26.
 
 Base revision: `d3f0574b37c68907206e59c7beff01d85b51ee88`.
 
