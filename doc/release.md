@@ -37,6 +37,7 @@ tag on that commit. The following example is for the first release and runs
 in the maintainer's clean `main` checkout after the version change above:
 
 ```sh
+(
 set -eu
 release_version=0.1.0
 release_revision=$(git rev-parse HEAD)
@@ -61,7 +62,11 @@ digest = hashlib.sha256(archive.read_bytes()).hexdigest()
 archive.with_name(archive.name + ".sha256").write_text(
     digest + "  " + archive.name + "\n")
 PY
+)
 ```
+
+The subshell confines shell options and temporary variables to this block.
+A failed prerequisite stops the block without closing the calling shell.
 
 Confirm that the tag resolves to the selected commit and that its name agrees
 with the source version. Keep a released tag and its contents immutable;
@@ -80,6 +85,19 @@ Publish the annotated tag and source archive/checksum only after an explicit
 maintainer decision and successful artifact validation. Confirm the verified
 destination, permissions and effective repository protection. Keep the
 source revision, tag, artifact digest and validation evidence together.
+
+For the first release, push the verified tag explicitly to the confirmed
+`origin` destination:
+
+```sh
+(
+set -eu
+release_version=0.1.0
+git push origin "refs/tags/v$release_version"
+)
+```
+
+Upload the validated source archive and checksum with the release assets.
 
 If binaries are distributed, provide their complete corresponding source for
 the exact shipped version, including the applicable build/install inputs,

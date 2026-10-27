@@ -25,6 +25,13 @@ The publication checklist links to it. The development suffix remains in the
 source; version promotion, tag and publication actions remain maintainer
 decisions. The workflow documents rather than performs those actions.
 
+Copyable release blocks run in subshells, confining shell options and
+temporary variables. Failed prerequisites stop the block while preserving
+the calling shell. Publication includes an explicit push of the verified
+tag to the confirmed origin, followed by source archive/checksum upload.
+The Unreleased changelog separates the existing TAR controlled-parent break
+and its migration guidance from other changes.
+
 The CLI source guard rejects explicit raises of Command_Error or Usage_Error
 outside the diagnostic owner, including qualified names. It ignores Ada
 comments, string literals and character literals and requires the owner to
@@ -55,6 +62,18 @@ compiler-style controls, public API clients, independent format checks,
 installation, CLI and body-inventory coverage. No body or omission entry is
 added for the pure specification. The preserved CLI and writer archive corpus,
 including GNU reference output, remains byte-identical.
+
+The release snippets pass syntax and execution checks in host Bash and Zsh
+using disposable local repositories. With the previous snippet, a wrong
+branch, dirty checkout or mismatched CLI version exits the calling shell.
+With the subshell, each prerequisite stops before tagging or creating an
+artifact, while the caller survives and temporary variables remain local.
+The successful path creates the expected annotated tag, reproducible gzip
+archive and matching SHA-256 checksum. Publication to a disposable local
+bare origin transfers only the selected tag; an absent tag fails without
+closing the caller. These checks leave the project's tags unchanged.
+The release-command and changelog clarifications affect only Markdown;
+the compiler and runtime evidence covers unchanged production and test sources.
 
 Author review checks the public additive interface, version coupling,
 diagnostic ownership, mutation sensitivity, archive integrity, documentation
