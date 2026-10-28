@@ -1,6 +1,6 @@
 # CLI output transaction identity
 
-Status: In progress on `codex/cli-staging-fix`.
+Status: Implemented and verified locally on `codex/cli-staging-fix`.
 
 Base revision: `84f8500ff5f3fb8d10b00d65c551a27d7a811b0c`.
 
@@ -35,8 +35,18 @@ Base revision: `84f8500ff5f3fb8d10b00d65c551a27d7a811b0c`.
 
 ## Progress
 
-The old working diff and untracked test are preserved. Current-source tracing
-and an independent investigation confirm the shared transaction boundary and
-the required compatibility controls. Implementation and runtime proof follow.
+Current-source tracing and independent investigation confirmed the shared
+transaction boundary and compatibility controls. Separate immutable-baseline
+and fixed executables pass the expected original-behavior and
+protected-behavior tests under distinct unprivileged UIDs. Cleanup inspection
+could overwrite the original CLI diagnostic; raw status inspection prevents
+this, and the focused test rejects the earlier candidate at that diagnostic.
+
+Both formats and all publication routes pass setup, pre-open, post-open,
+parent-renaming, writer-error and handled-signal controls. Ordinary and
+forced valid archives remain byte-identical to baseline output on the
+bounded corpus. The rootless CLI suite passes with permission and umask
+controls. Coverage then the full check pass on freshly archived committed
+sources in AMD64 Trixie.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

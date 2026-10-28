@@ -46,11 +46,18 @@ The focused rootless suite checks output permissions under several umasks,
 write/search-only and setgid parents, the target-header flag bridge and the
 existing CLI behavior. A cleanup-inspection regression rejects the earlier
 fix candidate at the diagnostic that displaced the actual failure and passes
-after raw status inspection. The independent candidate review found this
-regression and no surviving path substitution route.
+after raw status inspection. An independent read-only review found no
+surviving path substitution route in the candidate.
 
-The complete rootless Trixie checks and fresh-source coverage are recorded
-with the final implementation validation. ARM64 and filesystems lacking
-both supported publication methods remain outside this evidence.
+Coverage passed first from freshly archived committed implementation
+sources, without Git metadata or existing build output. The full rootless
+AMD64 Trixie check then passed on those same sources, including style,
+packaging, installed consumers, unit suites, independent format readers and
+CLI regressions. Every inventoried production body has executed coverage.
+Unattacked valid archives remain byte-identical to the separate baseline
+for both formats and ordinary/forced publication on a bounded corpus.
+ARM64 and a live NFS server remain outside this evidence.
+The new CI step was reproduced locally with a read-only source mount; a
+hosted workflow has not yet run for this local topic.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

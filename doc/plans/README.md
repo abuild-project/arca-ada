@@ -9,7 +9,7 @@ Entries are ordered by topic filename.
 | [Archive creation CLI](archive-cli.md) | Accepted in `a7c4735` (PR #7) |
 | [Repository bootstrap](bootstrap.md) | Accepted in `e2c1bd3` (PR #1) |
 | [CLI diagnostics, arguments and cancellation](cli-polish.md) | Accepted in `953a257` (PR #14) |
-| [CLI output transaction identity](cli-staging-fix.md) | In progress |
+| [CLI output transaction identity](cli-staging-fix.md) | Implemented and verified locally |
 | [Repository-wide Ada coding style](coding-style.md) | Accepted in `03a2a07` (PR #8) |
 | [CPIO extraction](cpio-extraction.md) | Accepted in `b7d8beb` (PR #3) |
 | [Documentation status and reader guidance](docs-cleanup.md) | Implemented and verified locally |
