@@ -86,17 +86,22 @@ filesystem error (exit 1), with a diagnostic identifying the output parent.
 The output's parent directory must already exist. A destination inside the
 input tree is excluded by its resolved parent and basename. This excludes
 only the specified destination, not other archives from previous runs.
-The command inventories inputs before making a private mode-0700 staging
-directory in the output parent, keeping the staging file on the same
-filesystem as the final destination.
+The command inventories inputs before making a private staging directory in
+the output parent, keeping the staging file on the same filesystem as the
+final destination. It retains open references to that parent and staging
+directory, and reserves the archive name exclusively before the writer opens
+it. Staging has owner-only access, with inherited setgid permitted. The CLI
+requires Linux procfs at `/proc/self/fd` for the writer's descriptor-backed
+path. The public library writers have no procfs requirement.
 
 Only a successfully closed archive is published. Default publication uses
 Linux `renameat2(RENAME_NOREPLACE)`, so even a destination created after the
 initial check is preserved. If the kernel or filesystem does not support
 that operation, a same-filesystem hard link publishes the closed staging
 file without overwriting another destination. The private staging name is
-then removed during cleanup. Filesystems must support at least one of these
-publication methods. An ambiguous NFS link error is accepted as success only
+then removed during bounded, nonrecursive cleanup. The filesystem must
+support no-replace rename or same-filesystem hard links. An ambiguous NFS
+link error is accepted as success only
 when the destination has the same regular-file identity as the staging file.
 `--force` uses atomic rename to replace the destination; for an existing
 symlink it replaces the link itself and leaves its target alone. Existing
@@ -156,3 +161,9 @@ must match an independent program compiled against the target's C headers.
 requires executed lines for every production body and does not claim complete
 branch coverage. Normal tests require only this repository and its development
 image, with no Abuild checkout or credentials.
+
+CI also runs a dedicated cross-UID test. Its coordinator starts as container
+root only to launch the archive command and a competing process as distinct
+unprivileged users without supplementary groups. It checks staging creation,
+opening, publication, parent renaming, failure and handled-signal cleanup
+for both formats and publication modes. Ordinary checks remain rootless.

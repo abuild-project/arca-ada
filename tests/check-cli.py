@@ -62,14 +62,14 @@ class CLIChecks(unittest.TestCase):
         self.addCleanup(self.scratch.cleanup)
         self.work = Path(self.scratch.name).resolve()
 
-    def invoke(self, arguments, expected=0, cwd=None, env=None):
+    def invoke(self, arguments, expected=0, cwd=None, env=None, umask=-1):
         environment = dict(os.environ)
         environment.pop("SOURCE_DATE_EPOCH", None)
         environment["LC_ALL"] = "C"
         environment.update(env or {})
         result = subprocess.run([str(OPTIONS.cli), *map(str, arguments)],
                                 cwd=cwd or self.work, env=environment,
-                                capture_output=True, timeout=60)
+                                capture_output=True, timeout=60, umask=umask)
         self.assertEqual(result.returncode, expected,
                          result.stdout.decode(errors="replace") +
                          result.stderr.decode(errors="replace"))
@@ -679,6 +679,62 @@ class CLIChecks(unittest.TestCase):
             self.assertIn(b"Permission denied", result.stderr)
             self.assertEqual(archive.read_bytes(), b"keep original")
             self.assertEqual(list(parent.glob(".arca-*")), [])
+
+    def test_output_parent_modes_and_umask(self):
+        self.assertNotEqual(os.geteuid(), 0, "run the documented rootless checks")
+        # Native Linux storage preserves access checks and inherited setgid.
+        native = tempfile.TemporaryDirectory(prefix="arca-cli-output-mode-")
+        self.addCleanup(native.cleanup)
+        workspace = Path(native.name)
+        root = workspace / "source"
+        root.mkdir()
+        (root / "payload").write_bytes(b"ordinary archive payload")
+        for mode in (0o700, 0o300, 0o2300):
+            for mask in (0o022, 0o027, 0o077):
+                for format_name in ("cpio", "tar"):
+                    with self.subTest(mode=oct(mode), mask=oct(mask),
+                                      format=format_name):
+                        parent = workspace / f"parent-{mode:o}-{mask:o}-{format_name}"
+                        parent.mkdir()
+                        parent.chmod(mode)
+                        self.assertEqual(parent.stat().st_mode & 0o2777, mode)
+                        archive = parent / "output"
+                        try:
+                            self.invoke(self.command(format_name, root, archive),
+                                        umask=mask)
+                            self.assertEqual(archive.stat().st_mode & 0o777,
+                                             0o666 & ~mask)
+                            self.assertEqual(archive.stat().st_gid,
+                                             parent.stat().st_gid)
+                            self.assertEqual(records(archive, format_name)
+                                             ["payload"]["data"],
+                                             b"ordinary archive payload")
+                        finally:
+                            parent.chmod(0o700)
+                        self.assertEqual(list(parent.glob(".arca-*")), [])
+
+    def test_cleanup_inspection_retains_primary_error(self):
+        self.assertNotEqual(os.geteuid(), 0, "run the documented rootless checks")
+        root = self.tree()
+        native = tempfile.TemporaryDirectory(prefix="arca-cli-inspection-")
+        self.addCleanup(native.cleanup)
+        workspace = Path(native.name)
+        for format_name in ("cpio", "tar"):
+            parent = workspace / ("cleanup-inspection-" + format_name)
+            parent.mkdir()
+            archive = parent / "output"
+            with self.paused_creation(format_name, root, archive) as (process, release):
+                # Publication fails after opening staging. Cleanup cannot
+                # inspect the parent and must retain the publish diagnostic.
+                parent.chmod(0)
+                try:
+                    release()
+                    _, error = process.communicate(timeout=30)
+                finally:
+                    parent.chmod(0o700)
+            self.assertEqual(process.returncode, 1, error)
+            self.assertIn(b"cannot publish", error)
+            self.assertNotIn(b"cannot inspect", error)
 
     def test_socket_and_invalid_roots(self):
         root = self.work / "socket-root"

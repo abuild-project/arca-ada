@@ -48,16 +48,17 @@ static int phase_fd(const char *name)
     return (int)fd;
 }
 
-static void phase_barrier(const char *path)
+static void phase_barrier(const char *path, const char *point)
 {
     static int entered;
-    if (!fault("phase-barrier") || entered ||
-        !strstr(path, "/.arca-") || !strstr(path, "/archive"))
+    if (!fault(point) || entered ||
+        (!strstr(path, "/.arca-") && !strstr(path, "/proc/self/fd/")) ||
+        (strcmp(point, "setup-barrier") && !strstr(path, "/archive")))
         return;
     entered = 1;
 
-    /* fopen has created empty staging after inventory and handler setup.
-       No entry can be emitted until the parent sends the release token. */
+    /* Hold the selected setup/open boundary until the parent acknowledges
+       its mutation. No writer operation proceeds before the release token. */
     int saved = errno;
     int ready = phase_fd("ARCA_TEST_READY_FD");
     int release = phase_fd("ARCA_TEST_RELEASE_FD");
@@ -84,14 +85,25 @@ FILE *name(const char *path, const char *mode) \
 { \
     FILE *(*original)(const char *, const char *); \
     NEXT(#name, original); \
+    phase_barrier(path, "before-barrier"); \
     FILE *result = original(path, mode); \
     if (result) \
-        phase_barrier(path); \
+        phase_barrier(path, "phase-barrier"); \
     return result; \
 }
 
 FOPEN_HOOK(fopen)
 FOPEN_HOOK(fopen64)
+
+char *mkdtemp(char *path)
+{
+    char *(*original)(char *);
+    NEXT("mkdtemp", original);
+    char *result = original(path);
+    if (result)
+        phase_barrier(path, "setup-barrier");
+    return result;
+}
 
 int sigwait(const sigset_t *set, int *number)
 {
@@ -219,6 +231,44 @@ int rmdir(const char *path)
         return -1;
     }
     return original(path);
+}
+
+int linkat(int oldfd, const char *old, int newfd, const char *new, int flags)
+{
+    int (*original)(int, const char *, int, const char *, int);
+    NEXT("linkat", original);
+    trace("link attempted\n");
+    if (fault("link-competitor")) {
+        int fd = openat(newfd, new, O_WRONLY | O_CREAT | O_EXCL, 0600);
+        const char message[] = "competing output";
+        if (fd < 0 || write(fd, message, sizeof(message) - 1) !=
+            (ssize_t)(sizeof(message) - 1) || close(fd) != 0)
+            _exit(125);
+        trace("competitor created\n");
+    }
+    if (fault("link-denied")) {
+        errno = EACCES;
+        return -1;
+    }
+    int result = original(oldfd, old, newfd, new, flags);
+    if (result == 0 && fault("link-ambiguous")) {
+        trace("link created with EIO reply\n");
+        errno = EIO;
+        return -1;
+    }
+    return result;
+}
+
+int unlinkat(int fd, const char *path, int flags)
+{
+    int (*original)(int, const char *, int);
+    NEXT("unlinkat", original);
+    if (fault("cleanup") && flags == AT_REMOVEDIR && strstr(path, ".arca-")) {
+        trace("rmdir denied\n");
+        errno = EACCES;
+        return -1;
+    }
+    return original(fd, path, flags);
 }
 
 size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream)

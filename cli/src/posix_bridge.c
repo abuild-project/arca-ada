@@ -18,6 +18,21 @@ _Static_assert(sizeof(struct arca_metadata) == 64, "metadata ABI size");
 _Static_assert(sizeof(long) == 8, "CLI requires a 64-bit Linux ABI");
 
 /* Keep target-specific constants beside the target-specific metadata layout. */
+int arca_directory_flags(void)
+{
+    return O_PATH | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC;
+}
+
+int arca_archive_flags(void)
+{
+    return O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC;
+}
+
+int arca_remove_directory(void)
+{
+    return AT_REMOVEDIR;
+}
+
 int arca_at_fdcwd(void)
 {
     return AT_FDCWD;

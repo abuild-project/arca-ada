@@ -11,14 +11,9 @@ package body Archive_CLI.Filesystem is
 
    package C renames Interfaces.C;
 
-   use type C.int;
    use type C.long;
    use type C.Strings.chars_ptr;
    use type Interfaces.Unsigned_32;
-
-   function C_At_FDCWD return C.int
-     with Import, Convention => C, External_Name => "arca_at_fdcwd";
-   --  Read the target header's current-directory descriptor sentinel.
 
    function C_Rename_Noreplace return C.unsigned
      with Import, Convention => C, External_Name => "arca_rename_noreplace";
@@ -40,7 +35,21 @@ package body Archive_CLI.Filesystem is
      with Import, Convention => C, External_Name => "arca_enoent";
    --  Read the target header's absent-path errno value.
 
-   Current_Directory_FD   : constant C.int := C_At_FDCWD;
+   function C_Directory_Flags return C.int
+     with Import, Convention => C, External_Name => "arca_directory_flags";
+   --  Read target flags for no-follow, close-on-exec directory capabilities.
+
+   function C_Archive_Flags return C.int
+     with Import, Convention => C, External_Name => "arca_archive_flags";
+   --  Read target flags for exclusive, no-follow archive reservation.
+
+   function C_Remove_Directory return C.int
+     with Import, Convention => C, External_Name => "arca_remove_directory";
+   --  Read the target header flag for nonrecursive directory removal.
+
+   Directory_Flags        : constant C.int := C_Directory_Flags;
+   Archive_Flags          : constant C.int := C_Archive_Flags;
+   Remove_Directory       : constant C.int := C_Remove_Directory;
    Rename_No_Replace      : constant C.unsigned := C_Rename_Noreplace;
    Invalid_Argument       : constant C.int := C_EINVAL;
    Not_Implemented        : constant C.int := C_ENOSYS;
@@ -91,13 +100,50 @@ package body Archive_CLI.Filesystem is
    --  Atomically create the private directory described by the template.
    --  Success points into Buffer and must not be freed; null reports failure.
 
-   function C_Rename (Source, Target : C.char_array) return C.int
-     with Import, Convention => C, External_Name => "rename";
+   function C_Renameat
+     (Source_FD : C.int;
+      Source    : C.char_array;
+      Target_FD : C.int;
+      Target    : C.char_array)
+      return C.int
+     with Import, Convention => C, External_Name => "renameat";
    --  Atomically replace Target on the same filesystem; return zero or -1.
 
-   function C_Link (Source, Target : C.char_array) return C.int
-     with Import, Convention => C, External_Name => "link";
+   function C_Linkat
+     (Source_FD : C.int;
+      Source    : C.char_array;
+      Target_FD : C.int;
+      Target    : C.char_array;
+      Flags     : C.int)
+      return C.int
+     with Import, Convention => C, External_Name => "linkat";
    --  Publish another name for a closed file without replacing any target.
+
+   function C_Open (Name : C.char_array; Flags : C.int) return C.int
+     with Import, Convention => C, External_Name => "open";
+   --  Open a directory without creation; O_PATH permits write/search parents.
+
+   function C_Openat
+     (Directory_FD : C.int;
+      Name         : C.char_array;
+      Flags        : C.int;
+      Mode         : C.unsigned)
+      return C.int
+     with Import, Convention => C, External_Name => "openat";
+   --  Reserve one fresh archive entry relative to an owned directory.
+
+   function C_Close (FD : C.int) return C.int
+     with Import, Convention => C, External_Name => "close";
+   --  Release a descriptor once; Linux closes it even for delayed errors.
+
+   function C_Unlinkat
+     (Directory_FD : C.int; Name : C.char_array; Flags : C.int) return C.int
+     with Import, Convention => C, External_Name => "unlinkat";
+   --  Remove a single entry; directory removal never recursively follows it.
+
+   function C_Geteuid return C.unsigned
+     with Import, Convention => C, External_Name => "geteuid";
+   --  Identify the effective owner required for inaccessible private staging.
 
    function C_Renameat2
      (Source_FD : C.int;
@@ -121,6 +167,15 @@ package body Archive_CLI.Filesystem is
 
    function Published_Link (Source : Metadata; Target : String) return Boolean;
    --  Resolve an ambiguous NFS link reply only for the same regular inode.
+
+   function Descriptor_Path (FD : C.int) return String;
+   --  Name a nonnegative retained descriptor without resolving its pathname.
+
+   procedure Close_Descriptor (FD : in out C.int);
+   --  Release once without allowing cleanup diagnostics to mask a result.
+
+   procedure Ignore_Error (Code : C.int);
+   --  Discard a cleanup syscall result after its side effect was attempted.
 
    protected body Cancellation
    is
@@ -309,22 +364,96 @@ package body Archive_CLI.Filesystem is
 
    -------------------------------------------------------------------------
 
+   function Descriptor_Path (FD : C.int) return String
+   is
+      Number : constant String := C.int'Image (FD);
+   begin
+      return "/proc/self/fd/" & Number (2 .. Number'Last);
+   end Descriptor_Path;
+
+   -------------------------------------------------------------------------
+
+   procedure Close_Descriptor (FD : in out C.int)
+   is
+      Previous : constant C.int := FD;
+   begin
+      FD := -1;
+
+      if Previous >= 0 then
+         Ignore_Error (C_Close (Previous));
+      end if;
+   end Close_Descriptor;
+
+   -------------------------------------------------------------------------
+
+   procedure Ignore_Error (Code : C.int)
+   is
+      pragma Unreferenced (Code);
+   begin
+      null;
+   end Ignore_Error;
+
+   -------------------------------------------------------------------------
+
    function Begin_Output (Parent : String) return Transaction
    is
-      Template : constant C.char_array := C.To_C (Parent & "/.arca-XXXXXX");
    begin
       return Result : Transaction do
-         if Template'Length > Result.Buffer'Length then
-            Diagnostics.Fail_Command ("output path is too long");
+         Result.Parent_FD := C_Open (C.To_C (Parent), Directory_Flags);
+
+         if Result.Parent_FD < 0 then
+            Require (C.int (GNAT.OS_Lib.Errno), "cannot open output parent");
          end if;
 
-         Result.Buffer (Template'Range) := Template;
+         declare
+            Template : constant C.char_array := C.To_C
+              (Descriptor_Path (Result.Parent_FD) & "/.arca-XXXXXX");
+         begin
+            if Template'Length > Result.Buffer'Length then
+               Diagnostics.Fail_Command ("output path is too long");
+            end if;
 
-         if C_Mkdtemp (Result.Buffer) = C.Strings.Null_Ptr then
-            Require (C.int (GNAT.OS_Lib.Errno), "cannot create output staging");
-         end if;
+            Result.Buffer (Template'Range) := Template;
+
+            if C_Mkdtemp (Result.Buffer) = C.Strings.Null_Ptr then
+               Require
+                 (C.int (GNAT.OS_Lib.Errno), "cannot create output staging");
+            end if;
+         end;
 
          Result.Active := True;
+         Result.Staging_FD := C_Open (Result.Buffer, Directory_Flags);
+
+         if Result.Staging_FD < 0 then
+            Require (C.int (GNAT.OS_Lib.Errno), "cannot open output staging");
+         end if;
+
+         Result.Identity := Stat (Descriptor_Path (Result.Staging_FD) & "/.");
+
+         if Kind (Result.Identity) /= Directory
+           or else Result.Identity.UID /= Interfaces.Unsigned_32 (C_Geteuid)
+           or else (Result.Identity.Mode and 8#777#) /= 8#700#
+         then
+            Diagnostics.Fail_Command
+              ("output staging is not private and owned");
+         end if;
+
+         Result.Private_Directory := True;
+
+         --  A stolen victim-owned directory can pass ownership checks. Never
+         --  follow an existing archive there, including an archive symlink.
+         declare
+            Reserved : C.int := C_Openat
+              (Result.Staging_FD, C.To_C ("archive"), Archive_Flags, 8#666#);
+         begin
+            if Reserved < 0 then
+               Require
+                 (C.int (GNAT.OS_Lib.Errno), "cannot reserve output archive");
+            end if;
+
+            Result.Archive_Created := True;
+            Close_Descriptor (Reserved);
+         end;
       end return;
    end Begin_Output;
 
@@ -333,7 +462,7 @@ package body Archive_CLI.Filesystem is
    function Staging_Name (Item : Transaction) return String
    is
    begin
-      return C.To_Ada (Item.Buffer) & "/archive";
+      return Descriptor_Path (Item.Staging_FD) & "/archive";
    end Staging_Name;
 
    -------------------------------------------------------------------------
@@ -344,31 +473,38 @@ package body Archive_CLI.Filesystem is
       Replace : Boolean)
    is
       Code : C.int;
+      Base : constant C.char_array := C.To_C
+        (Ada.Directories.Simple_Name (Target));
    begin
       Check_Interrupted;
 
       if Replace then
          Code := Errno_On_Failure
-           (C_Rename (C.To_C (Staging_Name (Item)), C.To_C (Target)));
+           (C_Renameat
+              (Item.Staging_FD, C.To_C ("archive"), Item.Parent_FD, Base));
       else
          Code := Errno_On_Failure
            (C_Renameat2
-              (Current_Directory_FD, C.To_C (Staging_Name (Item)),
-               Current_Directory_FD, C.To_C (Target), Rename_No_Replace));
+              (Item.Staging_FD, C.To_C ("archive"),
+               Item.Parent_FD, Base, Rename_No_Replace));
 
          if Code = Invalid_Argument or else Code = Not_Implemented
            or else Code = Operation_Unsupported
          then
             declare
-               Source : constant String := Staging_Name (Item);
-               Info   : constant Metadata := Stat (Source);
+               Source      : constant String := Staging_Name (Item);
+               Info        : constant Metadata := Stat (Source);
+               Destination : constant String := Descriptor_Path
+                 (Item.Parent_FD) & "/" & Ada.Directories.Simple_Name (Target);
             begin
                Code := Errno_On_Failure
-                 (C_Link (C.To_C (Source), C.To_C (Target)));
+                 (C_Linkat
+                    (Item.Staging_FD, C.To_C ("archive"),
+                     Item.Parent_FD, Base, 0));
 
                --  NFS can commit a link but lose its success reply. The
                --  private staging inode identifies our complete output.
-               if Code /= 0 and then Published_Link (Info, Target) then
+               if Code /= 0 and then Published_Link (Info, Destination) then
                   Code := 0;
                end if;
             end;
@@ -382,15 +518,40 @@ package body Archive_CLI.Filesystem is
 
    overriding procedure Finalize (Item : in out Transaction)
    is
+      Entry_Info : aliased Metadata;
+      use type Interfaces.Unsigned_64;
    begin
-      if Item.Active then
-         Ada.Directories.Delete_Tree (C.To_Ada (Item.Buffer));
-      end if;
-   exception
-      when others =>
-         --  Best effort: preserve the caller's exception and a successful
-         --  publication. A cleanup fault may leave the private staging tree.
-         null;
+      begin
+         if Item.Archive_Created then
+            Ignore_Error
+              (C_Unlinkat (Item.Staging_FD, C.To_C ("archive"), 0));
+         end if;
+
+         --  Never recurse into a pathname that another parent writer can
+         --  replace. A late empty-directory replacement is already removable
+         --  by that parent writer; nonempty replacement contents stay intact.
+         --  Cleanup must not call a diagnostic-raising helper: an inspection
+         --  error must not replace the command failure already in flight.
+         if Item.Active and then Item.Private_Directory
+           and then C_Stat (Item.Buffer, Entry_Info'Access) = 0
+           and then Entry_Info.Kind =
+             Interfaces.Unsigned_32 (Entry_Kind'Pos (Directory))
+           and then Entry_Info.Device = Item.Identity.Device
+           and then Entry_Info.Inode = Item.Identity.Inode
+         then
+            Ignore_Error (C_Unlinkat
+              (Item.Parent_FD, C.To_C (Ada.Directories.Simple_Name
+                 (C.To_Ada (Item.Buffer))), Remove_Directory));
+         end if;
+      exception
+         when others =>
+            null;
+      end;
+
+      --  Writer objects unwind first, including Stream_IO.Delete through the
+      --  retained proc path. Always release both descriptors after cleanup.
+      Close_Descriptor (Item.Staging_FD);
+      Close_Descriptor (Item.Parent_FD);
    end Finalize;
 
 end Archive_CLI.Filesystem;
