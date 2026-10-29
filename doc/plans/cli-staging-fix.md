@@ -1,6 +1,6 @@
 # CLI output transaction identity
 
-Status: Implemented and verified locally on `codex/cli-staging-fix`.
+Status: Accepted in `d715d62` (PR #16) on 2026-10-29.
 
 Base revision: `84f8500ff5f3fb8d10b00d65c551a27d7a811b0c`.
 
