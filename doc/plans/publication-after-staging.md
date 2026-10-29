@@ -1,6 +1,6 @@
 # Publication status after CLI staging acceptance
 
-Status: Planned on `codex/publication-after-staging`.
+Status: Implemented and checked locally on `codex/publication-after-staging`.
 
 Base revision: `d715d6295df56c5948d419458a5853df31dcf079`.
 

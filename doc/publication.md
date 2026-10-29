@@ -7,11 +7,15 @@ submission is performed by the preparation PR.
 
 ## Before the owner decision
 
-- Read the [publication assessment](assessments/publication.md), close its
-  blocking findings and review changes made since its recorded revision.
+- Read the [publication assessment](assessments/publication.md). Its CLI
+  staging finding is resolved in accepted commit `d715d62`; review later
+  changes and close any new blocking findings.
 - Retain the source revisions and attribution recorded in
   [licensing](licensing.md); no separate public predecessor reference is a
   publication condition.
+- Keep public repository-source references pending until the private transfer
+  to `abuild-project/arca-ada` is complete. Then verify explicit repository
+  links and downstream pinned dependency URLs at the final destination.
 - The separate local Abuild CPIO/TAR/OCI integration experiment is complete
   and reviewed. Retain its evidence; Arca's normal tests must still run
   without an Abuild checkout, credentials or network access.

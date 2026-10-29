@@ -10,6 +10,8 @@
 
 ### Changes
 
+- Record acceptance of the CLI staging fix and the remaining public
+  repository-reference gate after the planned transfer.
 - Retain CLI output-directory identities through archive creation,
   publication and bounded cleanup; accept read-only staging access while
   preserving primary failure diagnostics.

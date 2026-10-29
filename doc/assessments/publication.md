@@ -124,3 +124,26 @@ snapshots are not publication requirements.
 The dated assessment above retains its original scope and findings. This
 licensing disposition changes no runtime behavior and does not extend or
 repeat its code review. Other publication conditions remain applicable.
+
+## Resolved in `d715d6295df56c5948d419458a5853df31dcf079` (PR #16) on 2026-10-29
+
+The CLI staging finding recorded above is resolved in the accepted merge
+commit. A later repository-wide source audit at
+`84f8500ff5f3fb8d10b00d65c551a27d7a811b0c` confirmed that finding on
+the pre-fix code. The separate remediation retained output identities through
+creation, publication and cleanup, with synchronized original-behavior and
+fixed-behavior checks under distinct unprivileged identities.
+
+The [Trixie workflow for the exact merge commit](https://github.com/mweidle73/arca-ada/actions/runs/40855516717)
+completed successfully. Its job log confirms fresh-checkout coverage, the
+normal checks and the dedicated cross-UID staging step. The latter passed
+all format, publication, failure and handled-signal cases. This CI evidence
+belongs to the merge commit, not an earlier PR head.
+
+The old public predecessor-source snapshot condition remains retired under
+the GPL licensing disposition. A distinct public repository-source reference
+gate remains open until the private transfer to `abuild-project/arca-ada` and
+verification of explicit repository links and downstream pinned dependency
+URLs at that destination. The final publication review must still examine
+later source changes, reachable history, newer CI logs and artifacts,
+organization access, reporting and effective protection settings.
