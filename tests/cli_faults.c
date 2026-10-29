@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,6 +36,36 @@ static void trace(const char *message)
     errno = saved;
 }
 
+static int proc_descriptor(const char *path)
+{
+    const char prefix[] = "/proc/self/fd/";
+    if (strncmp(path, prefix, sizeof(prefix) - 1) != 0)
+        return 0;
+    path += sizeof(prefix) - 1;
+    if (!*path)
+        return 0;
+    for (; *path; path++)
+        if (*path < '0' || *path > '9')
+            return 0;
+    return 1;
+}
+
+#define LSTAT_HOOK(name, type) \
+int name(const char *path, struct type *info) \
+{ \
+    int (*original)(const char *, struct type *); \
+    NEXT(#name, original); \
+    if (fault("procfs-missing") && proc_descriptor(path)) { \
+        trace("procfs descriptor lookup denied\n"); \
+        errno = ENOENT; \
+        return -1; \
+    } \
+    return original(path, info); \
+}
+
+LSTAT_HOOK(lstat, stat)
+LSTAT_HOOK(lstat64, stat64)
+
 static int phase_fd(const char *name)
 {
     const char *value = getenv(name);
@@ -48,16 +79,17 @@ static int phase_fd(const char *name)
     return (int)fd;
 }
 
-static void phase_barrier(const char *path)
+static void phase_barrier(const char *path, const char *point)
 {
     static int entered;
-    if (!fault("phase-barrier") || entered ||
-        !strstr(path, "/.arca-") || !strstr(path, "/archive"))
+    if (!fault(point) || entered ||
+        (!strstr(path, "/.arca-") && !strstr(path, "/proc/self/fd/")) ||
+        (strcmp(point, "setup-barrier") && !strstr(path, "/archive")))
         return;
     entered = 1;
 
-    /* fopen has created empty staging after inventory and handler setup.
-       No entry can be emitted until the parent sends the release token. */
+    /* Hold the selected setup/open boundary until the parent acknowledges
+       its mutation. No writer operation proceeds before the release token. */
     int saved = errno;
     int ready = phase_fd("ARCA_TEST_READY_FD");
     int release = phase_fd("ARCA_TEST_RELEASE_FD");
@@ -84,14 +116,34 @@ FILE *name(const char *path, const char *mode) \
 { \
     FILE *(*original)(const char *, const char *); \
     NEXT(#name, original); \
+    phase_barrier(path, "before-barrier"); \
     FILE *result = original(path, mode); \
     if (result) \
-        phase_barrier(path); \
+        phase_barrier(path, "phase-barrier"); \
     return result; \
 }
 
 FOPEN_HOOK(fopen)
 FOPEN_HOOK(fopen64)
+
+char *mkdtemp(char *path)
+{
+    char *(*original)(char *);
+    NEXT("mkdtemp", original);
+    char *result = original(path);
+    if (result) {
+        if (fault("stage-mode-0755") || fault("stage-mode-0775") ||
+            fault("stage-mode-0757")) {
+            mode_t mode = fault("stage-mode-0755") ? 0755 :
+                fault("stage-mode-0775") ? 0775 : 0757;
+            if (chmod(path, mode) != 0)
+                _exit(125);
+            trace("staging mode adjusted\n");
+        }
+        phase_barrier(path, "setup-barrier");
+    }
+    return result;
+}
 
 int sigwait(const sigset_t *set, int *number)
 {
@@ -183,13 +235,13 @@ int renameat2(int oldfd, const char *old, int newfd, const char *new,
     return original(oldfd, old, newfd, new, flags);
 }
 
-int link(const char *old, const char *new)
+int linkat(int oldfd, const char *old, int newfd, const char *new, int flags)
 {
-    int (*original)(const char *, const char *);
-    NEXT("link", original);
+    int (*original)(int, const char *, int, const char *, int);
+    NEXT("linkat", original);
     trace("link attempted\n");
     if (fault("link-competitor")) {
-        int fd = open(new, O_WRONLY | O_CREAT | O_EXCL, 0600);
+        int fd = openat(newfd, new, O_WRONLY | O_CREAT | O_EXCL, 0600);
         const char message[] = "competing output";
         if (fd < 0 || write(fd, message, sizeof(message) - 1) !=
             (ssize_t)(sizeof(message) - 1) || close(fd) != 0)
@@ -200,7 +252,7 @@ int link(const char *old, const char *new)
         errno = EACCES;
         return -1;
     }
-    int result = original(old, new);
+    int result = original(oldfd, old, newfd, new, flags);
     if (result == 0 && fault("link-ambiguous")) {
         trace("link created with EIO reply\n");
         errno = EIO;
@@ -209,16 +261,16 @@ int link(const char *old, const char *new)
     return result;
 }
 
-int rmdir(const char *path)
+int unlinkat(int fd, const char *path, int flags)
 {
-    int (*original)(const char *);
-    NEXT("rmdir", original);
-    if (fault("cleanup") && strstr(path, "/.arca-")) {
+    int (*original)(int, const char *, int);
+    NEXT("unlinkat", original);
+    if (fault("cleanup") && flags == AT_REMOVEDIR && strstr(path, ".arca-")) {
         trace("rmdir denied\n");
         errno = EACCES;
         return -1;
     }
-    return original(path);
+    return original(fd, path, flags);
 }
 
 size_t fwrite(const void *ptr, size_t size, size_t count, FILE *stream)

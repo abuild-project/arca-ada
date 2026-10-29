@@ -1,6 +1,6 @@
 # Documentation status and reader guidance
 
-Status: Implemented and verified locally on `codex/docs-cleanup`.
+Status: Accepted in `0da4086` (PR #11) on 2026-10-24.
 
 Base revision: `2091ca9118f875b5fbd65adcf23ca62ae073289e`.
 

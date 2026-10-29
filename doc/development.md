@@ -250,6 +250,26 @@ the next call on that same thread, proving the handler has returned; queuing
 a signal alone is insufficient. This runtime-specific observation remains
 test support and introduces no production signal hook.
 
+The CLI output transaction retains `O_PATH` directory descriptors for its
+parent and staging directory. It reserves the archive exclusively,
+then lets the unchanged writers open it through `/proc/self/fd`. Linux procfs
+must be mounted there. The C bridge supplies target header flags while Ada
+owns the filesystem calls. Rootless checks exercise write/search-only output
+parents, inherited setgid, output umask, reported-mode write exclusions and
+preservation of the original diagnostic during cleanup inspection failure.
+Readable staging modes are accepted for mounts that report them; this is a
+local permission check, not proof of a remote server's access rules.
+The CLI checks its procfs descriptor path before staging allocation; a
+child-only fault injection proves that a missing path gets its own diagnostic.
+Ordinary staging permission failures retain their existing message.
+
+The dedicated `tests/check-staging-security.py` coordinator uses container
+root only to start the CLI and a competing process with separate unprivileged
+UIDs and no supplementary groups. Its native Linux temporary fixtures and
+acknowledged barriers check setup, writer opening, publication and cleanup.
+CI runs that coordinator separately after rootless build and check; neither
+production code nor the ordinary checks require root.
+
 ## Commands
 
 - `make -j8 all NUM_CPUS=8` builds the static library and CLI.
