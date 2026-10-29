@@ -14,7 +14,7 @@ other write access in the reported mode; read/search and inherited setgid
 are permitted. It reserves `archive` with
 exclusive no-follow creation before the unchanged writer opens its
 descriptor-backed pathname. The archive file keeps the conventional
-`0666 & umask` permissions.
+`0666 & ~umask` permissions.
 
 Forced replacement uses descriptor-relative `renameat`. Default publication
 keeps `renameat2` no-replace behavior and its same-filesystem `linkat`
