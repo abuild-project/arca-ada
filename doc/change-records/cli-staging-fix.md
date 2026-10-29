@@ -68,8 +68,9 @@ its original staging-creation context.
 If staging ownership or reported mode is rejected before the object is
 trusted, an empty staging directory can remain rather than deleting an
 unverified pathname.
-The new CI step was reproduced locally with a read-only source mount; a
-hosted workflow has not yet run for this local topic.
+The new CI step was reproduced locally with a read-only source mount.
+Hosted checks are separate evidence and must be read for the selected
+review revision.
 Fault injection makes the procfs descriptor lookup return ENOENT and verifies
 that the dedicated error appears before a staging directory is created. The
 previous implementation fails that check, while the ordinary unwritable
