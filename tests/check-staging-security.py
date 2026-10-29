@@ -136,7 +136,7 @@ def exercise(args, scratch, library, source, decode, kind, route, phase, finish)
             assert not compromised, (label, "output identity lost", out, err)
             if phase in ("setup", "stolen"):
                 assert process.returncode == 1, (label, out, err)
-                diagnostic = (b"not private and owned" if phase == "setup"
+                diagnostic = (b"not owned" if phase == "setup"
                               else b"cannot reserve output archive")
                 assert diagnostic in err, (label, err)
             elif finish == "success":

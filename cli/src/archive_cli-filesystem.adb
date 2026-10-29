@@ -120,7 +120,7 @@ package body Archive_CLI.Filesystem is
    --  Publish another name for a closed file without replacing any target.
 
    function C_Open (Name : C.char_array; Flags : C.int) return C.int
-     with Import, Convention => C, External_Name => "open";
+     with Import, Convention => C_Variadic_2, External_Name => "open";
    --  Open a directory without creation; O_PATH permits write/search parents.
 
    function C_Openat
@@ -129,7 +129,7 @@ package body Archive_CLI.Filesystem is
       Flags        : C.int;
       Mode         : C.unsigned)
       return C.int
-     with Import, Convention => C, External_Name => "openat";
+     with Import, Convention => C_Variadic_3, External_Name => "openat";
    --  Reserve one fresh archive entry relative to an owned directory.
 
    function C_Close (FD : C.int) return C.int
@@ -417,7 +417,8 @@ package body Archive_CLI.Filesystem is
 
             if C_Mkdtemp (Result.Buffer) = C.Strings.Null_Ptr then
                Require
-                 (C.int (GNAT.OS_Lib.Errno), "cannot create output staging");
+                 (C.int (GNAT.OS_Lib.Errno),
+                  "cannot create output staging via /proc/self/fd");
             end if;
          end;
 
@@ -432,10 +433,11 @@ package body Archive_CLI.Filesystem is
 
          if Kind (Result.Identity) /= Directory
            or else Result.Identity.UID /= Interfaces.Unsigned_32 (C_Geteuid)
-           or else (Result.Identity.Mode and 8#777#) /= 8#700#
          then
+            Diagnostics.Fail_Command ("output staging is not owned");
+         elsif (Result.Identity.Mode and 8#022#) /= 0 then
             Diagnostics.Fail_Command
-              ("output staging is not private and owned");
+              ("output staging is writable by other users");
          end if;
 
          Result.Private_Directory := True;

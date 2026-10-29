@@ -46,7 +46,7 @@ package Archive_CLI.Filesystem is
 
    function Begin_Output (Parent : String) return Transaction;
    --  Pin parent/staging directories and exclusively reserve the archive.
-   --  Requires Linux procfs; private staging permits inherited setgid.
+   --  Requires Linux procfs; group/other write is rejected after creation.
 
    function Staging_Name (Item : Transaction) return String;
    --  Return a proc path through the retained private staging descriptor.

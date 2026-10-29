@@ -736,6 +736,32 @@ class CLIChecks(unittest.TestCase):
             self.assertIn(b"cannot publish", error)
             self.assertNotIn(b"cannot inspect", error)
 
+    def test_staging_mode_accepts_read_only_access(self):
+        self.assertNotEqual(os.geteuid(), 0, "run the documented rootless checks")
+        root = self.tree()
+        native = self.native_workspace()
+        for format_name in ("cpio", "tar"):
+            for mode in (0o755, 0o775, 0o757):
+                with self.subTest(format=format_name, mode=oct(mode)):
+                    parent = native / f"stage-{format_name}-{mode:o}"
+                    parent.mkdir()
+                    archive = parent / "output"
+                    env, log = self.faults(f"stage-mode-{mode:04o}", root)
+                    accepted = mode == 0o755
+                    result = self.invoke(self.command(format_name, root, archive),
+                                         expected=0 if accepted else 1, env=env)
+                    self.assertIn("staging mode adjusted", log.read_text())
+                    if accepted:
+                        self.assert_tree(archive, format_name, root)
+                        self.assertEqual(list(parent.glob(".arca-*")), [])
+                    else:
+                        self.assertIn(b"output staging is writable by other users",
+                                      result.stderr)
+                        self.assertFalse(archive.exists())
+                        staging, = parent.glob(".arca-*")
+                        self.assertEqual(list(staging.iterdir()), [])
+                        staging.rmdir()
+
     def test_socket_and_invalid_roots(self):
         root = self.work / "socket-root"
         root.mkdir()

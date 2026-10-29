@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -100,8 +101,17 @@ char *mkdtemp(char *path)
     char *(*original)(char *);
     NEXT("mkdtemp", original);
     char *result = original(path);
-    if (result)
+    if (result) {
+        if (fault("stage-mode-0755") || fault("stage-mode-0775") ||
+            fault("stage-mode-0757")) {
+            mode_t mode = fault("stage-mode-0755") ? 0755 :
+                fault("stage-mode-0775") ? 0775 : 0757;
+            if (chmod(path, mode) != 0)
+                _exit(125);
+            trace("staging mode adjusted\n");
+        }
         phase_barrier(path, "setup-barrier");
+    }
     return result;
 }
 
@@ -193,44 +203,6 @@ int renameat2(int oldfd, const char *old, int newfd, const char *new,
         return -1;
     }
     return original(oldfd, old, newfd, new, flags);
-}
-
-int link(const char *old, const char *new)
-{
-    int (*original)(const char *, const char *);
-    NEXT("link", original);
-    trace("link attempted\n");
-    if (fault("link-competitor")) {
-        int fd = open(new, O_WRONLY | O_CREAT | O_EXCL, 0600);
-        const char message[] = "competing output";
-        if (fd < 0 || write(fd, message, sizeof(message) - 1) !=
-            (ssize_t)(sizeof(message) - 1) || close(fd) != 0)
-            _exit(125);
-        trace("competitor created\n");
-    }
-    if (fault("link-denied")) {
-        errno = EACCES;
-        return -1;
-    }
-    int result = original(old, new);
-    if (result == 0 && fault("link-ambiguous")) {
-        trace("link created with EIO reply\n");
-        errno = EIO;
-        return -1;
-    }
-    return result;
-}
-
-int rmdir(const char *path)
-{
-    int (*original)(const char *);
-    NEXT("rmdir", original);
-    if (fault("cleanup") && strstr(path, "/.arca-")) {
-        trace("rmdir denied\n");
-        errno = EACCES;
-        return -1;
-    }
-    return original(path);
 }
 
 int linkat(int oldfd, const char *old, int newfd, const char *new, int flags)
