@@ -259,6 +259,9 @@ parents, inherited setgid, output umask, reported-mode write exclusions and
 preservation of the original diagnostic during cleanup inspection failure.
 Readable staging modes are accepted for mounts that report them; this is a
 local permission check, not proof of a remote server's access rules.
+The CLI checks its procfs descriptor path before staging allocation; a
+child-only fault injection proves that a missing path gets its own diagnostic.
+Ordinary staging permission failures retain their existing message.
 
 The dedicated `tests/check-staging-security.py` coordinator uses container
 root only to start the CLI and a competing process with separate unprivileged

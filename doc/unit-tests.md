@@ -20,8 +20,8 @@ cleanup, named installation manifests and uninstall/reinstall behavior.
 CLI checks cover complete escaped diagnostics, output argument precedence,
 header-derived constants, documented help and acknowledged SIGHUP cleanup.
 They also check output-parent access modes, staging modes 0755/0775/0757,
-inherited setgid, umask and preservation of the first command diagnostic
-during failed cleanup inspection.
+inherited setgid, umask, a missing procfs descriptor path and preservation
+of the first command diagnostic during failed cleanup inspection.
 Version controls compare CLI output with the public package constant and
 require matching installed-client metadata. A source guard keeps explicit
 CLI exception raises in the diagnostic owner, ignoring comments and literals.

@@ -62,10 +62,17 @@ for both formats and ordinary/forced publication on a bounded corpus.
 ARM64 and live FAT, exFAT, CIFS and NFS mounts remain outside this evidence.
 Readable staging can expose an unfinished archive when its file mode allows;
 synthetic CIFS mode bits do not prove remote-client isolation.
+The CLI checks its procfs descriptor path before creating staging. A missing
+path has a specific diagnostic; a permission failure from `mkdtemp` retains
+its original staging-creation context.
 If staging ownership or reported mode is rejected before the object is
 trusted, an empty staging directory can remain rather than deleting an
 unverified pathname.
 The new CI step was reproduced locally with a read-only source mount; a
 hosted workflow has not yet run for this local topic.
+Fault injection makes the procfs descriptor lookup return ENOENT and verifies
+that the dedicated error appears before a staging directory is created. The
+previous implementation fails that check, while the ordinary unwritable
+parent case retains its original diagnostic.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

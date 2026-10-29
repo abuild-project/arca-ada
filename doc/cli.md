@@ -99,6 +99,9 @@ access; reported mode bits alone do not establish protection from remote
 writers. The CLI requires
 Linux procfs at `/proc/self/fd` for the writer's descriptor-backed path. The
 public library writers have no procfs requirement.
+If that descriptor path is absent, the CLI reports the procfs requirement
+before creating staging. Other staging-creation errors retain their own
+filesystem cause.
 
 Only a successfully closed archive is published. Default publication uses
 Linux `renameat2(RENAME_NOREPLACE)`, so even a destination created after the

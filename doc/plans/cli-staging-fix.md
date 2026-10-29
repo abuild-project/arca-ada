@@ -63,4 +63,13 @@ sources in AMD64 Trixie.
   mode change. Use explicit C variadic conventions, remove obsolete test
   hooks, clarify the procfs diagnostic and update stale acceptance status.
 
+## Procfs preflight on 2026-10-29
+
+- Decision: check the retained parent descriptor's procfs link before
+  allocating staging. Missing procfs has a dedicated error; other `mkdtemp`
+  failures keep their filesystem cause and familiar command context.
+- Inject ENOENT only for the descriptor link, and require the test to observe
+  that lookup. Check ordinary permission denial separately, so a generic
+  staging failure cannot pass as a missing-procfs result.
+
 Co-Authored-By: GPT-6 <noreply@openai.com>
