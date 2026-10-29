@@ -11,7 +11,8 @@
 ### Changes
 
 - Retain CLI output-directory identities through archive creation,
-  publication and bounded cleanup; preserve primary failure diagnostics.
+  publication and bounded cleanup; accept read-only staging access while
+  preserving primary failure diagnostics.
 - Add a single public development-version constant and use it in CLI and
   installed-client output; document compatibility, platforms and releases.
 - Guard centralized CLI exception raises against accidental bypasses.

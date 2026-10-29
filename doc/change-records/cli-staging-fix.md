@@ -8,9 +8,10 @@ CPIO and TAR use the same transaction; their public writer APIs and archive
 serialization are unchanged.
 
 `Begin_Output` opens the existing parent with target-derived no-follow
-directory flags, creates a private staging directory through that parent,
-and retains its descriptor. It checks effective ownership and owner-only
-access while permitting inherited setgid. It reserves `archive` with
+directory flags, requests a mode-0700 staging directory through that parent,
+and retains its descriptor. It requires effective ownership and no group or
+other write access in the reported mode; read/search and inherited setgid
+are permitted. It reserves `archive` with
 exclusive no-follow creation before the unchanged writer opens its
 descriptor-backed pathname. The archive file keeps the conventional
 `0666 & umask` permissions.
@@ -29,7 +30,8 @@ path. The public library remains independent of procfs. Existing rootless
 use with write/search-only output parents, inherited setgid, source/output
 metadata, no-clobber, `--force`, handled signals and error codes is retained.
 Target constants remain in the C bridge; Ada owns the calls and transaction
-state. The CI coordinator is root only to launch distinct unprivileged
+state. The `open` bindings identify their C variadic profiles. The CI
+coordinator is root only to launch distinct unprivileged
 victim and competing processes; no production command needs root.
 
 ## Validation
@@ -43,8 +45,9 @@ writer errors and each handled termination signal; its children have no
 supplementary groups. No real user file or credential is used.
 
 The focused rootless suite checks output permissions under several umasks,
-write/search-only and setgid parents, the target-header flag bridge and the
-existing CLI behavior. A cleanup-inspection regression rejects the earlier
+write/search-only and setgid parents, reported staging modes 0755, 0775 and
+0757, the target-header flag bridge and existing CLI behavior. A
+cleanup-inspection regression rejects the earlier
 fix candidate at the diagnostic that displaced the actual failure and passes
 after raw status inspection. An independent read-only review found no
 surviving path substitution route in the candidate.
@@ -56,7 +59,12 @@ packaging, installed consumers, unit suites, independent format readers and
 CLI regressions. Every inventoried production body has executed coverage.
 Unattacked valid archives remain byte-identical to the separate baseline
 for both formats and ordinary/forced publication on a bounded corpus.
-ARM64 and a live NFS server remain outside this evidence.
+ARM64 and live FAT, exFAT, CIFS and NFS mounts remain outside this evidence.
+Readable staging can expose an unfinished archive when its file mode allows;
+synthetic CIFS mode bits do not prove remote-client isolation.
+If staging ownership or reported mode is rejected before the object is
+trusted, an empty staging directory can remain rather than deleting an
+unverified pathname.
 The new CI step was reproduced locally with a read-only source mount; a
 hosted workflow has not yet run for this local topic.
 

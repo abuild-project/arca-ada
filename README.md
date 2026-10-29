@@ -128,7 +128,8 @@ CLI failures retain low-level I/O diagnostics and reject incomplete directory
 reads. No-clobber publication has a hard-link fallback for filesystems without
 no-replace rename; staging cleanup is best effort and preserves command results.
 The CLI retains output-directory identities through creation, publication and
-cleanup, including when another principal can rename entries in a shared parent.
+cleanup, including when another local principal can rename entries in a shared
+parent and the filesystem enforces the reported directory permissions.
 
 Diagnostics keep complete CLI context and escape control bytes for display.
 Directory-only output spellings are argument errors. SIGHUP, SIGINT and

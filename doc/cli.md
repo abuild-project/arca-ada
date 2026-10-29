@@ -86,23 +86,29 @@ filesystem error (exit 1), with a diagnostic identifying the output parent.
 The output's parent directory must already exist. A destination inside the
 input tree is excluded by its resolved parent and basename. This excludes
 only the specified destination, not other archives from previous runs.
-The command inventories inputs before making a private staging directory in
-the output parent, keeping the staging file on the same filesystem as the
-final destination. It retains open references to that parent and staging
-directory, and reserves the archive name exclusively before the writer opens
-it. Staging has owner-only access, with inherited setgid permitted. The CLI
-requires Linux procfs at `/proc/self/fd` for the writer's descriptor-backed
-path. The public library writers have no procfs requirement.
+The command inventories inputs before requesting a mode-0700 staging
+directory in the output parent, keeping the staging file on the same
+filesystem as the final destination. It retains open references to the
+parent and staging directory. It reserves the archive name exclusively
+before the writer opens it. The CLI requires effective ownership and rejects
+group or other write permission, while allowing read/search bits and inherited
+setgid. On mounts that report 0755 for new directories, another user may read
+an unfinished archive when the file mode also permits it. Filesystems with
+synthetic modes or server-side access rules need separately controlled
+access; reported mode bits alone do not establish protection from remote
+writers. The CLI requires
+Linux procfs at `/proc/self/fd` for the writer's descriptor-backed path. The
+public library writers have no procfs requirement.
 
 Only a successfully closed archive is published. Default publication uses
 Linux `renameat2(RENAME_NOREPLACE)`, so even a destination created after the
 initial check is preserved. If the kernel or filesystem does not support
 that operation, a same-filesystem hard link publishes the closed staging
-file without overwriting another destination. The private staging name is
-then removed during bounded, nonrecursive cleanup. The filesystem must
+file without overwriting another destination. The staging name is removed
+during bounded, nonrecursive cleanup. The filesystem must
 support no-replace rename or same-filesystem hard links. An ambiguous NFS
-link error is accepted as success only
-when the destination has the same regular-file identity as the staging file.
+link error is accepted as success only when the destination has the same
+regular-file identity as the staging file.
 `--force` uses atomic rename to replace the destination; for an existing
 symlink it replaces the link itself and leaves its target alone. Existing
 directories and special nodes are rejected. Keep the destination stable
@@ -118,8 +124,11 @@ be confused with an escape. Other bytes, source names and archive names are
 unchanged.
 
 Normal unwinding attempts staging removal. Cleanup is best effort: failure
-can leave a private staging directory, but never masks an earlier error or
+can leave a staging directory, but never masks an earlier error or
 turns successful publication into failure.
+If ownership or mode verification fails before the staging object can be
+trusted, an empty staging directory can remain. Remove that entry only after
+checking it belongs to the failed run.
 SIGHUP, SIGINT and SIGTERM request cleanup at the next filesystem or entry
 boundary; a synchronous payload copy may finish before the request is observed.
 SIGKILL, a process crash or power loss cannot guarantee cleanup. Atomic

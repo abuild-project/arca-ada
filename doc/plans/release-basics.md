@@ -1,6 +1,6 @@
 # Version, compatibility and release procedure
 
-Status: Implemented and verified locally on `codex/release-basics`.
+Status: Accepted in `84f8500` (PR #15) on 2026-10-27.
 
 Base revision: `953a257c1fcc235eb78aeaa8fb39b938f54342c0`.
 

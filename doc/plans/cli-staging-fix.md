@@ -49,4 +49,18 @@ bounded corpus. The rootless CLI suite passes with permission and umask
 controls. Coverage then the full check pass on freshly archived committed
 sources in AMD64 Trixie.
 
+## Permission compatibility on 2026-10-29
+
+- Decision: accept a staging directory owned by the effective UID when its
+  reported mode gives neither group nor others write permission. This retains
+  the local directory-entry integrity boundary while allowing read/search
+  modes reported by filesystems with mount-derived permissions.
+- A readable staging directory can reveal unfinished output when the archive
+  file is also readable. Synthetic modes do not prove server-side isolation;
+  operators must control remote access separately. No live FAT, exFAT or CIFS
+  mount has been validated.
+- Check 0755 acceptance and 0775/0757 rejection with a controlled staging
+  mode change. Use explicit C variadic conventions, remove obsolete test
+  hooks, clarify the procfs diagnostic and update stale acceptance status.
+
 Co-Authored-By: GPT-6 <noreply@openai.com>
