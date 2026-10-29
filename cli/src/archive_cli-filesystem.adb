@@ -406,6 +406,19 @@ package body Archive_CLI.Filesystem is
          end if;
 
          declare
+            Ignored : aliased Metadata;
+            Code    : constant C.int := C_Stat
+              (C.To_C (Descriptor_Path (Result.Parent_FD)), Ignored'Access);
+         begin
+            if Code = Missing_Path then
+               Diagnostics.Fail_Command
+                 ("Linux procfs required at /proc/self/fd");
+            end if;
+
+            Require (Code, "cannot inspect /proc/self/fd");
+         end;
+
+         declare
             Template : constant C.char_array := C.To_C
               (Descriptor_Path (Result.Parent_FD) & "/.arca-XXXXXX");
          begin
@@ -417,8 +430,7 @@ package body Archive_CLI.Filesystem is
 
             if C_Mkdtemp (Result.Buffer) = C.Strings.Null_Ptr then
                Require
-                 (C.int (GNAT.OS_Lib.Errno),
-                  "cannot create output staging via /proc/self/fd");
+                 (C.int (GNAT.OS_Lib.Errno), "cannot create output staging");
             end if;
          end;
 

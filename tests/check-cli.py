@@ -677,8 +677,23 @@ class CLIChecks(unittest.TestCase):
                                  expected=1)
             self.assertIn(b"cannot create output staging", result.stderr)
             self.assertIn(b"Permission denied", result.stderr)
+            self.assertNotIn(b"/proc/self/fd", result.stderr)
             self.assertEqual(archive.read_bytes(), b"keep original")
             self.assertEqual(list(parent.glob(".arca-*")), [])
+
+    def test_missing_procfs_has_its_own_diagnostic(self):
+        root = self.tree()
+        for format_name in ("cpio", "tar"):
+            archive = self.work / ("missing-procfs." + format_name)
+            env, log = self.faults("procfs-missing", root)
+            result = self.invoke(self.command(format_name, root, archive),
+                                 expected=1, env=env)
+            self.assertIn(b"Linux procfs required at /proc/self/fd",
+                          result.stderr)
+            self.assertNotIn(b"cannot create output staging", result.stderr)
+            self.assertIn("procfs descriptor lookup denied", log.read_text())
+            self.assertFalse(archive.exists())
+            self.assertEqual(list(self.work.glob(".arca-*")), [])
 
     def test_output_parent_modes_and_umask(self):
         self.assertNotEqual(os.geteuid(), 0, "run the documented rootless checks")

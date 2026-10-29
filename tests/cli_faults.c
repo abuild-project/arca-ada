@@ -36,6 +36,36 @@ static void trace(const char *message)
     errno = saved;
 }
 
+static int proc_descriptor(const char *path)
+{
+    const char prefix[] = "/proc/self/fd/";
+    if (strncmp(path, prefix, sizeof(prefix) - 1) != 0)
+        return 0;
+    path += sizeof(prefix) - 1;
+    if (!*path)
+        return 0;
+    for (; *path; path++)
+        if (*path < '0' || *path > '9')
+            return 0;
+    return 1;
+}
+
+#define LSTAT_HOOK(name, type) \
+int name(const char *path, struct type *info) \
+{ \
+    int (*original)(const char *, struct type *); \
+    NEXT(#name, original); \
+    if (fault("procfs-missing") && proc_descriptor(path)) { \
+        trace("procfs descriptor lookup denied\n"); \
+        errno = ENOENT; \
+        return -1; \
+    } \
+    return original(path, info); \
+}
+
+LSTAT_HOOK(lstat, stat)
+LSTAT_HOOK(lstat64, stat64)
+
 static int phase_fd(const char *name)
 {
     const char *value = getenv(name);
