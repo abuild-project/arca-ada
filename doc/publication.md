@@ -4,8 +4,9 @@ Arca became public at
 [abuild-project/arca-ada](https://github.com/abuild-project/arca-ada)
 on 2026-11-03. The selected source revision was
 `e3892da2ec4c6dbce313f5dd80866cf153ade29b`. Public source availability
-does not constitute a versioned release; `Arca.Version.Value` remains
-`0.1.0-dev`, with no release tag or asset.
+and versioned releases are distinct. `Arca.Version.Value` identifies the
+source version; [GitHub Releases](https://github.com/abuild-project/arca-ada/releases)
+lists published tags and artifacts.
 
 ## Publication evidence
 
@@ -50,8 +51,8 @@ does not constitute a versioned release; `Arca.Version.Value` remains
   submodule URL whose GitHub resolution begins at the former owner; its
   redirect is not a permanent dependency configuration.
 - Follow the [release procedure](release.md) for version promotion, tags,
-  source archives, checksums and corresponding-source delivery. Release and
-  Alire publication require their own decisions and validation.
+  source archives, checksums and corresponding-source delivery. Alire
+  publication requires its own decision and validation.
 
 The source and transfer evidence above belongs to the selected immutable
 commit; Pages validation belongs to `4c594da`. After future source or

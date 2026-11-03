@@ -1,9 +1,8 @@
 # Release procedure
 
 This procedure is for a maintainer preparing an explicitly authorized release.
-Version promotion, tags, publication, repository transfer and visibility are
-separate actions. Preparation work leaves the source at its development
-version and does not perform them.
+Version promotion, tags and publication are separate actions. Planning and
+validation do not publish a release.
 
 ## Select and validate the release
 

@@ -1,6 +1,6 @@
 # First versioned source release
 
-Status: Preparing `0.1.0` on `codex/release-0-1-0`; no tag or release yet.
+Status: `0.1.0` candidate prepared; exact-revision validation pending.
 
 Base revision: `b14373e45f8b550794387ca86a099459576a239c`.
 
@@ -21,6 +21,15 @@ The existing TAR lifecycle interface break remains visible under Breaking
 changes because users of development revisions may have used the controlled
 parent. The first release does not create another API change.
 
+## Changelog baseline correction on 2026-11-03
+
+The first public release has no earlier public version to compare against.
+The GPL decision and TAR lifecycle encapsulation happened during private
+development. Keep their current terms and migration guidance in the licensing
+and TAR guides, but omit Changed and Breaking changes sections that would
+misrepresent them as changes between published releases. List only the
+capabilities shipped in `0.1.0`.
+
 ## Preflight on 2026-11-03
 
 The public repository had no open pull requests, issues, version tags or
@@ -35,7 +44,8 @@ to Arca's source-release gate.
 ## Steps
 
 1. Promote the version constant and prepare a concise dated `0.1.0`
-   changelog section, retaining an empty Unreleased section.
+   changelog section, retaining an empty Unreleased section. If acceptance
+   and tagging occur on another date, update that section before acceptance.
 2. Update README and publication guidance to avoid stale pre-release claims.
    Add an indexed change record for the release preparation.
 3. Build and validate the candidate in rootless AMD64 Trixie. Verify CLI and

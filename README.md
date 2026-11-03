@@ -9,7 +9,7 @@ the CLI, CPIO and TAR writers, development and project guidance.
 
 ## Status
 
-Arca is a pre-release project. It provides an independent
+Arca provides an independent
 [CPIO `newc` writer](doc/cpio.md), a [TAR writer](doc/tar.md), an
 [archive creation CLI](doc/cli.md), a minimal library client,
 installation checks and development infrastructure. The client verifies
@@ -18,7 +18,7 @@ archives. Named [Ahven unit suites](doc/unit-tests.md) test library contracts.
 Finalizer regressions cover nonregular outputs and failed deletion without
 masking caller exceptions. Library, CLI and test builds enable full validity and
 stack checks alongside the existing Ada checks.
-The public API is in its `0.y` development phase; no release is published yet.
+The public API is in its `0.y` development phase.
 
 Writers expose tagged limited private types with implicit scope cleanup.
 CPIO entry operations select the file type and retain only caller permission
@@ -47,8 +47,8 @@ subject to its separate backend decision.
 Arca uses [Semantic Versioning 2.0](https://semver.org/spec/v2.0.0.html).
 The single operative version is `Arca.Version.Value` in
 [arca-version.ads](src/arca-version.ads); `arca --version` reports it as
-`arca VERSION`. The first planned release is `0.1.0`; development sources
-carry a prerelease identifier until the release is prepared.
+`arca VERSION`. Published tags and source archives are listed under
+[GitHub Releases](https://github.com/abuild-project/arca-ada/releases).
 
 Public library interfaces are `Arca`, `Arca.CPIO`, `Arca.TAR` and the version
 metadata in `Arca.Version`. `Arca.Binary_IO` is private; CLI implementation,

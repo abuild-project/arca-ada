@@ -4,7 +4,7 @@ package Arca.Version
   with Pure
 is
 
-   Value : constant String := "0.1.0-dev";
+   Value : constant String := "0.1.0";
    --  SemVer identifier for this source version, shared by library and CLI.
 
 end Arca.Version;
