@@ -15,6 +15,7 @@ theme:
   language: en
   font: false
   features:
+    - content.code.copy
     - navigation.sections
     - navigation.top
     - toc.follow
@@ -29,7 +30,9 @@ plugins:
 
 markdown_extensions:
   - attr_list
-  - fenced_code
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.superfences
   - tables
   - toc:
       permalink: true

@@ -10,12 +10,13 @@
 
 ### Changes
 
-- Build a searchable GitHub Pages site from the maintained Markdown guides,
+- Highlight Ada and shell examples on the documentation site and add code
+  copy controls without loading a browser-side highlighter.
+- Publish a searchable GitHub Pages site from the maintained Markdown guides,
   with curated navigation, strict link validation and guarded deployment.
 - Record the accepted CLI staging fix and the public repository transition;
   align reporting, contribution, release and repository safety guidance.
-  Retain permanent downstream links and a Pages documentation site as later
-  tasks.
+  Retain permanent downstream links as a later task.
 - Retain CLI output-directory identities through archive creation,
   publication and bounded cleanup; accept read-only staging access while
   preserving primary failure diagnostics.

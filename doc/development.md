@@ -327,6 +327,8 @@ docker/dev/run arca-dev:trixie make -j8 docs NUM_CPUS=8
 The generated pages and search index stay below ignored `build/docs-site/`.
 The build rejects broken internal links. Pull requests validate the site;
 only accepted `main` builds deploy it to GitHub Pages.
+Ada and shell examples use Pygments syntax highlighting during the build and
+offer copy controls without loading a browser-side highlighter.
 
 ## Publication maintenance
 
