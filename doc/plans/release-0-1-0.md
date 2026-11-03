@@ -1,6 +1,6 @@
 # First versioned source release
 
-Status: `0.1.0` candidate prepared; exact-revision validation pending.
+Status: Candidate validated locally; main acceptance and release pending.
 
 Base revision: `b14373e45f8b550794387ca86a099459576a239c`.
 
@@ -55,3 +55,27 @@ to Arca's source-release gate.
 5. Create an annotated tag on the accepted commit, build a deterministic
    source archive and checksum, and validate the unpacked tree. Publish the
    verified tag and artifacts only after the final release decision.
+
+## Candidate validation on 2026-11-03
+
+The Trixie development image built from the repository Dockerfile. A Git
+archive of the candidate commit contained licence notices, source, GPR
+projects, build scripts and fixtures, without Git metadata or build output.
+The image reported GNATLS 14.2.0 and Debian GPRbuild package 2025.0.0-4.
+Its unpacked tree passed rootless AMD64 Trixie coverage before the full
+check target, in separate invocations. The check includes installed-library
+and CLI consumers, independent format readers and the public API boundary.
+Both the built CLI and example client reported `0.1.0`. The strict docs
+target passed. A `gzip -n` source archive passed its SHA-256 checksum check.
+ARM64 remains selectable but unvalidated. These candidate checks do not
+replace CI and unpacked-source validation for the accepted main revision.
+
+## Version-source evaluation on 2026-11-03
+
+Abuild and Spawn Manager generate Ada version specifications through Make
+from Git metadata. Arca also supports direct GPRbuild consumers and builds
+the release source archive without `.git`. A generated specification would
+need separately shipped version metadata and a fallback for those paths.
+Retain the tracked pure `Arca.Version` specification for this release. Its
+single value is checked against CLI and installed-client output; the release
+procedure checks it against the planned tag before creating that tag.
