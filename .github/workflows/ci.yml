@@ -40,6 +40,8 @@ jobs:
             --mount "type=bind,source=$PWD,target=/work,readonly" \
             --workdir /work arca-dev:trixie \
             python3 tests/check-staging-security.py --cli cli/bin/arca
+      - name: Build the documentation site
+        run: docker/dev/run arca-dev:trixie make -j8 docs NUM_CPUS=8
       - name: Preserve Ahven XML reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -47,3 +49,30 @@ jobs:
           name: ahven-unit-results
           path: build/unit-results-*/*.xml
           if-no-files-found: ignore
+      - name: Upload GitHub Pages artifact
+        if: >-
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: build/docs-site/
+          retention-days: 7
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: trixie
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy documentation
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
