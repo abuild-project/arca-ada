@@ -49,6 +49,9 @@ The single operative version is `Arca.Version.Value` in
 [arca-version.ads](src/arca-version.ads); `arca --version` reports it as
 `arca VERSION`. Published tags and source archives are listed under
 [GitHub Releases](https://github.com/abuild-project/arca-ada/releases).
+The current `main` branch reports `0.2.0-dev`; use the
+[`v0.1.0` source release](https://github.com/abuild-project/arca-ada/releases/tag/v0.1.0)
+for the published version.
 
 Public library interfaces are `Arca`, `Arca.CPIO`, `Arca.TAR` and the version
 metadata in `Arca.Version`. `Arca.Binary_IO` is private; CLI implementation,

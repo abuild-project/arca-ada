@@ -7,6 +7,7 @@ on 2026-11-03. The selected source revision was
 and versioned releases are distinct. `Arca.Version.Value` identifies the
 source version; [GitHub Releases](https://github.com/abuild-project/arca-ada/releases)
 lists published tags and artifacts.
+The current `main` branch carries `0.2.0-dev` for the next development line.
 
 ## Publication evidence
 
@@ -43,6 +44,14 @@ lists published tags and artifacts.
   passed the Trixie documentation build, artifact upload and Pages deployment.
   Anonymous HTTPS access, guide navigation and site search passed. The
   organization's Documentation link points to the live site.
+- [Arca 0.1.0](https://github.com/abuild-project/arca-ada/releases/tag/v0.1.0)
+  is the first versioned source release, from merge commit `2c57cea` (PR #21).
+  The [main CI](https://github.com/abuild-project/arca-ada/actions/runs/41669851310)
+  and [tag CI](https://github.com/abuild-project/arca-ada/actions/runs/41676660662)
+  passed. GitHub reports the release as immutable, Latest and not a
+  prerelease. Its checked source asset has SHA-256
+  `c64644280fabf43ee863249f6732d6aef798b084b00d4d61a96df91897430b48`;
+  no binaries were published.
 
 ## Continuing work
 
@@ -50,10 +59,11 @@ lists published tags and artifacts.
   delivered. The local Abuild integration branch still has a relative Arca
   submodule URL whose GitHub resolution begins at the former owner; its
   redirect is not a permanent dependency configuration.
-- Follow the [release procedure](release.md) for version promotion, tags,
-  source archives, checksums and corresponding-source delivery. Alire
-  publication requires its own decision and validation.
+- For later versions, follow the [release procedure](release.md) for version
+  promotion, tags, source archives, checksums and corresponding-source
+  delivery. Alire publication requires its own decision and validation.
 
 The source and transfer evidence above belongs to the selected immutable
-commit; Pages validation belongs to `4c594da`. After future source or
-workflow changes, assess the new revision and CI evidence on its own terms.
+commit; Pages validation belongs to `4c594da`, and first-release evidence
+belongs to `2c57cea`. After future source or workflow changes, assess the
+new revision and CI evidence on its own terms.

@@ -105,6 +105,7 @@ as described in [licensing.md](licensing.md). Installed licence notices alone
 are insufficient. Treat a changed binary build as its own artifact with its
 toolchain and source identity recorded.
 
-A later development change advances the version to the next planned
-prerelease and starts its changelog entries. Release automation and Alire
-submission are separate work; neither is implied by this procedure.
+After a release, advance the source version to the next planned prerelease.
+Keep Unreleased empty until a user- or integrator-relevant change is made.
+Release automation and Alire submission are separate work; neither is
+implied by this procedure.
