@@ -36,6 +36,12 @@ does not constitute a versioned release; `Arca.Version.Value` remains
 - The former repository URL redirects to the organization. Historical plans
   and change records retain their dated links. New maintained references use
   the canonical organization URL.
+- The [documentation site](https://abuild-project.github.io/arca-ada/) was
+  published from merge commit `4c594da` (PR #19). Its
+  [Actions run](https://github.com/abuild-project/arca-ada/actions/runs/41635919473)
+  passed the Trixie documentation build, artifact upload and Pages deployment.
+  Anonymous HTTPS access, guide navigation and site search passed. The
+  organization's Documentation link points to the live site.
 
 ## Continuing work
 
@@ -43,13 +49,10 @@ does not constitute a versioned release; `Arca.Version.Value` remains
   delivered. The local Abuild integration branch still has a relative Arca
   submodule URL whose GitHub resolution begins at the former owner; its
   redirect is not a permanent dependency configuration.
-- Build a navigable GitHub Pages site from the maintained guides. The
-  organization's current Documentation link intentionally points to the
-  repository README until that site is published; replace it afterward.
 - Follow the [release procedure](release.md) for version promotion, tags,
   source archives, checksums and corresponding-source delivery. Release and
   Alire publication require their own decisions and validation.
 
-After future source or workflow changes, assess the new revision and CI
-evidence on their own terms. The publication evidence above belongs to the
-selected immutable commit.
+The source and transfer evidence above belongs to the selected immutable
+commit; Pages validation belongs to `4c594da`. After future source or
+workflow changes, assess the new revision and CI evidence on its own terms.

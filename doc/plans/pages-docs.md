@@ -1,6 +1,6 @@
 # Navigable documentation site
 
-Status: Implemented locally; Pages deployment pending acceptance.
+Status: Accepted in `4c594da` (PR #19) on 2026-11-03; site published.
 
 Base revision: `56b463a6e2ddb98b129e56c7a708279eaebb7b87`.
 
@@ -56,3 +56,16 @@ from unchanged sources restores a successful build. The Pages deployment and
 live destination cannot be verified until the accepted workflow runs on main.
 The local preview shows the expected guide navigation and site search, and
 generated HTML navigation and asset targets resolve within the site.
+
+## Publication validation on 2026-11-03
+
+GitHub Pages uses the Actions workflow source. The `github-pages` environment
+allows deployments only from `main`. The accepted merge commit `4c594da`
+passed the Trixie job, including the documentation build and Pages artifact
+upload, and the deployment job in Actions run `41635919473`. Anonymous HTTPS
+access returned HTTP 200; the live site exposed guide navigation and a search
+result leading to the CPIO guide. The organization profile's Documentation
+link now points to the live site in commit
+`53360e86223a62c61001143a60f3aee53b2cc0fc` of `abuild-project/.github`.
+Pages was configured before the merge so the first main run could deploy; no
+site content was published until the accepted commit completed its workflow.

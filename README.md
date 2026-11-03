@@ -2,7 +2,7 @@
 
 **Artifact Representation and Construction in Ada**
 
-Archive and filesystem image writers for Ada.
+CPIO and TAR archive writers for Ada.
 
 [Browse the documentation](https://abuild-project.github.io/arca-ada/) for
 the CLI, CPIO and TAR writers, development and project guidance.
