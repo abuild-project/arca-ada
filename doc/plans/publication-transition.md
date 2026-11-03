@@ -1,6 +1,6 @@
 # Public repository transition
 
-Status: Public; documentation follow-up implemented locally.
+Status: Accepted in `56b463a` (PR #18) on 2026-11-03.
 
 Selected source revision: `e3892da2ec4c6dbce313f5dd80866cf153ade29b`.
 

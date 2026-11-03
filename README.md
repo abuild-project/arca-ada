@@ -4,6 +4,9 @@
 
 Archive and filesystem image writers for Ada.
 
+[Browse the documentation](https://abuild-project.github.io/arca-ada/) for
+the CLI, CPIO and TAR writers, development and project guidance.
+
 ## Status
 
 Arca is a pre-release project. It provides an independent

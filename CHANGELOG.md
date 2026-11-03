@@ -10,6 +10,8 @@
 
 ### Changes
 
+- Build a searchable GitHub Pages site from the maintained Markdown guides,
+  with curated navigation, strict link validation and guarded deployment.
 - Record the accepted CLI staging fix and the public repository transition;
   align reporting, contribution, release and repository safety guidance.
   Retain permanent downstream links and a Pages documentation site as later
