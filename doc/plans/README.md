@@ -16,6 +16,7 @@ Entries are ordered by topic filename.
 | [GPL licensing and documentation policy](gpl-licensing.md) | Accepted in `2091ca9` (PR #10) |
 | [LGPL licensing](lgpl-licensing.md) | Accepted in `1bca4a7` (PR #2); superseded by GPL licensing in `2091ca9` |
 | [Consumer build profiles and installation](packaging.md) | Accepted in `d3f0574` (PR #13) |
+| [Navigable documentation site](pages-docs.md) | Planned on `codex/pages-docs` |
 | [Publication status after CLI staging acceptance](publication-after-staging.md) | Accepted in `e3892da` (PR #17) |
 | [Publication preparation](publication-prep.md) | Accepted in `b5c0f11` (PR #9); publication completed on 2026-11-03 |
 | [Public repository transition](publication-transition.md) | Public at `abuild-project/arca-ada`; documentation follow-up implemented locally |
