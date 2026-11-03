@@ -10,6 +10,8 @@
 
 ### Changes
 
+- Highlight Ada and shell examples on the documentation site and add code
+  copy controls without loading a browser-side highlighter.
 - Publish a searchable GitHub Pages site from the maintained Markdown guides,
   with curated navigation, strict link validation and guarded deployment.
 - Record the accepted CLI staging fix and the public repository transition;

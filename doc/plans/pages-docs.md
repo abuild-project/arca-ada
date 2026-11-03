@@ -69,3 +69,15 @@ link now points to the live site in commit
 `53360e86223a62c61001143a60f3aee53b2cc0fc` of `abuild-project/.github`.
 Pages was configured before the merge so the first main run could deploy; no
 site content was published until the accepted commit completed its workflow.
+
+## Code rendering follow-up on 2026-11-03
+
+The initial site preserved `ada` and `sh` language labels but rendered code
+blocks without colored tokens. Use Material's `pymdownx.highlight` and
+`pymdownx.superfences` with build-time Pygments, replacing the plain fenced
+code extension. Enable local copy controls. Debian Trixie's Material package
+already includes the required Python extensions, so the image needs no new
+dependency and the site needs no browser-side syntax service.
+The rootless Trixie `make docs` target passed in strict mode. Generated Ada
+and shell blocks contain Pygments token spans, and the browser preview shows
+colored Ada source with a copy control.

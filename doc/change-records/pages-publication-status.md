@@ -17,7 +17,16 @@ the live site in commit `53360e86223a62c61001143a60f3aee53b2cc0fc` of
 The plan and record indexes now identify the accepted Pages merge. The
 changelog reflects publication of the site. The README introduction describes
 the current CPIO and TAR writers accurately on the site homepage. This topic
-changes documentation only; library and CLI behavior remain as validated at
-`4c594da`.
+also enables build-time syntax highlighting for the existing Ada and shell
+examples, plus code copy controls. The initial Markdown renderer had preserved
+the language labels but emitted uncolored code. Material's Highlight and
+SuperFences extensions use Pygments supplied by the Trixie package; no
+browser-side syntax service is added. Library and CLI behavior remain as
+validated at `4c594da`.
+
+The rootless Trixie documentation build passed with strict link validation.
+Generated Ada and shell blocks contain Pygments token spans; the browser
+preview showed colored Ada code and its copy control. Before the change,
+the generated Ada block contained only a `language-ada` class and plain text.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
