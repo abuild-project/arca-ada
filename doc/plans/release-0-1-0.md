@@ -79,3 +79,11 @@ need separately shipped version metadata and a fallback for those paths.
 Retain the tracked pure `Arca.Version` specification for this release. Its
 single value is checked against CLI and installed-client output; the release
 procedure checks it against the planned tag before creating that tag.
+
+## Release guidance alignment on 2026-11-03
+
+The security policy now accepts reports for current `main` and the latest
+published release while stating the `0.y` support limits. The changelog
+briefly names the consumer compiler-profile selection and the CLI's procfs
+requirement because both affect use of the first release. Existing detailed
+guides remain the authoritative description of those contracts.

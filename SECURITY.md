@@ -2,10 +2,11 @@
 
 ## Supported versions
 
-Arca is pre-release software. Please report security issues against the
-current main branch. There is no stable release or long-term support branch
-yet. Reports about older revisions are welcome when the issue remains in
-current code; no fixed response or remediation time is promised.
+Please report security issues affecting the current `main` branch or the
+latest published release. The `0.y` series does not promise cross-minor API
+stability or long-term support. Reports about older revisions are welcome
+when the issue remains in current code; no fixed response or remediation
+time is promised.
 
 ## Reporting a vulnerability
 

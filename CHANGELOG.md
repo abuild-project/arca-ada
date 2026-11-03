@@ -19,8 +19,10 @@ before publication.
   directory trees with stable ordering, preserved hardlinks and metadata,
   owner and time overrides, and atomic publication that does not replace an
   existing output by default. Handled signals request cleanup; `--force`
-  allows replacement.
+  allows replacement. The CLI requires Linux procfs at `/proc/self/fd`.
 - The library and CLI can be installed and uninstalled with GPRinstall. The
   public `Arca.Version` package and `arca --version` report the source version.
+  Source consumers use the `release` compiler profile by default; pass
+  `-XARCA_BUILD_MODE=validation` for strict checks.
 - A searchable [documentation site](https://abuild-project.github.io/arca-ada/)
   covers the writers, CLI, development and project guidance.

@@ -20,6 +20,11 @@ versioned artifacts without pinning a mutable delivery state. The release
 procedure clarifies that planning and validation do not themselves publish
 a release. The first release follows the documented source-only archive and
 checksum path; binary distribution has separate corresponding-source needs.
+The security policy accepts reports for `main` and the latest published
+release without calling an actual `0.y` release a prerelease. The changelog
+also names the default consumer build profile, strict validation selection
+and the CLI's procfs requirement.
+
 The tracked pure version package remains usable through direct GPRbuild and
 from Git-free source archives. Generating it from Git as in Abuild or Spawn
 Manager would require additional shipped metadata and a fallback on those
