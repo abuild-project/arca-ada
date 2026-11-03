@@ -24,6 +24,14 @@ normal tests and the cross-UID staging check. A fresh anonymous HTTPS clone
 passed rootless AMD64 Trixie coverage and checks. No versioned release tag
 or release asset was published.
 
+Repository-level secret-scanning alerts, push protection and Dependabot
+alerts are enabled. Actions allow only GitHub-owned actions pinned to full
+commit SHAs, and workflows from all external fork contributors require
+maintainer approval. A separate Trixie run on the unchanged selected source
+passed under those effective Actions permissions. Automated Dependabot
+security updates, organization-wide authentication policy and merge methods
+were not changed by this topic.
+
 The current publication, security, contribution and release guidance now
 describes the public destination and active reporting channel. Historical
 dated links remain readable through GitHub's redirect. Abuild's local

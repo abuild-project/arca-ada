@@ -28,6 +28,11 @@ does not constitute a versioned release; `Arca.Version.Value` remains
   subject to the rule; force pushes and branch deletion remain blocked.
   GitHub Actions and private vulnerability reporting are enabled. The root
   [security policy](../SECURITY.md) describes the reporting channel.
+- Repository-level secret-scanning alerts, push protection and Dependabot
+  alerts are enabled. Actions accept only GitHub-owned actions pinned to full
+  commit SHAs; workflows from external fork contributors require approval.
+  The [Trixie run under these settings](https://github.com/abuild-project/arca-ada/actions/runs/41619479596)
+  passed on the selected source revision.
 - The former repository URL redirects to the organization. Historical plans
   and change records retain their dated links. New maintained references use
   the canonical organization URL.

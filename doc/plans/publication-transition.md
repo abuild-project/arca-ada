@@ -58,3 +58,13 @@ procedure checks current publication status and remaining release work.
 Publication guidance, the change record and a new dated assessment section
 name the effective pull-request requirement and link the recorded protection
 policy. These corrections change no runtime code or accepted security limit.
+
+## Repository safety settings on 2026-11-03
+
+Secret-scanning alerts, push protection and Dependabot alerts were enabled
+for Arca. Its Actions policy now allows only GitHub-owned actions and requires
+full commit-SHA pins. Fork pull-request workflows require approval for every
+external contributor. A workflow dispatched on the unchanged selected `main`
+commit passed the normal Trixie checks under the new policy. These settings
+are repository-scoped; organization-wide 2FA, merge methods and community
+templates are separate decisions.

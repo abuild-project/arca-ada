@@ -200,3 +200,16 @@ conversations, administrator enforcement and blocked force pushes/deletion
 remain as recorded in the
 [protection request](../repository-protection.json). This supplements the
 dated transition evidence without changing its observed outcome.
+
+## Repository safety settings on 2026-11-03
+
+Secret-scanning alerts, push protection and Dependabot alerts are enabled for
+this public repository. GitHub Actions are limited to GitHub-owned actions
+with full-length commit-SHA pins, and all external fork pull-request workflows
+require maintainer approval. The
+[Trixie workflow under those permissions](https://github.com/abuild-project/arca-ada/actions/runs/41619479596)
+passed on the unchanged selected source commit; its log confirms coverage,
+normal checks and cross-UID staging tests. GitHub reported no open
+secret-scanning or Dependabot alert at the time of inspection; alert
+processing may report new findings later. Organization-wide 2FA, merge
+methods and community settings were not changed.
