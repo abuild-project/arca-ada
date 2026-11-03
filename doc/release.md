@@ -7,8 +7,9 @@ version and does not perform them.
 
 ## Select and validate the release
 
-1. Complete the applicable [publication gates](publication.md) before a first
-   public release. Review the [compatibility and platform policy](../README.md#version-and-compatibility)
+1. Confirm the [publication status](publication.md) and complete the remaining
+   release prerequisites. Review the
+   [compatibility and platform policy](../README.md#version-and-compatibility)
    and [licensing requirements](licensing.md).
 2. Prepare a release change that promotes `Arca.Version.Value` to the chosen
    normal SemVer version, removing the development suffix. The first planned

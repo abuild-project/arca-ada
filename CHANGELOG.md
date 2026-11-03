@@ -10,8 +10,10 @@
 
 ### Changes
 
-- Record acceptance of the CLI staging fix and the remaining public
-  repository-reference gate after the planned transfer.
+- Record the accepted CLI staging fix and the public repository transition;
+  align reporting, contribution, release and repository safety guidance.
+  Retain permanent downstream links and a Pages documentation site as later
+  tasks.
 - Retain CLI output-directory identities through archive creation,
   publication and bounded cleanup; accept read-only staging access while
   preserving primary failure diagnostics.

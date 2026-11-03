@@ -1,6 +1,6 @@
 # Publication status after CLI staging acceptance
 
-Status: Implemented and checked locally on `codex/publication-after-staging`.
+Status: Accepted in `e3892da` (PR #17) on 2026-10-29.
 
 Base revision: `d715d6295df56c5948d419458a5853df31dcf079`.
 

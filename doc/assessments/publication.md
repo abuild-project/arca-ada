@@ -147,3 +147,69 @@ verification of explicit repository links and downstream pinned dependency
 URLs at that destination. The final publication review must still examine
 later source changes, reachable history, newer CI logs and artifacts,
 organization access, reporting and effective protection settings.
+
+## Public repository transition on 2026-11-03
+
+The selected source remained
+`e3892da2ec4c6dbce313f5dd80866cf153ade29b` through the final
+publication review, public-visibility change and transfer to
+`abuild-project/arca-ada`. The repository became public before transfer so
+that the effective protected-branch rule would not lapse under the destination
+organization's GitHub Free plan. No release tag was created.
+
+The final review inspected every commit and blob reachable through GitHub
+`main` and retained pull-request heads, all then-available workflow logs and
+retained Ahven artifacts. All pull-request heads were ancestors of `main`.
+Credential, private-infrastructure, local-path and high-entropy searches found
+no unreviewed candidate; historical SHA-256 values, author attribution and
+provider-owned CI paths were reviewed in context. This is a bounded review of
+reachable and available material, not a claim about deleted artifacts,
+unreachable server objects or future CI output.
+
+A post-audit security diff review covered the accepted changes from
+`84f8500ff5f3fb8d10b00d65c551a27d7a811b0c` to the selected commit
+without a new reportable finding. Its automatic changed-file inventory missed
+Ada and test sources; those files and their supporting call path were read
+directly. The documented stable-input contract and the accepted possibility
+of readable staging on mode-fixed filesystems remain unchanged. Real FAT,
+exFAT, CIFS and NFS mounts were not tested.
+
+The [Trixie workflow after transfer](https://github.com/abuild-project/arca-ada/actions/runs/41612211026)
+passed on the exact selected commit. Its log confirms fresh-checkout coverage,
+normal checks and the dedicated cross-UID staging step. An anonymous HTTPS
+clone of the new destination passed rootless AMD64 Trixie coverage and checks
+in separate invocations. The new workflow log and retained unit-test artifact
+were checked for publication-sensitive material without a new candidate.
+At the public organization destination, `main` retains strict `trixie`
+status, conversation resolution, administrator
+enforcement and blocked force pushes/deletion. GitHub Actions and private
+vulnerability reporting are enabled.
+
+The former repository address redirects to the new owner. Historical dated
+PR and workflow links remain as recorded; maintained publication guidance
+uses the canonical destination. Downstream dependency URLs that still resolve
+through the former owner need a permanent update when their integration topics
+are delivered. A navigable GitHub Pages documentation site and first versioned
+release remain separate follow-ups.
+
+## Protection policy detail on 2026-11-03
+
+The effective `main` rule also requires changes through a pull request; it
+currently requires no approving review. Strict `trixie` status, resolved
+conversations, administrator enforcement and blocked force pushes/deletion
+remain as recorded in the
+[protection request](../repository-protection.json). This supplements the
+dated transition evidence without changing its observed outcome.
+
+## Repository safety settings on 2026-11-03
+
+Secret-scanning alerts, push protection and Dependabot alerts are enabled for
+this public repository. GitHub Actions are limited to GitHub-owned actions
+with full-length commit-SHA pins, and all external fork pull-request workflows
+require maintainer approval. The
+[Trixie workflow under those permissions](https://github.com/abuild-project/arca-ada/actions/runs/41619479596)
+passed on the unchanged selected source commit; its log confirms coverage,
+normal checks and cross-UID staging tests. GitHub reported no open
+secret-scanning or Dependabot alert at the time of inspection; alert
+processing may report new findings later. Organization-wide 2FA, merge
+methods and community settings were not changed.
