@@ -20,7 +20,7 @@ Entries are ordered by topic filename.
 | [Publication status after CLI staging acceptance](publication-after-staging.md) | Accepted in `e3892da` (PR #17) |
 | [Publication preparation](publication-prep.md) | Accepted in `b5c0f11` (PR #9); publication completed on 2026-11-03 |
 | [Public repository transition](publication-transition.md) | Accepted in `56b463a` (PR #18); public at `abuild-project/arca-ada` |
-| [First versioned source release](release-0-1-0.md) | Candidate validated locally; main acceptance and release pending |
+| [First versioned source release](release-0-1-0.md) | Accepted in `2c57cea` (PR #21); `v0.1.0` published |
 | [Version, compatibility and release procedure](release-basics.md) | Accepted in `84f8500` (PR #15) |
 | [TAR extraction](tar-extraction.md) | Accepted in `3914462` (PR #4) |
 | [Writer cleanup and compiler checks](writer-cleanup.md) | Accepted in `52ead53` (PR #6) |

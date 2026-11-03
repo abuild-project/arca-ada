@@ -11,11 +11,11 @@ validation do not publish a release.
    [compatibility and platform policy](../README.md#version-and-compatibility)
    and [licensing requirements](licensing.md).
 2. Prepare a release change that promotes `Arca.Version.Value` to the chosen
-   normal SemVer version, removing the development suffix. The first planned
-   release is `0.1.0`. Move the relevant changelog entries from Unreleased to
-   a section with that version and date; retain an empty Unreleased section
-   for later work. Mark API breaks under Breaking changes and provide the
-   migration path. Update README status and any version-specific examples.
+   normal SemVer version, removing the development suffix. Move the relevant
+   changelog entries from Unreleased to a section with that version and date;
+   retain an empty Unreleased section for later work. Record API breaks under
+   Breaking changes, with migration guidance. Update README status and any
+   version-specific examples.
 3. Merge that change through the normal review process. Select the exact
    resulting `main` commit. Read the required CI jobs and logs for that
    revision; a green result for an earlier commit is insufficient.
@@ -33,8 +33,9 @@ metadata is needed to query the version from a source archive.
 ## Tag and prepare source artifacts
 
 Only after the selected revision is accepted and green, create an annotated
-tag on that commit. The following example is for the first release and runs
-in the maintainer's clean `main` checkout after the version change above:
+tag on that commit. The examples below use `0.1.0` from the first release;
+substitute the chosen version for later releases. Run the following in the
+maintainer's clean `main` checkout after the version change above:
 
 ```sh
 (
@@ -105,6 +106,7 @@ as described in [licensing.md](licensing.md). Installed licence notices alone
 are insufficient. Treat a changed binary build as its own artifact with its
 toolchain and source identity recorded.
 
-A later development change advances the version to the next planned
-prerelease and starts its changelog entries. Release automation and Alire
-submission are separate work; neither is implied by this procedure.
+After a release, advance the source version to the next planned prerelease.
+Keep Unreleased empty until a user- or integrator-relevant change is made.
+Release automation and Alire submission are separate work; neither is
+implied by this procedure.

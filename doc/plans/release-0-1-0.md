@@ -1,6 +1,6 @@
 # First versioned source release
 
-Status: Candidate validated locally; main acceptance and release pending.
+Status: Accepted in `2c57cea` (PR #21) on 2026-11-03; `v0.1.0` published.
 
 Base revision: `b14373e45f8b550794387ca86a099459576a239c`.
 
@@ -87,3 +87,17 @@ published release while stating the `0.y` support limits. The changelog
 briefly names the consumer compiler-profile selection and the CLI's procfs
 requirement because both affect use of the first release. Existing detailed
 guides remain the authoritative description of those contracts.
+
+## Published source release on 2026-11-03
+
+The annotated tag `v0.1.0` resolves to accepted merge commit
+`2c57ceaec8bc867a4b02d8134bd0ab56b49413fa`. The required main workflow
+run `41669851310` and the tag-triggered run `41676660662` passed. A fresh
+source archive from that commit contained the expected notices, sources,
+projects, scripts and fixtures without Git metadata or build output. Its
+unpacked tree passed rootless AMD64 Trixie coverage before the full check,
+in separate invocations. The CLI and installed client reported `0.1.0`.
+The published `arca-0.1.0.tar.gz` asset has SHA-256
+`c64644280fabf43ee863249f6732d6aef798b084b00d4d61a96df91897430b48`.
+GitHub reports the release immutable, Latest and not a prerelease. It
+contains a source archive and checksum, without prebuilt binaries.
