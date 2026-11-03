@@ -14,18 +14,21 @@ The post-audit code diff had no new reportable security finding after manual
 review of the Ada files omitted by the automatic inventory. The previous
 staging finding was fixed before the public transition.
 
-The public destination preserves strict `trixie` checks, resolved
-conversations, administrator enforcement and blocked force pushes/deletion.
+The public destination requires pull requests, strict `trixie` checks and
+resolved conversations on `main`; administrators are included, and force
+pushes and deletion are blocked. The recorded protection request is
+[retained with the publication guidance](../repository-protection.json).
 GitHub Actions and private vulnerability reporting are enabled. An Actions
 run after transfer passed on the selected revision, including coverage,
 normal tests and the cross-UID staging check. A fresh anonymous HTTPS clone
 passed rootless AMD64 Trixie coverage and checks. No versioned release tag
 or release asset was published.
 
-The current publication status, assessment and contributor links now identify
-the public destination. Historical dated links remain readable through
-GitHub's redirect. Abuild's local integration branch still needs a permanent
-dependency URL when it is delivered; this topic does not change that branch.
+The current publication, security, contribution and release guidance now
+describes the public destination and active reporting channel. Historical
+dated links remain readable through GitHub's redirect. Abuild's local
+integration branch still needs a permanent dependency URL when delivered;
+this topic does not change that branch.
 The public repository has topics for its Abuild family, Ada library, archive
 formats and CLI. The organization profile's Documentation link temporarily
 targets the Arca README. A later GitHub Pages documentation site will replace

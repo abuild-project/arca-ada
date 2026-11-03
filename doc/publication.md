@@ -22,10 +22,11 @@ does not constitute a versioned release; `Arca.Version.Value` remains
   coverage, normal checks and the dedicated cross-UID staging step. An
   anonymous HTTPS clone at the new URL passed rootless AMD64 Trixie coverage
   and checks in separate invocations.
-- After transfer, `main` still requires the strict GitHub Actions `trixie`
-  check and resolved conversations; administrators are subject to the rule,
-  while force pushes and branch deletion remain blocked. GitHub Actions and
-  private vulnerability reporting are enabled. The root
+- After transfer, the [recorded protection policy](repository-protection.json)
+  remains effective: changes to `main` require a pull request, the strict
+  GitHub Actions `trixie` check and resolved conversations. Administrators are
+  subject to the rule; force pushes and branch deletion remain blocked.
+  GitHub Actions and private vulnerability reporting are enabled. The root
   [security policy](../SECURITY.md) describes the reporting channel.
 - The former repository URL redirects to the organization. Historical plans
   and change records retain their dated links. New maintained references use

@@ -9,10 +9,9 @@ current code; no fixed response or remediation time is promised.
 
 ## Reporting a vulnerability
 
-Use this repository's Security tab and Report a vulnerability action when
-private vulnerability reporting is available. Maintainers must enable and
-verify that channel when the repository becomes public; this file does not
-enable it automatically.
+Use [Report a vulnerability](https://github.com/abuild-project/arca-ada/security/advisories/new)
+to send a private report to the repository maintainers. The reporting channel
+is enabled for this public repository; this file does not configure it.
 
 If the private reporting action is unavailable, open an issue asking for a
 private contact channel without including vulnerability details. Do not put

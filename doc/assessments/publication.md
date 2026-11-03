@@ -191,3 +191,12 @@ uses the canonical destination. Downstream dependency URLs that still resolve
 through the former owner need a permanent update when their integration topics
 are delivered. A navigable GitHub Pages documentation site and first versioned
 release remain separate follow-ups.
+
+## Protection policy detail on 2026-11-03
+
+The effective `main` rule also requires changes through a pull request; it
+currently requires no approving review. Strict `trixie` status, resolved
+conversations, administrator enforcement and blocked force pushes/deletion
+remain as recorded in the
+[protection request](../repository-protection.json). This supplements the
+dated transition evidence without changing its observed outcome.

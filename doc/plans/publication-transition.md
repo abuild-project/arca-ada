@@ -48,3 +48,13 @@ were resolved through GitHub's redirect. Current publication guidance uses
 the canonical destination, while the Abuild integration URL and future
 Pages site remain separate follow-ups. The organization profile now lists
 Arca and links to its README until the documentation site is available.
+
+## Public guidance on 2026-11-03
+
+The maintained security policy now links directly to the enabled private
+reporting form. Contributor guidance names that channel and points to the
+current publication status instead of a pre-publication checklist. The release
+procedure checks current publication status and remaining release work.
+Publication guidance, the change record and a new dated assessment section
+name the effective pull-request requirement and link the recorded protection
+policy. These corrections change no runtime code or accepted security limit.
