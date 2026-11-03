@@ -17,10 +17,11 @@ Entries are ordered by topic filename.
 | [LGPL licensing](lgpl-licensing.md) | Historical project licence, additional import grant and installed notices; superseded by GPL licensing | `1bca4a7` |
 | [Consumer build profiles and installation](packaging.md) | Consumer compiler policy, Ahven-free cleanup and named uninstallable manifests | `d3f0574` |
 | [Navigable documentation site](pages-docs.md) | Searchable maintained guides and guarded GitHub Pages deployment | `4c594da` |
-| [Published documentation status](pages-publication-status.md) | Live Pages, exact-revision CI, profile link and code highlighting | pending |
+| [Published documentation status](pages-publication-status.md) | Live Pages, exact-revision CI, profile link and code highlighting | `b14373e` |
 | [Publication status after CLI staging acceptance](publication-after-staging.md) | Accepted fix status, exact-revision CI evidence and remaining source-link gate | `e3892da` |
 | [Publication preparation](publication-prep.md) | Security reporting, publication audit and explicit owner gates | `b5c0f11` |
 | [Public repository transition](publication-transition.md) | Public destination, transfer checks and remaining documentation work | `56b463a` |
+| [First versioned source release](release-0-1-0.md) | Version promotion, concise changelog and source-release guidance | pending |
 | [Version, compatibility and release procedure](release-basics.md) | Public version metadata, compatibility/platform policy, release workflow and diagnostic source guard | `84f8500` |
 | [Standalone TAR writer](tar-extraction.md) | Native writer extraction, ownership and independent validation | `3914462` |
 | [Writer finalization and compiler checks](writer-cleanup.md) | Best-effort discard/close, failure regressions and stronger library/test compilation | `52ead53` |
