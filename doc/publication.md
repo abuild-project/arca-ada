@@ -7,7 +7,6 @@ on 2026-11-03. The selected source revision was
 and versioned releases are distinct. `Arca.Version.Value` identifies the
 source version; [GitHub Releases](https://github.com/abuild-project/arca-ada/releases)
 lists published tags and artifacts.
-The current `main` branch carries `0.2.0-dev` for the next development line.
 
 ## Publication evidence
 
