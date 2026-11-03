@@ -13,6 +13,7 @@ RUN apt-get update \
         libahven-dev \
         libarchive-tools \
         make \
+        mkdocs-material \
         python3 \
         tar \
     && rm -rf /var/lib/apt/lists/*

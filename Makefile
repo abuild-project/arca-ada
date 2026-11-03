@@ -5,8 +5,9 @@ PREFIX ?= $(CURDIR)/build/install
 GPRBUILD ?= gprbuild
 GPRINSTALL ?= gprinstall
 GPRCLEAN ?= gprclean
+MKDOCS ?= mkdocs
 
-.PHONY: all cli check coverage install uninstall clean preflight
+.PHONY: all cli check coverage docs install uninstall clean preflight
 
 all: preflight
 	"$(GPRBUILD)" -p -P arca.gpr -j$(NUM_CPUS) -XARCA_BUILD_MODE=validation
@@ -40,6 +41,10 @@ check: all
 coverage: preflight
 	./scripts/check-test-tools.sh
 	./tests/check-coverage.py --builder "$(GPRBUILD)" --jobs "$(NUM_CPUS)"
+
+docs:
+	python3 scripts/build-docs-site.py
+	"$(MKDOCS)" build --strict
 
 install: all
 	"$(GPRINSTALL)" -p -P arca.gpr --prefix="$(PREFIX)" -XARCA_BUILD_MODE=validation

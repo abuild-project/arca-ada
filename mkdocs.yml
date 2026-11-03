@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+site_name: Arca
+site_description: CPIO and TAR archive writers for Ada
+site_url: https://abuild-project.github.io/arca-ada/
+repo_url: https://github.com/abuild-project/arca-ada
+repo_name: abuild-project/arca-ada
+edit_uri: ""
+
+docs_dir: build/docs-source
+site_dir: build/docs-site
+
+theme:
+  name: material
+  language: en
+  font: false
+  features:
+    - navigation.sections
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+  palette:
+    primary: blue grey
+    accent: blue
+
+plugins:
+  - search
+
+markdown_extensions:
+  - attr_list
+  - fenced_code
+  - tables
+  - toc:
+      permalink: true
+
+validation:
+  nav:
+    omitted_files: warn
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn
+
+nav:
+  - Home: index.md
+  - Using Arca:
+      - Archive CLI: cli.md
+      - CPIO writer: cpio.md
+      - TAR writer: tar.md
+  - Development:
+      - Development guide: development.md
+      - Unit tests: unit-tests.md
+      - Test coverage mapping: native-test-coverage.md
+      - Coding style: coding-style.md
+  - Project:
+      - Contributing: contributing.md
+      - Security: security.md
+      - Licensing: licensing.md
+      - Publication status: publication.md
+      - Release procedure: release.md
+      - Changelog: changelog.md

@@ -313,6 +313,21 @@ inventory, coverage, dependency checkout, release licensing, manuals and
 integration tests must change together. A separate local integration experiment
 does not become an Arca test dependency.
 
+## Documentation site
+
+The [documentation site](https://abuild-project.github.io/arca-ada/) renders
+the maintained Markdown guides without a parallel prose copy. Build it in the
+reference environment with:
+
+```sh
+docker/dev/build
+docker/dev/run arca-dev:trixie make -j8 docs NUM_CPUS=8
+```
+
+The generated pages and search index stay below ignored `build/docs-site/`.
+The build rejects broken internal links. Pull requests validate the site;
+only accepted `main` builds deploy it to GitHub Pages.
+
 ## Publication maintenance
 
 Read the [publication status](publication.md) and
