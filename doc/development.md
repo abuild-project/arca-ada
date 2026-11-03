@@ -315,10 +315,10 @@ does not become an Arca test dependency.
 
 ## Publication maintenance
 
-Read the [publication checklist](publication.md) and
-[reviewed assessment](assessments/publication.md) before preparing an owner
-decision. [SECURITY.md](../SECURITY.md) defines reporting guidance; its presence
-does not enable GitHub private reporting. Keep the published documentation
-independent of local paths, private services and unrelated project material.
-Record exact revisions and evidence limits rather than claiming that an old
-audit certifies later code or repository settings.
+Read the [publication status](publication.md) and
+[reviewed assessment](assessments/publication.md) when maintaining the public
+repository or preparing a release. [SECURITY.md](../SECURITY.md) defines
+reporting guidance; GitHub's private reporting setting is enabled separately.
+Keep published documentation independent of local paths, private services and
+unrelated project material. Record exact revisions and evidence limits rather
+than claiming that an old audit certifies later code or repository settings.

@@ -180,7 +180,7 @@ apply to the library, CLI, tests and examples. Compiler style checks run in
 repository Make builds and coverage; `make check` verifies that each project's
 gate accepts the documented line limit and rejects an overlong source.
 
-Use [SECURITY.md](SECURITY.md) for vulnerability reporting. Maintainers must
-complete the [publication checklist](doc/publication.md) before making the
-repository public; the [publication assessment](doc/assessments/publication.md)
-records the reviewed revision, evidence and remaining gates.
+Use [SECURITY.md](SECURITY.md) for vulnerability reporting. The
+[publication status](doc/publication.md) records the public repository
+transition and later release work; the
+[publication assessment](doc/assessments/publication.md) retains its evidence.

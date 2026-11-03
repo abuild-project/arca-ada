@@ -1,6 +1,6 @@
 # Public repository transition
 
-Status: Public at `abuild-project/arca-ada`; documentation follow-up in progress.
+Status: Public; documentation follow-up implemented locally.
 
 Selected source revision: `e3892da2ec4c6dbce313f5dd80866cf153ade29b`.
 
@@ -36,3 +36,15 @@ documentation task, not a condition for the repository transition.
    URL still depends on the former owner namespace.
 4. Check relative documentation links and whitespace. The documentation-only
    follow-up does not change library or CLI behavior.
+
+## Completion evidence on 2026-11-03
+
+The destination is public at the selected commit. Protection, Actions and
+private vulnerability reporting remain effective. The post-transfer Trixie
+workflow `41612211026` passed after fresh-checkout coverage, normal checks
+and cross-UID staging tests. An anonymous HTTPS clone passed the documented
+rootless AMD64 coverage and check targets. Historical PR and workflow links
+were resolved through GitHub's redirect. Current publication guidance uses
+the canonical destination, while the Abuild integration URL and future
+Pages site remain separate follow-ups. The organization profile now lists
+Arca and links to its README until the documentation site is available.

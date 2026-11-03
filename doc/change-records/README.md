@@ -16,8 +16,9 @@ Entries are ordered by topic filename.
 | [GPL licensing and documentation policy](gpl-licensing.md) | Common GPL licence, retained source attribution and independent validation | `2091ca9` |
 | [LGPL licensing](lgpl-licensing.md) | Historical project licence, additional import grant and installed notices; superseded by GPL licensing | `1bca4a7` |
 | [Consumer build profiles and installation](packaging.md) | Consumer compiler policy, Ahven-free cleanup and named uninstallable manifests | `d3f0574` |
-| [Publication status after CLI staging acceptance](publication-after-staging.md) | Accepted fix status, exact-revision CI evidence and remaining source-link gate | pending |
+| [Publication status after CLI staging acceptance](publication-after-staging.md) | Accepted fix status, exact-revision CI evidence and remaining source-link gate | `e3892da` |
 | [Publication preparation](publication-prep.md) | Security reporting, publication audit and explicit owner gates | `b5c0f11` |
+| [Public repository transition](publication-transition.md) | Public destination, transfer checks and remaining documentation work | pending |
 | [Version, compatibility and release procedure](release-basics.md) | Public version metadata, compatibility/platform policy, release workflow and diagnostic source guard | `84f8500` |
 | [Standalone TAR writer](tar-extraction.md) | Native writer extraction, ownership and independent validation | `3914462` |
 | [Writer finalization and compiler checks](writer-cleanup.md) | Best-effort discard/close, failure regressions and stronger library/test compilation | `52ead53` |

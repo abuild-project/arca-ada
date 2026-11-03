@@ -1,53 +1,49 @@
-# Publication checklist
+# Publication status
 
-The owner intends to transfer `mweidle73/arca-ada` to
-`abuild-project/arca-ada`, then decide on public visibility. This document
-prepares that decision. No transfer, visibility change, tag, release or Alire
-submission is performed by the preparation PR.
+Arca became public at
+[abuild-project/arca-ada](https://github.com/abuild-project/arca-ada)
+on 2026-11-03. The selected source revision was
+`e3892da2ec4c6dbce313f5dd80866cf153ade29b`. Public source availability
+does not constitute a versioned release; `Arca.Version.Value` remains
+`0.1.0-dev`, with no release tag or asset.
 
-## Before the owner decision
+## Publication evidence
 
-- Read the [publication assessment](assessments/publication.md). Its CLI
-  staging finding is resolved in accepted commit `d715d62`; review later
-  changes and close any new blocking findings.
-- Retain the source revisions and attribution recorded in
-  [licensing](licensing.md); no separate public predecessor reference is a
-  publication condition.
-- Keep public repository-source references pending until the private transfer
-  to `abuild-project/arca-ada` is complete. Then verify explicit repository
-  links and downstream pinned dependency URLs at the final destination.
-- The separate local Abuild CPIO/TAR/OCI integration experiment is complete
-  and reviewed. Retain its evidence; Arca's normal tests must still run
-  without an Abuild checkout, credentials or network access.
-- Review every reachable ref/history, CI log and retained artifact for
-  sensitive material, including new artifacts produced by this PR. Existing
-  historical licence states do not by themselves require rewriting history.
-- Run the documented rootless Trixie checks and coverage at the exact commit
-  selected for publication. Read CI job status and relevant logs.
-- Verify the destination organization, repository permissions, default branch,
-  required CI checks, branch protection/rulesets and Actions permissions with
-  the owner. Main protection is configured with strict GitHub Actions trixie
-  checks, pull requests, resolved conversations, administrator enforcement
-  and blocked force pushes/deletion. The
-  [recorded request](repository-protection.json) preserves the policy.
-  Recheck the effective settings after a transfer.
-- Enable and verify GitHub private vulnerability reporting when available.
-  Check that the root [SECURITY.md](../SECURITY.md) and the actual reporting
-  UI agree; a Markdown file does not configure GitHub.
+- The [publication assessment](assessments/publication.md) retains the
+  reviewed history, security findings, licensing disposition and dated
+  resolution. A final review of the selected revision, reachable GitHub refs,
+  available CI logs and retained artifacts found no new publication blocker.
+- The accepted CLI staging fix is in `d715d62`. The separate post-audit code
+  review found no new reportable finding through the selected revision.
+  Earlier predecessor-source snapshot requirements remain retired under the
+  [GPL licensing disposition](licensing.md).
+- An [Actions run at the new repository](https://github.com/abuild-project/arca-ada/actions/runs/41612211026)
+  passed for the exact selected commit. Its Trixie job includes fresh-checkout
+  coverage, normal checks and the dedicated cross-UID staging step. An
+  anonymous HTTPS clone at the new URL passed rootless AMD64 Trixie coverage
+  and checks in separate invocations.
+- After transfer, `main` still requires the strict GitHub Actions `trixie`
+  check and resolved conversations; administrators are subject to the rule,
+  while force pushes and branch deletion remain blocked. GitHub Actions and
+  private vulnerability reporting are enabled. The root
+  [security policy](../SECURITY.md) describes the reporting channel.
+- The former repository URL redirects to the organization. Historical plans
+  and change records retain their dated links. New maintained references use
+  the canonical organization URL.
 
-## Transfer and public switch
+## Continuing work
 
-Obtain the owner's explicit instruction for each external action. Transfer
-while private, verify organization access and clone/fetch permissions, and
-then decide public visibility. Update explicit repository links
-and downstream pinned dependency URLs to the verified destination. Test an
-anonymous fresh clone and standalone build after the public switch; do not
-treat GitHub redirects as the only permanent dependency configuration.
+- Check and update downstream pinned dependency URLs when those changes are
+  delivered. The local Abuild integration branch still has a relative Arca
+  submodule URL whose GitHub resolution begins at the former owner; its
+  redirect is not a permanent dependency configuration.
+- Build a navigable GitHub Pages site from the maintained guides. The
+  organization's current Documentation link intentionally points to the
+  repository README until that site is published; replace it afterward.
+- Follow the [release procedure](release.md) for version promotion, tags,
+  source archives, checksums and corresponding-source delivery. Release and
+  Alire publication require their own decisions and validation.
 
-## First release
-
-Follow the [release procedure](release.md) after the publication gates and
-the maintainer's explicit release decision. It defines version promotion,
-the accepted source revision, platform evidence, annotated tags, source
-archives/checksums and corresponding-source delivery. Release automation and
-Alire submission remain separate changes.
+After future source or workflow changes, assess the new revision and CI
+evidence on their own terms. The publication evidence above belongs to the
+selected immutable commit.

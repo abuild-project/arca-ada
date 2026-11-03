@@ -1,7 +1,7 @@
 # Publication preparation
 
-Status: Accepted in `b5c0f11` (PR #9) on 2026-10-23. Publication gates remain
-open; see [publication guidance](../publication.md).
+Status: Accepted in `b5c0f11` (PR #9) on 2026-10-23. Publication completed
+on 2026-11-03; see [publication status](../publication.md).
 
 ## Scope
 
