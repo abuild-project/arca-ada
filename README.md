@@ -173,8 +173,9 @@ corresponding-source requirements when distributing binaries.
 ## Roadmap
 
 See the [plan index](doc/plans/README.md) and
-[change records](doc/change-records/README.md). The next steps are pinned
-Abuild integration and additional VFAT, EXT2 and ISO writers.
+[change records](doc/change-records/README.md). The next writer step is the
+[VFAT format inventory](doc/plans/vfat-format-inventory.md), followed by
+native VFAT, EXT2 and ISO work.
 
 ## Contributing
 

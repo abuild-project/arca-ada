@@ -23,5 +23,6 @@ Entries are ordered by topic filename.
 | [First versioned source release](release-0-1-0.md) | Accepted in `2c57cea` (PR #21); `v0.1.0` published |
 | [Version, compatibility and release procedure](release-basics.md) | Accepted in `84f8500` (PR #15) |
 | [TAR extraction](tar-extraction.md) | Accepted in `3914462` (PR #4) |
+| [VFAT format and reference inventory](vfat-format-inventory.md) | In progress; reference pins recorded, compatibility profile pending |
 | [Writer cleanup and compiler checks](writer-cleanup.md) | Accepted in `52ead53` (PR #6) |
-| [Writer extraction](writer-extraction.md) | CPIO `b7d8beb`, TAR `3914462`, Ahven `6f1514a` and CLI `a7c4735` accepted; local integration experiment complete; pinned Abuild integration and later writers pending |
+| [Writer extraction](writer-extraction.md) | CPIO, TAR, Ahven and CLI accepted; Abuild integration accepted at `1b8ac1848`; VFAT inventory in progress |

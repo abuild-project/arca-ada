@@ -308,10 +308,10 @@ integration, pass the directory containing `arca.gpr`. Pin the dependency to
 an accepted commit; do not depend on a moving branch for released builds.
 Every build environment must be able to fetch the pinned Arca revision.
 
-Abuild integration is a later change: transformation adapters, source-file
-inventory, coverage, dependency checkout, release licensing, manuals and
-integration tests must change together. A separate local integration experiment
-does not become an Arca test dependency.
+Abuild consumes a pinned Arca revision in its own repository. Transformation
+adapters, source-file inventory, coverage, dependency checkout, release
+licensing, manuals and integration tests remain that consumer's responsibility.
+Arca's normal checks do not depend on an Abuild checkout.
 
 ## Documentation site
 
