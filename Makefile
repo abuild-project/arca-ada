@@ -36,6 +36,7 @@ check: all
 	./tests/check-unit.py
 	./tests/check-cpio.py
 	./tests/check-tar.py
+	./tests/check-vfat-reference.py
 	./tests/check-cli.py
 
 coverage: preflight

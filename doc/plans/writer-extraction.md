@@ -1,9 +1,9 @@
 # Writer extraction
 
 Status: CPIO accepted in `b7d8beb` (PR #3), TAR in `3914462` (PR #4), Ahven
-suites in `6f1514a` (PR #5) and CLI in `a7c4735` (PR #7). The local Abuild
-integration experiment is complete; pinned Abuild integration and later
-writers remain open. See [publication guidance](../publication.md).
+suites in `6f1514a` (PR #5) and CLI in `a7c4735` (PR #7). Abuild integration
+is accepted at `1b8ac1848`; the VFAT reference inventory is in progress.
+Later writers remain open. See [publication guidance](../publication.md).
 
 ## Scope and order
 
@@ -96,3 +96,12 @@ On 2026-10-22, the owner accepted the Ahven suites by requesting the merge of
 [PR #5](https://github.com/mweidle73/arca-ada/pull/5), then requested work on
 the [archive creation CLI](archive-cli.md). PR #5 is merged; CLI work is a
 separate local topic. Abuild integration remains a subsequent change.
+
+## VFAT inventory on 2026-11-05
+
+The accepted Abuild revision `1b8ac18483f70b018441b27554d13241bdd7b80b`
+pins Arca `v0.1.0` for CPIO/TAR. The next writer step is the
+[VFAT format and reference inventory](vfat-format-inventory.md). It records
+the format authority, current consumer contract, historical native PoC and
+distinct producer profiles before an `Arca.VFAT` API or implementation is
+chosen. No native VFAT writer is added in this step.

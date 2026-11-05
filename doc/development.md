@@ -36,8 +36,10 @@ builds this Dockerfile and runs the standalone coverage target before any
 other tests. It first asserts that `build/` does not exist, verifying that
 coverage creates its own scratch parent without packaging or wrapper checks.
 The normal check target follows. Python 3, GNU cpio/tar, libarchive's bsdtar,
-gcov and Ahven (`libahven-dev`) are supplied by the development image. The
-test preflight reports missing tools and an unavailable test project.
+gcov, Ahven (`libahven-dev`), bzip2, mtools and dosfstools are supplied by
+the development image. The latter three support test-only VFAT references;
+they are not library or CLI dependencies. The test preflight reports missing
+readers and an unavailable test project.
 
 With no explicit command, the launcher starts Bash and forwards standard
 input, including piped commands. It allocates a TTY only when both its input
@@ -164,6 +166,11 @@ are resolved before entering the private consumer directories.
 The consumer check establishes GPR packaging and compiler/linker usability.
 The separate CPIO and TAR suites check raw layout, payloads, two external
 readers, parallel instances, errors, reproducibility and scope-exit cleanup.
+The VFAT reference check consumes committed mtools-generated FAT12, FAT16
+and FAT32 images one at a time without regenerating them. It combines
+independent raw decoding with `fsck.fat`, `mdir` and `mtype`, and includes
+corruption controls for FAT and long-name records. It does not test an Arca
+VFAT writer yet.
 See the [CPIO guide](cpio.md) and [TAR guide](tar.md) for their contracts.
 TAR also retains the historical GNU ustar fixture with its original producer
 record; it is checked without device-node privileges.
@@ -308,10 +315,10 @@ integration, pass the directory containing `arca.gpr`. Pin the dependency to
 an accepted commit; do not depend on a moving branch for released builds.
 Every build environment must be able to fetch the pinned Arca revision.
 
-Abuild integration is a later change: transformation adapters, source-file
-inventory, coverage, dependency checkout, release licensing, manuals and
-integration tests must change together. A separate local integration experiment
-does not become an Arca test dependency.
+Abuild consumes a pinned Arca revision in its own repository. Transformation
+adapters, source-file inventory, coverage, dependency checkout, release
+licensing, manuals and integration tests remain that consumer's responsibility.
+Arca's normal checks do not depend on an Abuild checkout.
 
 ## Documentation site
 

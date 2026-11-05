@@ -3,7 +3,7 @@
 
 set -eu
 missing=''
-for tool in python3 cpio tar bsdtar gprls; do
+for tool in python3 cpio tar bsdtar gprls mdir mtype fsck.fat; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         missing="$missing $tool"
     fi
