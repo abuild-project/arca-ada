@@ -25,8 +25,8 @@ serial, two isolated wrapper runs in the Trixie tool profile differed despite
 the same `SOURCE_DATE_EPOCH`. Abuild's current populated-image
 reproducibility test uses the system `mkdosfs` and passed across a time and
 time-zone change. The wrapper observation is not a product-build result.
-The raw images remain local, generated evidence; no golden fixture or byte
-compatibility promise is added by this topic.
+Those four empty images remain local observations, not golden fixtures. The
+bounded populated FAT12 golden is described below.
 
 The accepted Abuild tree's focused VFAT transformation tests passed in the
 rootless Trixie container. They exercise the direct dosfstools path, not the
@@ -51,15 +51,30 @@ the late label, long-name chains and a three-cluster payload; a corrupted
 second FAT failed its equality check. A different time zone changed raw
 directory timestamp bytes in this isolated mtools profile. The current Abuild
 reproducibility test and the actual consumer build are separate evidence.
-These observations do not promote the provisional outputs to golden fixtures.
+These observations alone did not make the provisional outputs golden fixtures.
 
 Decision (2026-11-05): Accept the pinned Trixie producer profile as the
 initial VFAT reference because the maintained consumer mainline uses Trixie.
 The wrapper-compatible layout remains the target. Older Debian and Red Hat
 buildenv flavors need separate evidence and are not part of this validation.
 The earlier provisional environment gate is resolved by this scope choice;
-a golden fixture still requires a guarded generator and a bounded parity
-claim against the native writer.
+a bounded fixture can now be retained with guarded generation. Native-writer
+parity remains a separate future check.
+
+Decision (2026-11-05): Retain one bzip2-compressed FAT12 reference for the
+wrapper-compatible 10,272 KiB subset. It contains a late label, short and
+long names with colliding aliases, one directory and a multi-cluster file.
+The generator rejects wrong package versions, executable hashes and changed
+input bytes before writing. The committed raw and compressed hashes are
+recorded with the producer command in the fixture README. Normal `make check`
+reads the committed image without regenerating it or checking producer
+identities. The checker expands the image sparsely and hashes its full logical
+contents. An independent decoder, `fsck.fat`, `mdir` and `mtype` validate
+layout and content; private FAT and LFN mutations fail their respective
+guards. A separate pinned-environment check proves that forged package and
+binary identities fail the producer guard. The complete check target passed
+in Trixie. FAT16/FAT32 full-image parity,
+native-writer parity and product comparisons are outside this fixture.
 
 A later product-image comparison is required before the Abuild backend
 switch. It will run the wrapper-backed and native paths on the same locked
@@ -72,9 +87,10 @@ indexes are sorted. The development guide now describes Abuild as an existing
 consumer while retaining the independent project boundary. The CPIO, TAR and
 CLI guides remain unchanged because there is no new library contract to
 document. The changelog has no entry because users receive no new behavior.
-A committed golden fixture, broader populated-image comparisons, executable
-VFAT checks and a public API require separate decisions and work. The site built
-in the supported Arca container; relative links were checked separately.
-No Arca compiler or runtime tests were run for this documentation-only topic.
+Additional golden data, broader populated-image comparisons and the public
+`Arca.VFAT` API require separate decisions and work. The documentation site
+built in the supported Arca container; relative links were checked
+separately. The full Arca check ran with the new test-only tools. No native
+VFAT writer or Abuild adapter change is part of this topic.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

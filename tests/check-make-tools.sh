@@ -19,6 +19,7 @@ ln -s "$repo_root/scripts/check-tools.sh" \
 ln -s /bin/true "$scratch/project/scripts/check-test-tools.sh"
 ln -s /bin/true "$scratch/project/tests/check-cpio.py"
 ln -s /bin/true "$scratch/project/tests/check-tar.py"
+ln -s /bin/true "$scratch/project/tests/check-vfat-reference.py"
 ln -s /bin/true "$scratch/project/tests/check-unit.py"
 ln -s /bin/true "$scratch/project/tests/check-cli.py"
 ln -s /bin/true "$scratch/project/tests/check-style.py"

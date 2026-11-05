@@ -2,8 +2,8 @@
 
 Status: Phase 0 format and populated baselines recorded on 2026-11-05;
 the pinned Trixie profile and wrapper-compatible layout are the reference.
-Golden-data scope and native parity remain open. No writer or public API is
-introduced.
+A bounded FAT12 golden fixture is retained; native parity remains open. No
+writer or public API is introduced.
 
 ## Boundary
 
@@ -335,3 +335,40 @@ normalizing away format bytes. Repeat at least one pair to test output
 stability. Include the product's boot and data-image uses where their VFAT
 contracts differ. This product evidence gates the Abuild backend switch;
 older buildenv flavors remain separate follow-up validation.
+
+## Bounded VFAT reference fixtures on 2026-11-05
+
+Decision (2026-11-05): Retain one compressed 10,272 KiB FAT12 reference
+because it exercises the wrapper-compatible small-image layout, a late
+label, long-name aliases and a multi-cluster file while adding 1,218 bytes
+to the source tree. This is a deliberately byte-compatible target for that
+subset, not a claim about every FAT variant or the future native writer's
+unimplemented behavior.
+
+The project-owned inputs, guarded producer, compressed image and independent
+checker are described in the
+[fixture record](../../tests/fixtures/vfat/README.md). The raw image retains
+SHA-256 `1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd`;
+the `bzip2 -9` artifact has SHA-256
+`889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd`.
+The generator adds directory files before the root README, matching the
+maintained adapter's traversal for these selected paths.
+
+The generator refuses changed package versions, executable bytes and input
+files before writing. Normal `make check` consumes the committed fixture
+without regenerating it or checking producer identities. The independent
+checker expands the image sparsely in 4-KiB blocks, then hashes its full
+logical contents. It checks BPB geometry, FAT
+copies, the late label, LFN ordinals/checksums and a three-cluster payload;
+`fsck.fat`, `mdir` and `mtype` check structural and semantic use. Private
+mutations of the second FAT and an LFN checksum fail at their intended raw
+guards. An explicit pinned-environment check proves that forged package and
+`mformat` identities fail the producer guard. The full Arca check passed in
+the Trixie image.
+
+FAT16 and FAT32 remain covered by the observed field and reader baselines
+above, not by this whole-image golden. More golden data needs a specific
+compatibility purpose and a reviewable size/runtime cost. Native writer
+output must later be compared with this fixture and with independent format
+checks. Real product-image comparisons remain the separate Abuild-switch
+gate above.

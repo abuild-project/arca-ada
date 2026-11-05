@@ -50,9 +50,17 @@ docker/dev/run --platform linux/amd64 arca-dev:vfat-reference \
   python3 tests/fixtures/vfat/generate-reference.py
 ```
 
-Normal `make check` does not regenerate the fixture. The separate reference
-checker added later in this topic validates the committed hashes, FAT fields,
-external readers and targeted corruptions without generator constants.
+Normal `make check` does not regenerate the fixture or check the producer
+identity. Its independent `check-vfat-reference.py` validates the committed
+hashes, FAT fields, external readers and targeted corruptions without using
+generator constants. It writes the decompressed image sparsely in 4-KiB
+blocks and hashes its full logical contents. Test the producer guard
+separately in the pinned Trixie environment:
+
+```sh
+docker/dev/run --platform linux/amd64 arca-dev:vfat-reference \
+  python3 tests/check-vfat-reference.py --check-producer-guard
+```
 
 The fixture covers a late root volume label, a short root file, one
 subdirectory, two colliding long-name aliases and a three-cluster file.
