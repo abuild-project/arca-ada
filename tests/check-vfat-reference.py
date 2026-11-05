@@ -9,6 +9,7 @@ import hashlib
 import mmap
 import os
 from pathlib import Path
+import shutil
 import struct
 import subprocess
 import sys
@@ -289,13 +290,39 @@ def check_sensitivity(image, case, fat_copy, directory_start):
 
 
 def check_producer_guard(directory):
-    """Prove exact producer checks pass and reject a wrong package and binary."""
+    """Check pinned, relative-PATH, wrong-package and wrong-binary producers."""
     positive = subprocess.run(
         [sys.executable, str(GENERATOR), "--check-producer"],
         capture_output=True, text=True, timeout=30)
     require(positive.returncode == 0 and
             "producer identities match" in positive.stdout,
             "reference producer identity check failed")
+
+    relative_tools = directory / "relative-tools"
+    relative_tools.mkdir()
+    mformat = shutil.which("mformat")
+    require(mformat is not None, "mformat missing for relative PATH probe")
+    (relative_tools / "mformat").symlink_to(os.path.abspath(mformat))
+    relative_entry = str(relative_tools.relative_to(ROOT))
+    relative_environment = os.environ.copy()
+    relative_environment["PATH"] = (
+        relative_entry + os.pathsep + relative_environment["PATH"])
+    selection = subprocess.run(
+        [sys.executable, "-c", "import shutil; print(shutil.which('mformat'))"],
+        cwd=ROOT, env=relative_environment, capture_output=True,
+        text=True, timeout=30)
+    require(selection.returncode == 0 and
+            selection.stdout.strip() == relative_entry + "/mformat",
+            "relative mformat was not selected")
+    positive = subprocess.run(
+        [sys.executable, str(GENERATOR), "--case", "fat12"],
+        cwd=ROOT, env=relative_environment, capture_output=True,
+        text=True, timeout=30)
+    require(positive.returncode == 0 and
+            "regeneration matched" in positive.stdout,
+            "relative PATH producer failed after directory change: "
+            + positive.stderr.strip())
+
     fake = directory / "dpkg-query"
     fake.write_text("#!/bin/sh\nprintf '0.0'\n")
     fake.chmod(0o755)

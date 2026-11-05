@@ -43,7 +43,9 @@ compressed hashes and producer identities are recorded in
 `tests/fixtures/vfat/README.md`.
 
 The generator checks exact package, executable, configuration and input
-identities before creating an image. Normal `make check` reads the committed
+identities before creating an image. It anchors executables selected from
+relative `PATH` entries before entering its scratch directory, while
+retaining mtools symlink names. Normal `make check` reads the committed
 fixtures without regenerating them or checking producer versions. The
 independent checker requires `BZh9` headers, expands one image at a time
 with sparse 4-KiB zero blocks and hashes the full logical contents. It

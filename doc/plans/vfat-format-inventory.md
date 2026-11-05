@@ -375,3 +375,13 @@ changed package and executable identities fail the producer guard.
 These fixtures cover three selected sizes and inputs, not every geometry,
 name encoding, timestamp policy or real product image. The paired product
 comparison remains the separate Abuild adapter-switch gate above.
+
+## Relative producer paths on 2026-11-05
+
+The generator anchors an executable selected through a relative `PATH`
+entry before it changes into its scratch directory. It keeps the selected
+symlink spelling because mtools chooses its operation from `argv[0]`.
+The explicit producer-guard check places a valid `mformat` symlink under a
+relative `PATH` entry and regenerates the FAT12 fixture. This check fails
+when the selected path remains relative and passes after anchoring it.
+Normal `make check` remains independent of producer identities.

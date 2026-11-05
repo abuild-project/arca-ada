@@ -34,6 +34,8 @@ verification regenerates all three privately and compares bytes without
 changing a fixture. Intentional regeneration requires an explicit `--case`,
 `--write --replace`, and review of any changed producer, input, raw hash and
 compressed hash.
+Producer paths selected through relative `PATH` entries are anchored before
+the generator enters its scratch directory; mtools symlink names are retained.
 
 | FAT type and size | Raw image SHA-256 | Committed bzip2 SHA-256 |
 | --- | --- | --- |
@@ -64,7 +66,8 @@ decodes FAT fields without generator constants, checks `fsck.fat`, `mdir` and
 `mtype`, and proves that altered FAT and long-name bytes fail the raw checks for
 each FAT variant. It does not require the pinned producer binaries. To test
 that the generator accepts the pinned environment and rejects changed package
-and executable identities, run the separate guard check in that environment:
+and executable identities, and works with a relative `PATH` entry, run the
+separate guard check in that environment:
 
 ```sh
 docker/dev/run --platform linux/amd64 arca-dev:vfat-reference \
