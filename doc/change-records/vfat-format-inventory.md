@@ -1,96 +1,67 @@
 # VFAT format and reference inventory
 
-This topic establishes the evidence base for a native VFAT writer without
-introducing a writer, public API or build dependency. Microsoft FAT format
-rules, a fixed specification file, current Abuild behavior, historical
-native PoC revisions and two distinct external producer profiles are recorded
-in `doc/plans/vfat-format-inventory.md`.
+This topic establishes the format and compatibility references for a native
+VFAT writer. It adds no writer, public API or Abuild dependency. The
+`doc/plans/vfat-format-inventory.md` records the Microsoft FAT specification,
+exact reference inputs, observed producer profiles and later validation
+gates.
 
 The format authority is Microsoft's FAT32 File System Specification version
-1.03. Its official downloaded bytes are identified by SHA-256. The reference
-environment is Debian 13.6 Trixie/AMD64 with exact `dosfstools` and `mtools`
-package versions and executable digests. The existing Abuild adapter invokes
-`mkdosfs` for an empty image, `mmd` and `mcopy` to populate it, and `fatlabel`
-after population. The maintained consumer selects a wrapper that translates the
-`mkdosfs` call to `mformat` with fixed geometry. Its source digest and command
-translation are recorded without importing the wrapper into Arca.
+1.03, identified by its downloaded SHA-256. The reference producer is
+AMD64 Debian 13.6 Trixie with pinned `mtools 4.0.48-1`,
+`dosfstools 4.2-1.2` and `bzip2 1.0.8-6` packages, executable digests and
+`/etc/mtools.conf` bytes. Other Debian and Red Hat flavors require their own
+evidence.
 
-Controlled empty images at 9 MiB and 520 MiB make the difference concrete.
-At 9 MiB the wrapper-equivalent command emits FAT12 while direct Trixie
-`mkdosfs -F 16` emits FAT16. At 520 MiB both emit FAT32 but use different FAT
-lengths and total-sector layouts. All four pass `fsck.fat -vn`; both 9 MiB
-images are readable with `mdir`. Fixed serials and environment settings made
-two independent generations byte-identical for each profile. Without a fixed
-serial, two isolated wrapper runs in the Trixie tool profile differed despite
-the same `SOURCE_DATE_EPOCH`. Abuild's current populated-image
-reproducibility test uses the system `mkdosfs` and passed across a time and
-time-zone change. The wrapper observation is not a product-build result.
-Those four empty images remain local observations, not golden fixtures. The
-bounded populated FAT12 golden is described below.
+The accepted Abuild adapter invokes `mkdosfs` to create an empty image,
+`mmd` and `mcopy` to populate it, and `fatlabel` after population. The
+maintained consumer build places a private `mkdosfs` compatibility wrapper
+ahead of the system executable on `PATH`. The inspected wrapper source has
+SHA-256 `4a627b68621c39d68cafdf4d88d279719cc27023a688e533f96b74ff83e667d0`.
+For the adapter's arguments it invokes `mformat -C -T (2 * size_in_KiB)
+-i image -h 64 -s 32 -H 0 ::`. It maps `-F 32` to mtools `-F` and does not
+force FAT16 when the adapter requests `-F 16`.
 
-The accepted Abuild tree's focused VFAT transformation tests passed in the
-rootless Trixie container. They exercise the direct dosfstools path, not the
-maintained wrapper. The historical native PoC and later hardening are mapped
-by exact source revisions. No old implementation file was copied.
+Controlled empty images show why the producer distinction matters. At
+9,216 KiB the wrapper-equivalent profile emits FAT12, while direct Trixie
+`mkdosfs -F 16` emits FAT16. At 520 MiB both emit FAT32 but differ in FAT
+length and total-sector layout. All pass `fsck.fat -vn`; fixed serials make
+repeated producer outputs byte-identical. The direct dosfstools path passes
+Abuild's populated-image `SOURCE_DATE_EPOCH` test. That result does not
+establish wrapper-backed product reproducibility.
 
-Decision (2026-11-05): Target the established wrapper-compatible layout for
-valid inputs because existing consumers used it. Departures need a concrete
-format, reader, safety or reproducibility reason and a targeted test. The
-PoC's raw layout assertions for FAT12, FAT16 and FAT32 agree with selected
-fields of independently generated mtools images at three recorded sizes.
-Full native-to-reference image parity remains unproven; the direct Trixie
-dosfstools profile is a separate comparison, not the native default.
+Decision (2026-11-05): Target the maintained wrapper-compatible layout for
+valid images because existing consumers use it. A deviation needs a format,
+reader, safety or reproducibility reason and a focused check. Historical
+native PoC revisions supply layout evidence, not code to transplant.
 
-Decision (2026-11-05): Use the pinned Trixie mtools profile provisionally for
-populated references because the actual consumer tool identity is not yet
-available. Fixed input bytes, mtimes, serial and UTC environment produced
-byte-identical FAT12, FAT16 and FAT32 images across three runs per size.
-`fsck.fat`, `mdir` and `mtype` accepted the images and recovered the selected
-payloads. An independent raw decoder checked BPB fields, equal FAT copies,
-the late label, long-name chains and a three-cluster payload; a corrupted
-second FAT failed its equality check. A different time zone changed raw
-directory timestamp bytes in this isolated mtools profile. The current Abuild
-reproducibility test and the actual consumer build are separate evidence.
-These observations alone did not make the provisional outputs golden fixtures.
+Three bounded whole-image references cover FAT12 at 10,272 KiB, FAT16 at
+200,000 KiB and FAT32 at 600,000 KiB. They use fixed source bytes, mtimes,
+serial, UTC environment, late label and Abuild input-set traversal order.
+The compressed `bzip2 -9` fixtures total 4,290 bytes. Their raw and
+compressed hashes and producer identities are recorded in
+`tests/fixtures/vfat/README.md`.
 
-Decision (2026-11-05): Accept the pinned Trixie producer profile as the
-initial VFAT reference because the maintained consumer mainline uses Trixie.
-The wrapper-compatible layout remains the target. Older Debian and Red Hat
-buildenv flavors need separate evidence and are not part of this validation.
-The earlier provisional environment gate is resolved by this scope choice;
-a bounded fixture can now be retained with guarded generation. Native-writer
-parity remains a separate future check.
+The generator checks exact package, executable, configuration and input
+identities before creating an image. Normal `make check` reads the committed
+fixtures without regenerating them or checking producer versions. The
+independent checker requires `BZh9` headers, expands one image at a time
+with sparse 4-KiB zero blocks and hashes the full logical contents. It
+decodes BPB fields, FAT copies, label, long-name aliases and checksums and
+the payload chain. `fsck.fat`, `mdir` and `mtype` validate structure and
+content. FAT-copy and long-name corruption controls fail at their intended
+guards. An explicit pinned-environment check proves that wrong package and
+executable identities fail the generator guard.
 
-Decision (2026-11-05): Retain one bzip2-compressed FAT12 reference for the
-wrapper-compatible 10,272 KiB subset. It contains a late label, short and
-long names with colliding aliases, one directory and a multi-cluster file.
-The generator rejects wrong package versions, executable hashes and changed
-input bytes before writing. The committed raw and compressed hashes are
-recorded with the producer command in the fixture README. Normal `make check`
-reads the committed image without regenerating it or checking producer
-identities. The checker expands the image sparsely and hashes its full logical
-contents. An independent decoder, `fsck.fat`, `mdir` and `mtype` validate
-layout and content; private FAT and LFN mutations fail their respective
-guards. A separate pinned-environment check proves that forged package and
-binary identities fail the producer guard. The complete check target passed
-in Trixie. FAT16/FAT32 full-image parity,
-native-writer parity and product comparisons are outside this fixture.
+The selected references do not prove a complete native writer or all FAT
+geometries, names and timestamps. Before switching the Abuild adapter,
+build representative wrapper-backed and native product images from locked
+inputs in Trixie, then compare readers, raw fields, contents and the chosen
+byte-compatible subset. Product boot and data images may need distinct
+cases. The adapter switch remains separate from Arca's native writer.
 
-A later product-image comparison is required before the Abuild backend
-switch. It will run the wrapper-backed and native paths on the same locked
-inputs in Trixie, then check independent readers, raw layout and the
-deliberately byte-compatible subset. This is a future validation gate, not
-evidence claimed by this inventory topic.
-
-The README links the inventory as the next writer step; the plan and record
-indexes are sorted. The development guide now describes Abuild as an existing
-consumer while retaining the independent project boundary. The CPIO, TAR and
-CLI guides remain unchanged because there is no new library contract to
-document. The changelog has no entry because users receive no new behavior.
-Additional golden data, broader populated-image comparisons and the public
-`Arca.VFAT` API require separate decisions and work. The documentation site
-built in the supported Arca container; relative links were checked
-separately. The full Arca check ran with the new test-only tools. No native
-VFAT writer or Abuild adapter change is part of this topic.
+The plan and record indexes are sorted, development guidance names the
+test-only tools, and the documentation site builds in strict mode. No
+changelog entry is added because this topic changes no user-facing behavior.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

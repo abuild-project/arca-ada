@@ -125,8 +125,9 @@ the default installation prefix.
 
 The same target runs Ahven suites and separately checks CPIO and TAR layout,
 payloads, external readers, reproducibility, errors and lifetime behavior.
-It also validates a [bounded VFAT reference fixture](tests/fixtures/vfat/README.md)
-with independent readers and raw-field checks; no VFAT writer is built yet.
+It also validates [bounded VFAT reference fixtures](tests/fixtures/vfat/README.md)
+for FAT12, FAT16 and FAT32 with independent readers and raw-field checks;
+no VFAT writer is built yet.
 CLI checks cover directory traversal, source metadata, links, atomic
 publication and cleanup after errors or handled signals. Normal tests need
 no Abuild checkout, credentials or network access.

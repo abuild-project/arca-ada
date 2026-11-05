@@ -166,10 +166,11 @@ are resolved before entering the private consumer directories.
 The consumer check establishes GPR packaging and compiler/linker usability.
 The separate CPIO and TAR suites check raw layout, payloads, two external
 readers, parallel instances, errors, reproducibility and scope-exit cleanup.
-The VFAT reference check consumes one committed mtools-generated FAT12 image
-without regenerating it. It combines independent raw decoding with
-`fsck.fat`, `mdir` and `mtype`, and includes corruption controls for FAT and
-long-name records. It does not test an Arca VFAT writer yet.
+The VFAT reference check consumes committed mtools-generated FAT12, FAT16
+and FAT32 images one at a time without regenerating them. It combines
+independent raw decoding with `fsck.fat`, `mdir` and `mtype`, and includes
+corruption controls for FAT and long-name records. It does not test an Arca
+VFAT writer yet.
 See the [CPIO guide](cpio.md) and [TAR guide](tar.md) for their contracts.
 TAR also retains the historical GNU ustar fixture with its original producer
 record; it is checked without device-node privileges.

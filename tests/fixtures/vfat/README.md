@@ -1,19 +1,19 @@
-# Pinned mtools FAT12 reference
+# Pinned mtools VFAT references
 
-`mtools-fat12-10272.img.bz2` is a generated, project-owned reference image.
-It fixes a narrow wrapper-compatible FAT12 subset before a native writer is
-implemented. It is not a claim that every mtools image, every FAT variant or
-the current Abuild direct-dosfstools profile must be byte-identical.
+The three `mtools-fat*.img.bz2` files are generated, project-owned reference
+images. They fix narrow wrapper-compatible FAT12, FAT16 and FAT32 subsets
+before a native writer is implemented. They do not promise byte identity for
+every mtools image or the current Abuild direct-dosfstools profile.
 
-The image was generated in the rootless AMD64 Trixie development image from
+The images were generated in the rootless AMD64 Trixie development image from
 the four files under `input/`. All input mtimes are set to
 `SOURCE_DATE_EPOCH=946684800`, with `TZ=UTC`, `LC_ALL=C`, umask `0022`, a
 private empty `HOME` and volume serial `0x12345678`. The generator applies
 the maintained wrapper geometry `-h 64 -s 32 -H 0` using `mformat`, creates
 `DIR`, then adds `DIR/Long Filename Alpha.txt`,
-`DIR/Long Filename Beta.txt`, `DIR/PAYLOAD.BIN` and `README.TXT` with
-`mcopy -s`. This follows the Abuild input-set traversal for these paths.
-It applies `VFAT TEST` late with `fatlabel`.
+`DIR/Long Filename Beta.txt`, `DIR/PAYLOAD.BIN` and finally `README.TXT`
+with `mcopy -s`. This matches Abuild's path traversal order for the selected
+input set. It applies `VFAT TEST` late with `fatlabel`.
 
 The guarded producer identities are:
 
@@ -29,15 +29,22 @@ The guarded producer identities are:
 
 `generate-reference.py` checks those exact packages and binaries, then the
 source-file hashes, before running any producer. It requires the raw image
-SHA-256 below and compresses it with `bzip2 -9`. A normal verification
-regenerates privately and compares bytes without changing the fixture.
-Intentional regeneration requires `--write --replace` and review of any
-changed producer, input, raw hash and compressed hash.
+SHA-256 below and compresses each image with `bzip2 -9`. A normal
+verification regenerates all three privately and compares bytes without
+changing a fixture. Intentional regeneration requires an explicit `--case`,
+`--write --replace`, and review of any changed producer, input, raw hash and
+compressed hash.
 
-| Artifact | SHA-256 |
-| --- | --- |
-| Raw 10,272 KiB image | `1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd` |
-| Committed bzip2 image | `889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd` |
+| FAT type and size | Raw image SHA-256 | Committed bzip2 SHA-256 |
+| --- | --- | --- |
+| FAT12, 10,272 KiB | `1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd` | `889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd` |
+| FAT16, 200,000 KiB | `bacf4e0614fb830be3438bcdb59bde1eb1de3ae1e38d59cfb6fdfc7a9408b5f8` | `d719324840bbe526349a7020d7bf096097648cf6f05bb521c31098587cf73326` |
+| FAT32, 600,000 KiB | `aca4f8804cd6624211dd6204f21f8c102154473cd187931d36c7d87e1ea07575` | `791e713c9e7e3536bc92854c627c15d2df79834715e45db58e12d5f8beec9c67` |
+
+The first image uses `mformat -T 20544`, the second `-T 400000`, and the
+third `-F -T 1200000`. All use the fixed geometry, serial, population order
+and late label above. The compressed files occupy 4,290 bytes together;
+normal checks decompress only one at a time into sparse private scratch space.
 
 Generate or verify in the documented Trixie image after building this
 repository's Dockerfile:
@@ -50,21 +57,23 @@ docker/dev/run --platform linux/amd64 arca-dev:vfat-reference \
   python3 tests/fixtures/vfat/generate-reference.py
 ```
 
-Normal `make check` does not regenerate the fixture or check the producer
-identity. Its independent `check-vfat-reference.py` validates the committed
-hashes, FAT fields, external readers and targeted corruptions without using
-generator constants. It writes the decompressed image sparsely in 4-KiB
-blocks and hashes its full logical contents. Test the producer guard
-separately in the pinned Trixie environment:
+Normal `make check` does not regenerate the fixtures. Its independent
+`check-vfat-reference.py` verifies the committed hashes and `BZh9` headers,
+expands images sparsely in 4-KiB blocks, hashes their full logical contents,
+decodes FAT fields without generator constants, checks `fsck.fat`, `mdir` and
+`mtype`, and proves that altered FAT and long-name bytes fail the raw checks for
+each FAT variant. It does not require the pinned producer binaries. To test
+that the generator accepts the pinned environment and rejects changed package
+and executable identities, run the separate guard check in that environment:
 
 ```sh
 docker/dev/run --platform linux/amd64 arca-dev:vfat-reference \
   python3 tests/check-vfat-reference.py --check-producer-guard
 ```
 
-The fixture covers a late root volume label, a short root file, one
+Each fixture covers a late root volume label, a short root file, one
 subdirectory, two colliding long-name aliases and a three-cluster file.
-FAT16/FAT32 layout, Unicode names, broader collision classes, exact minimum
-sizes, parallel writers, other time zones and real product images remain
-outside this golden subset. See the [VFAT inventory](../../../doc/plans/vfat-format-inventory.md)
+Unicode names, broader collision classes, exact minimum sizes, parallel
+writers, other time zones and real product images remain outside these
+golden subsets. See the [VFAT inventory](../../../doc/plans/vfat-format-inventory.md)
 for those separate checks and the later product-comparison gate.

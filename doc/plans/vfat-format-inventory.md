@@ -2,8 +2,8 @@
 
 Status: Phase 0 format and populated baselines recorded on 2026-11-05;
 the pinned Trixie profile and wrapper-compatible layout are the reference.
-A bounded FAT12 golden fixture is retained; native parity remains open. No
-writer or public API is introduced.
+Bounded FAT12, FAT16 and FAT32 goldens are retained; native parity remains
+open. No writer or public API is introduced.
 
 ## Boundary
 
@@ -306,12 +306,12 @@ consumer's mainline currently uses Trixie, so matching that profile is more
 relevant than reconstructing every older build environment. This supersedes
 the provisional environment choice in the preceding dated section.
 
-The historical wrapper's command translation remains the layout target.
+The maintained wrapper's command translation remains the layout target.
 The current Trixie `mformat` implementation supplies the pinned producer
 behavior for that translation. Other Debian and Red Hat buildenv flavors
 are outside the initial validation scope; no behavior or byte identity is
-claimed for their tool versions. A future golden fixture still needs a
-self-checking generator and a deliberately bounded parity subset. The
+claimed for their tool versions. Golden fixtures use a self-checking
+generator and a deliberately bounded parity subset. The
 unobserved identity of an older consumer binary does not block this Trixie
 reference choice.
 
@@ -338,37 +338,40 @@ older buildenv flavors remain separate follow-up validation.
 
 ## Bounded VFAT reference fixtures on 2026-11-05
 
-Decision (2026-11-05): Retain one compressed 10,272 KiB FAT12 reference
-because it exercises the wrapper-compatible small-image layout, a late
-label, long-name aliases and a multi-cluster file while adding 1,218 bytes
-to the source tree. This is a deliberately byte-compatible target for that
-subset, not a claim about every FAT variant or the future native writer's
-unimplemented behavior.
+Decision (2026-11-05): Retain one bounded whole-image reference for each of
+FAT12, FAT16 and FAT32 because the maintained wrapper's layout target spans
+all three variants. The three `bzip2 -9` artifacts total 4,290 bytes. They
+cover one late label, a short root file, two colliding long-name aliases, a
+directory and a three-cluster payload; they do not define every valid FAT
+layout or imply native-writer parity.
 
-The project-owned inputs, guarded producer, compressed image and independent
-checker are described in the
-[fixture record](../../tests/fixtures/vfat/README.md). The raw image retains
-SHA-256 `1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd`;
-the `bzip2 -9` artifact has SHA-256
-`889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd`.
-The generator adds directory files before the root README, matching the
-maintained adapter's traversal for these selected paths.
+All references use the pinned Trixie mtools and dosfstools profile, the
+same project-owned input bytes and mtimes, UTC, fixed serial `0x12345678`
+and wrapper geometry. Their `mcopy -s` order follows Abuild input-set
+traversal: `DIR/Long Filename Alpha.txt`, `DIR/Long Filename Beta.txt`,
+`DIR/PAYLOAD.BIN`, then `README.TXT`. The label is applied last.
+The raw hashes differ from the populated observations above because those
+copied `README.TXT` first, while these fixtures copy it last.
 
-The generator refuses changed package versions, executable bytes and input
-files before writing. Normal `make check` consumes the committed fixture
-without regenerating it or checking producer identities. The independent
-checker expands the image sparsely in 4-KiB blocks, then hashes its full
-logical contents. It checks BPB geometry, FAT
-copies, the late label, LFN ordinals/checksums and a three-cluster payload;
-`fsck.fat`, `mdir` and `mtype` check structural and semantic use. Private
-mutations of the second FAT and an LFN checksum fail at their intended raw
-guards. An explicit pinned-environment check proves that forged package and
-`mformat` identities fail the producer guard. The full Arca check passed in
-the Trixie image.
+| FAT | Size (KiB) | mformat size options | Raw SHA-256 | bzip2 SHA-256 |
+| --- | ---: | --- | --- | --- |
+| FAT12 | 10,272 | `-T 20544` | `1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd` | `889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd` |
+| FAT16 | 200,000 | `-T 400000` | `bacf4e0614fb830be3438bcdb59bde1eb1de3ae1e38d59cfb6fdfc7a9408b5f8` | `d719324840bbe526349a7020d7bf096097648cf6f05bb521c31098587cf73326` |
+| FAT32 | 600,000 | `-F -T 1200000` | `aca4f8804cd6624211dd6204f21f8c102154473cd187931d36c7d87e1ea07575` | `791e713c9e7e3536bc92854c627c15d2df79834715e45db58e12d5f8beec9c67` |
 
-FAT16 and FAT32 remain covered by the observed field and reader baselines
-above, not by this whole-image golden. More golden data needs a specific
-compatibility purpose and a reviewable size/runtime cost. Native writer
-output must later be compared with this fixture and with independent format
-checks. Real product-image comparisons remain the separate Abuild-switch
-gate above.
+The [fixture record](../../tests/fixtures/vfat/README.md) identifies the
+compressed files and producer binaries. The guarded generator refuses
+changed package versions, binary bytes, configuration or input files.
+Normal `make check` reads the committed fixtures without regenerating or
+checking producer identities. It checks each `BZh9` header, expands one
+image at a time sparsely in 4-KiB blocks and hashes its full logical size.
+The independent decoder derives FAT type from cluster count and checks BPB
+geometry, both FAT copies, the late label, long-name aliases and checksum
+chains, and the payload cluster chain. `fsck.fat`, `mdir` and `mtype` check
+each image. Mutations of the second FAT and an LFN checksum fail their
+respective guards. An explicit pinned-environment test verifies that
+changed package and executable identities fail the producer guard.
+
+These fixtures cover three selected sizes and inputs, not every geometry,
+name encoding, timestamp policy or real product image. The paired product
+comparison remains the separate Abuild adapter-switch gate above.

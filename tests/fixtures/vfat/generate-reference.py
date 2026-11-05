@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-"""Regenerate the bounded mtools FAT12 reference with pinned producers."""
+"""Regenerate bounded mtools FAT references with pinned producers."""
 
 import argparse
 import hashlib
@@ -14,11 +14,28 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURE = Path(__file__).resolve().parent
-OUTPUT = FIXTURE / "mtools-fat12-10272.img.bz2"
 EPOCH = 946684800
-RAW_SHA256 = "1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd"
-BZIP2_SHA256 = "889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd"
 MTOOLS_CONFIG_SHA256 = "d778ef3a45d726b6017d282a20ef6ff1555d1bb8f801aa196de753a7340679b8"
+CASES = {
+    "fat12": {
+        "size_kib": 10_272,
+        "fat32": False,
+        "raw_sha": "1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd",
+        "bzip2_sha": "889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd",
+    },
+    "fat16": {
+        "size_kib": 200_000,
+        "fat32": False,
+        "raw_sha": "bacf4e0614fb830be3438bcdb59bde1eb1de3ae1e38d59cfb6fdfc7a9408b5f8",
+        "bzip2_sha": "d719324840bbe526349a7020d7bf096097648cf6f05bb521c31098587cf73326",
+    },
+    "fat32": {
+        "size_kib": 600_000,
+        "fat32": True,
+        "raw_sha": "aca4f8804cd6624211dd6204f21f8c102154473cd187931d36c7d87e1ea07575",
+        "bzip2_sha": "791e713c9e7e3536bc92854c627c15d2df79834715e45db58e12d5f8beec9c67",
+    },
+}
 
 PACKAGES = {
     "bzip2": "1.0.8-6",
@@ -85,8 +102,8 @@ def run(command, *, environment, directory):
     subprocess.run(command, cwd=directory, env=environment, check=True)
 
 
-def generate(paths, directory):
-    """Build and compress the FAT12 image from the recorded input sequence."""
+def generate(paths, directory, case):
+    """Build and compress one image from the recorded input sequence."""
     source = directory / "source"
     source.mkdir()
     (source / "DIR").mkdir()
@@ -103,8 +120,14 @@ def generate(paths, directory):
         "TZ": "UTC",
     }
     os.umask(0o022)
-    run([paths["mformat"], "-C", "-T", "20544", "-i", str(image),
-         "-h", "64", "-s", "32", "-H", "0", "-N", "0x12345678", "::"],
+    format_command = [paths["mformat"], "-C"]
+    if case["fat32"]:
+        format_command.append("-F")
+    format_command.extend([
+        "-T", str(case["size_kib"] * 2), "-i", str(image),
+        "-h", "64", "-s", "32", "-H", "0", "-N", "0x12345678", "::",
+    ])
+    run(format_command,
         environment=environment, directory=directory)
     run([paths["mmd"], "-i", str(image), "::/DIR"],
         environment=environment, directory=directory)
@@ -115,20 +138,19 @@ def generate(paths, directory):
         ("README.TXT", "::/README.TXT"),
     ):
         relative = name if name == "README.TXT" else f"DIR/{name}"
-        run([paths["mcopy"], "-s", "-i", str(image),
-             str(source / relative), target],
+        run([paths["mcopy"], "-s", "-i", str(image), str(source / relative), target],
             environment=environment, directory=directory)
     run([paths["fatlabel"], str(image), "VFAT TEST"],
         environment=environment, directory=directory)
     actual = sha256(image)
-    if actual != RAW_SHA256:
+    if actual != case["raw_sha"]:
         raise RuntimeError(f"raw image hash mismatch: {actual}")
     compressed = directory / "reference.img.bz2"
     with compressed.open("wb") as target:
         subprocess.run([paths["bzip2"], "-9", "-c", str(image)],
                        cwd=directory, env=environment, stdout=target, check=True)
     compressed_hash = sha256(compressed)
-    if BZIP2_SHA256 is not None and compressed_hash != BZIP2_SHA256:
+    if compressed_hash != case["bzip2_sha"]:
         raise RuntimeError(f"bzip2 hash mismatch: {compressed_hash}")
     return compressed, compressed_hash
 
@@ -136,27 +158,36 @@ def generate(paths, directory):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check-producer", action="store_true")
+    parser.add_argument("--case", choices=["all", *CASES], default="all")
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--replace", action="store_true")
     options = parser.parse_args()
+    if options.write and options.case == "all":
+        parser.error("--write requires one explicit --case")
     try:
         paths = producers()
         if options.check_producer:
             print("VFAT reference producer identities match")
             return
         (ROOT / "build").mkdir(exist_ok=True)
-        with tempfile.TemporaryDirectory(prefix="vfat-reference.",
-                                         dir=ROOT / "build") as scratch:
-            compressed, actual = generate(paths, Path(scratch))
-            if options.write:
-                if OUTPUT.exists() and not options.replace:
-                    raise RuntimeError("fixture exists; use --replace explicitly")
-                shutil.copyfile(compressed, OUTPUT)
-                print(f"wrote {OUTPUT.name}: sha256 {actual}")
-            else:
-                if not OUTPUT.is_file() or compressed.read_bytes() != OUTPUT.read_bytes():
-                    raise RuntimeError("committed fixture differs from regeneration")
-                print(f"VFAT reference regeneration matched: sha256 {actual}")
+        selected = CASES if options.case == "all" else (options.case,)
+        for name in selected:
+            case = CASES[name]
+            output = FIXTURE / f"mtools-{name}-{case['size_kib']}.img.bz2"
+            with tempfile.TemporaryDirectory(prefix="vfat-reference.",
+                                             dir=ROOT / "build") as scratch:
+                compressed, actual = generate(paths, Path(scratch), case)
+                if options.write:
+                    if output.exists() and not options.replace:
+                        raise RuntimeError(
+                            f"{output.name} exists; use --replace explicitly")
+                    shutil.copyfile(compressed, output)
+                    print(f"wrote {output.name}: sha256 {actual}")
+                else:
+                    if not output.is_file() or compressed.read_bytes() != output.read_bytes():
+                        raise RuntimeError(
+                            f"{output.name} differs from regeneration")
+                    print(f"{output.name} regeneration matched: sha256 {actual}")
     except (OSError, subprocess.CalledProcessError, RuntimeError) as error:
         raise SystemExit(str(error)) from error
 

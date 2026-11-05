@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-"""Check one pinned FAT12 reference with independent readers and raw fields."""
+"""Check pinned FAT references with independent readers and raw field maps."""
 
 import argparse
 import bz2
@@ -17,10 +17,33 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/vfat"
-GOLDEN = FIXTURE / "mtools-fat12-10272.img.bz2"
 GENERATOR = FIXTURE / "generate-reference.py"
-BZIP2_SHA256 = "889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd"
-RAW_SHA256 = "1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd"
+CASES = {
+    "fat12": {
+        "size_kib": 10_272,
+        "bzip2_sha": "889332f715a6e121d950820bc0e8ab206254d950287a4a61c40e25ff62e0e7bd",
+        "raw_sha": "1a358f797abb99c85dd0802ba06551c8449e7737958146d834844bdb6e698ccd",
+        "bpb": (512, 8, 1, 2, 512, 20_544, 8),
+        "data_start": 49,
+        "clusters": 2561,
+    },
+    "fat16": {
+        "size_kib": 200_000,
+        "bzip2_sha": "d719324840bbe526349a7020d7bf096097648cf6f05bb521c31098587cf73326",
+        "raw_sha": "bacf4e0614fb830be3438bcdb59bde1eb1de3ae1e38d59cfb6fdfc7a9408b5f8",
+        "bpb": (512, 8, 1, 2, 512, 400_000, 196),
+        "data_start": 425,
+        "clusters": 49_946,
+    },
+    "fat32": {
+        "size_kib": 600_000,
+        "bzip2_sha": "791e713c9e7e3536bc92854c627c15d2df79834715e45db58e12d5f8beec9c67",
+        "raw_sha": "aca4f8804cd6624211dd6204f21f8c102154473cd187931d36c7d87e1ea07575",
+        "bpb": (512, 8, 32, 2, 0, 1_200_000, 1170),
+        "data_start": 2372,
+        "clusters": 149_703,
+    },
+}
 INPUTS = {
     "README.TXT": "a17e1739456862261be4b460e87f055544a5fe7bfc4903caa71703b98acefee8",
     "Long Filename Alpha.txt": "cb57dea126a43a6430ba97b781613050b4968f09ae5a80c94cc34d3990083220",
@@ -36,7 +59,7 @@ def require(condition, reason):
 
 
 def sha256(path):
-    """Hash a file in bounded blocks, including sparse logical zeroes."""
+    """Hash one file in bounded blocks, including large sparse images."""
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
@@ -99,15 +122,19 @@ def long_name(parts):
     return units.decode("utf-16le").split("\x00", 1)[0].rstrip("\uffff")
 
 
-def fat12_next(data, fat_start, cluster):
-    """Read one packed FAT12 cluster pointer without producer code."""
-    value = u16(data, fat_start + cluster * 3 // 2)
-    return (value >> 4) & 0xFFF if cluster & 1 else value & 0xFFF
+def next_cluster(data, fat_start, kind, cluster):
+    """Read one cluster pointer using the FAT variant's packed field width."""
+    if kind == 12:
+        value = u16(data, fat_start + cluster * 3 // 2)
+        return (value >> 4) & 0xFFF if cluster & 1 else value & 0xFFF
+    if kind == 16:
+        return u16(data, fat_start + cluster * 2)
+    return u32(data, fat_start + cluster * 4) & 0x0FFFFFFF
 
 
-def inspect(data):
+def inspect(data, case):
     """Require the recorded BPB, FAT, label, alias and payload-chain layout."""
-    require(len(data) == 10_272 * 1024, "reference image size")
+    require(len(data) == case["size_kib"] * 1024, "reference image size")
     require(data[510:512] == b"\x55\xaa", "boot signature")
     bps = u16(data, 11)
     spc = data[13]
@@ -115,17 +142,20 @@ def inspect(data):
     fats = data[16]
     root_count = u16(data, 17)
     sectors = u16(data, 19) or u32(data, 32)
-    fat_sectors = u16(data, 22)
+    fat_sectors = u16(data, 22) or u32(data, 36)
     require((bps, spc, reserved, fats, root_count, sectors, fat_sectors)
-            == (512, 8, 1, 2, 512, 20_544, 8), "FAT12 BPB geometry")
+            == case["bpb"], "FAT BPB geometry")
     require((u16(data, 24), u16(data, 26), u32(data, 28))
             == (32, 64, 0), "CHS and hidden-sector geometry")
-    require(u32(data, 39) == 0x12345678, "fixed volume serial")
     root_sectors = (root_count * 32 + bps - 1) // bps
     data_sector = reserved + fats * fat_sectors + root_sectors
     clusters = (sectors - data_sector) // spc
-    require((data_sector, clusters) == (49, 2561), "FAT12 data-area plan")
-    require(clusters < 4085, "FAT12 cluster-count class")
+    kind = 12 if clusters < 4085 else 16 if clusters < 65525 else 32
+    require((data_sector, clusters) ==
+            (case["data_start"], case["clusters"]), "FAT data-area plan")
+    require(kind == int(case["name"][3:]), "FAT cluster-count class")
+    require(u32(data, 67 if kind == 32 else 39) == 0x12345678,
+            "fixed volume serial")
     fat_start = reserved * bps
     fat_bytes = fat_sectors * bps
     require(data[21] == 0xF8 and data[fat_start] == 0xF8, "media byte")
@@ -133,8 +163,15 @@ def inspect(data):
             data[fat_start + fat_bytes:fat_start + 2 * fat_bytes],
             "FAT copies differ")
 
-    root_start = (reserved + fats * fat_sectors) * bps
-    root = entries(data, root_start, root_count * 32)
+    if kind == 32:
+        require(u32(data, 44) == 2 and u16(data, 48) == 1,
+                "FAT32 root and FSInfo sectors")
+        root_start = data_sector * bps
+        root_length = spc * bps
+    else:
+        root_start = (reserved + fats * fat_sectors) * bps
+        root_length = root_count * 32
+    root = entries(data, root_start, root_length)
     labels = [i for i, entry in enumerate(root) if entry[11] == 8]
     require(labels == [len(root) - 1], "late root volume label")
     require(root[labels[0]][:11] == b"VFAT TEST  ", "volume label bytes")
@@ -143,6 +180,8 @@ def inspect(data):
     directories = [entry for entry in root if entry[:11] == b"DIR        "]
     require(len(directories) == 1, "missing root directory")
     directory_cluster = u16(directories[0], 26)
+    if kind == 32:
+        directory_cluster += u16(directories[0], 20) << 16
     directory_start = (data_sector + (directory_cluster - 2) * spc) * bps
     children = entries(data, directory_start, spc * bps)
     pending = []
@@ -173,12 +212,15 @@ def inspect(data):
     require(payload is not None and u32(payload, 28) == 9216,
             "payload size entry")
     cluster = u16(payload, 26)
+    if kind == 32:
+        cluster += u16(payload, 20) << 16
     chain = []
-    while cluster < 0xFF8:
-        require(cluster >= 2 and cluster not in chain,
+    end_marker = {12: 0xFF8, 16: 0xFFF8, 32: 0x0FFFFFF8}[kind]
+    while cluster < end_marker:
+        require(2 <= cluster <= clusters + 1 and cluster not in chain,
                 "invalid payload cluster chain")
         chain.append(cluster)
-        cluster = fat12_next(data, fat_start, cluster)
+        cluster = next_cluster(data, fat_start, kind, cluster)
     require(len(chain) == 3, "payload cluster count")
     return fat_start + fat_bytes, directory_start
 
@@ -198,11 +240,11 @@ def run_reader(command, home):
     return result.stdout
 
 
-def check_external(image):
+def check_external(image, kind):
     """Require structural and semantic agreement from dosfstools and mtools."""
     fsck = run_reader(["fsck.fat", "-vn", str(image)], image.parent)
-    require(b"12 bit entries" in fsck and b"0 files" not in fsck,
-            "fsck did not inspect populated FAT12")
+    require(f"{kind} bit entries".encode() in fsck and b"0 files" not in fsck,
+            "fsck did not inspect populated FAT")
     listing = run_reader(["mdir", "-i", str(image), "::/DIR"], image.parent)
     require(b"LONGFI~1 TXT" in listing and b"Long Filename Alpha.txt" in listing,
             "first long name missing from mdir")
@@ -220,34 +262,34 @@ def check_external(image):
         require(actual == expected, f"mtype payload mismatch: {name}")
 
 
-def check_sensitivity(data, fat_copy, directory_start):
-    """Show that distinct FAT and long-name damage reach the intended guard."""
-    damaged_fat = bytearray(data)
-    damaged_fat[fat_copy + 10] ^= 1
-    try:
-        inspect(damaged_fat)
-    except AssertionError as error:
-        require(str(error) == "FAT copies differ", "wrong FAT damage guard")
-    else:
-        raise AssertionError("FAT damage was accepted")
-
-    damaged_name = bytearray(data)
-    for offset in range(directory_start, directory_start + 4096, 32):
-        if damaged_name[offset + 11] == 0x0F:
-            damaged_name[offset + 13] ^= 1
-            break
-    else:
-        raise AssertionError("LFN damage control found no LFN")
-    try:
-        inspect(damaged_name)
-    except AssertionError as error:
-        require(str(error) == "long-name checksum", "wrong LFN damage guard")
-    else:
-        raise AssertionError("LFN damage was accepted")
+def check_sensitivity(image, case, fat_copy, directory_start):
+    """Show that FAT and long-name damage reach the intended guard."""
+    with image.open("rb") as stream:
+        with mmap.mmap(stream.fileno(), 0, access=mmap.ACCESS_COPY) as data:
+            data[fat_copy + 10] ^= 1
+            try:
+                inspect(data, case)
+            except AssertionError as error:
+                require(str(error) == "FAT copies differ", "wrong FAT damage guard")
+            else:
+                raise AssertionError("FAT damage was accepted")
+        with mmap.mmap(stream.fileno(), 0, access=mmap.ACCESS_COPY) as data:
+            for offset in range(directory_start, directory_start + 4096, 32):
+                if data[offset + 11] == 0x0F:
+                    data[offset + 13] ^= 1
+                    break
+            else:
+                raise AssertionError("LFN damage control found no LFN")
+            try:
+                inspect(data, case)
+            except AssertionError as error:
+                require(str(error) == "long-name checksum", "wrong LFN damage guard")
+            else:
+                raise AssertionError("LFN damage was accepted")
 
 
 def check_producer_guard(directory):
-    """Prove the exact producer guard passes and rejects a wrong package."""
+    """Prove exact producer checks pass and reject a wrong package and binary."""
     positive = subprocess.run(
         [sys.executable, str(GENERATOR), "--check-producer"],
         capture_output=True, text=True, timeout=30)
@@ -277,34 +319,42 @@ def check_producer_guard(directory):
             "wrong producer binary was not rejected")
 
 
+def check_one(name, case):
+    """Read one compressed golden without retaining the raw image afterward."""
+    golden = FIXTURE / f"mtools-{name}-{case['size_kib']}.img.bz2"
+    with golden.open("rb") as stream:
+        require(stream.read(4) == b"BZh9", "bzip2 level-9 header")
+    require(sha256(golden) == case["bzip2_sha"], "compressed fixture hash")
+    with tempfile.TemporaryDirectory(prefix="vfat-reference.",
+                                     dir=ROOT / "build") as scratch:
+        image = Path(scratch) / "reference.img"
+        expand_sparse(golden, image)
+        require(sha256(image) == case["raw_sha"], "raw fixture hash")
+        with image.open("rb") as stream:
+            with mmap.mmap(stream.fileno(), 0, access=mmap.ACCESS_READ) as data:
+                fat_copy, directory_start = inspect(data, {**case, "name": name})
+        check_external(image, int(name[3:]))
+        check_sensitivity(image, {**case, "name": name},
+                          fat_copy, directory_start)
+    print(f"{name} reference layout, readers and sensitivity passed")
+
+
 def main():
-    """Validate the committed fixture without regenerating its producer."""
+    """Validate committed fixtures without regenerating their producers."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check-producer-guard", action="store_true",
                         help="test strict producer identity rejection explicitly")
     options = parser.parse_args()
-    require(sha256(GOLDEN) == BZIP2_SHA256,
-            "compressed fixture hash")
-    with GOLDEN.open("rb") as stream:
-        require(stream.read(4) == b"BZh9", "bzip2 level-9 header")
     for name, expected in INPUTS.items():
-        actual = hashlib.sha256((FIXTURE / "input" / name).read_bytes()).hexdigest()
-        require(actual == expected, f"source fixture hash: {name}")
+        require(sha256(FIXTURE / "input" / name) == expected,
+                f"source fixture hash: {name}")
     (ROOT / "build").mkdir(exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="vfat-reference.",
-                                     dir=ROOT / "build") as scratch:
-        image = Path(scratch) / "reference.img"
-        expand_sparse(GOLDEN, image)
-        require(sha256(image) == RAW_SHA256, "raw fixture hash")
-        with image.open("rb") as stream:
-            with mmap.mmap(stream.fileno(), 0, access=mmap.ACCESS_READ) as data:
-                fat_copy, directory_start = inspect(data)
-                check_sensitivity(data, fat_copy, directory_start)
-        check_external(image)
-        if options.check_producer_guard:
-            check_producer_guard(Path(scratch))
-    print("VFAT reference raw fields, readers and sensitivity passed")
+    for name, case in CASES.items():
+        check_one(name, case)
     if options.check_producer_guard:
+        with tempfile.TemporaryDirectory(prefix="vfat-producer-guard.",
+                                         dir=ROOT / "build") as scratch:
+            check_producer_guard(Path(scratch))
         print("VFAT producer guards passed")
 
 
