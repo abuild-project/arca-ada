@@ -61,6 +61,12 @@ The earlier provisional environment gate is resolved by this scope choice;
 a golden fixture still requires a guarded generator and a bounded parity
 claim against the native writer.
 
+A later product-image comparison is required before the Abuild backend
+switch. It will run the wrapper-backed and native paths on the same locked
+inputs in Trixie, then check independent readers, raw layout and the
+deliberately byte-compatible subset. This is a future validation gate, not
+evidence claimed by this inventory topic.
+
 The README links the inventory as the next writer step; the plan and record
 indexes are sorted. The development guide now describes Abuild as an existing
 consumer while retaining the independent project boundary. The CPIO, TAR and

@@ -314,3 +314,24 @@ claimed for their tool versions. A future golden fixture still needs a
 self-checking generator and a deliberately bounded parity subset. The
 unobserved identity of an older consumer binary does not block this Trixie
 reference choice.
+
+## Product-image comparison before the backend switch
+
+Decision (2026-11-05): Build representative real product VFAT images with
+the maintained wrapper-backed path and, later, the native Arca writer before
+switching the Abuild adapter. This checks the actual consumer boundary after
+the independent writer tests; it is not a prerequisite to starting the Arca
+implementation.
+
+Use the same locked component revisions, configuration, input bytes and
+metadata, `SOURCE_DATE_EPOCH`, locale, time zone and worker setting for each
+pair. Record exact source and tool identities and verify the input manifests
+before comparing outputs. Check structural validity with `fsck.fat`, list
+and extract with `mtools`, and compare paths, contents and metadata. Compare
+raw boot fields, FAT tables, labels, short aliases and long-name chains
+separately. Use whole-image byte comparison only where the selected layout
+profile claims it; record every difference and its reason instead of
+normalizing away format bytes. Repeat at least one pair to test output
+stability. Include the product's boot and data-image uses where their VFAT
+contracts differ. This product evidence gates the Abuild backend switch;
+older buildenv flavors remain separate follow-up validation.
