@@ -4,8 +4,10 @@ FROM debian:trixie-slim
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        bzip2 \
         ca-certificates \
         cpio \
+        dosfstools \
         gcc \
         git \
         gnat \
@@ -14,6 +16,7 @@ RUN apt-get update \
         libarchive-tools \
         make \
         mkdocs-material \
+        mtools \
         python3 \
         tar \
     && rm -rf /var/lib/apt/lists/*

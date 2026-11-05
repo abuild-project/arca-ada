@@ -36,8 +36,10 @@ builds this Dockerfile and runs the standalone coverage target before any
 other tests. It first asserts that `build/` does not exist, verifying that
 coverage creates its own scratch parent without packaging or wrapper checks.
 The normal check target follows. Python 3, GNU cpio/tar, libarchive's bsdtar,
-gcov and Ahven (`libahven-dev`) are supplied by the development image. The
-test preflight reports missing tools and an unavailable test project.
+gcov, Ahven (`libahven-dev`), bzip2, mtools and dosfstools are supplied by
+the development image. The latter three support test-only VFAT references;
+they are not library or CLI dependencies. The test preflight reports missing
+readers and an unavailable test project.
 
 With no explicit command, the launcher starts Bash and forwards standard
 input, including piped commands. It allocates a TTY only when both its input
