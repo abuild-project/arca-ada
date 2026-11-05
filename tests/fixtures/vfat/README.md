@@ -35,7 +35,8 @@ changing a fixture. Intentional regeneration requires an explicit `--case`,
 `--write --replace`, and review of any changed producer, input, raw hash and
 compressed hash.
 Producer paths selected through relative `PATH` entries are anchored before
-the generator enters its scratch directory; mtools symlink names are retained.
+the generator enters its scratch directory. Symlink names and `symlink/..`
+components are retained so the checked executable is the one invoked.
 
 | FAT type and size | Raw image SHA-256 | Committed bzip2 SHA-256 |
 | --- | --- | --- |
@@ -65,9 +66,10 @@ expands images sparsely in 4-KiB blocks, hashes their full logical contents,
 decodes FAT fields without generator constants, checks `fsck.fat`, `mdir` and
 `mtype`, and proves that altered FAT and long-name bytes fail the raw checks for
 each FAT variant. It does not require the pinned producer binaries. To test
-that the generator accepts the pinned environment and rejects changed package
-and executable identities, and works with a relative `PATH` entry, run the
-separate guard check in that environment:
+that the generator accepts the pinned environment, rejects changed package
+and executable identities, and works with relative `PATH` entries including
+directory symlinks followed by `..`, run the separate guard check in that
+environment:
 
 ```sh
 docker/dev/run --platform linux/amd64 arca-dev:vfat-reference \

@@ -385,3 +385,12 @@ The explicit producer-guard check places a valid `mformat` symlink under a
 relative `PATH` entry and regenerates the FAT12 fixture. This check fails
 when the selected path remains relative and passes after anchoring it.
 Normal `make check` remains independent of producer identities.
+
+## Relative PATH symlink components on 2026-11-05
+
+Anchoring must preserve a directory symlink followed by `..`: lexical
+normalization can otherwise name a different executable. The generator
+joins the current directory with the selected path without resolving or
+normalizing its components. The explicit guard probes both an ordinary
+relative `PATH` entry and one containing `symlink/..`; the latter rejects
+the normalized candidate and passes with the preserved path.

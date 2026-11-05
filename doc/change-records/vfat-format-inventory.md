@@ -45,12 +45,12 @@ compressed hashes and producer identities are recorded in
 The generator checks exact package, executable, configuration and input
 identities before creating an image. It anchors executables selected from
 relative `PATH` entries before entering its scratch directory, while
-retaining mtools symlink names. Normal `make check` reads the committed
-fixtures without regenerating them or checking producer versions. The
-independent checker requires `BZh9` headers, expands one image at a time
-with sparse 4-KiB zero blocks and hashes the full logical contents. It
-decodes BPB fields, FAT copies, label, long-name aliases and checksums and
-the payload chain. `fsck.fat`, `mdir` and `mtype` validate structure and
+retaining symlink names and `symlink/..` path components. Normal `make check`
+reads the committed fixtures without regenerating them or checking producer
+versions. The independent checker requires `BZh9` headers, expands each
+image sparsely in 4-KiB zero blocks and hashes its full logical contents.
+It decodes BPB fields, FAT copies, label, long-name aliases and checksums,
+and the payload chain. `fsck.fat`, `mdir` and `mtype` validate structure and
 content. FAT-copy and long-name corruption controls fail at their intended
 guards. An explicit pinned-environment check proves that wrong package and
 executable identities fail the generator guard.

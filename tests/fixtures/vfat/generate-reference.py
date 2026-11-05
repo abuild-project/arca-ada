@@ -83,9 +83,9 @@ def producers():
         selected = shutil.which(name)
         if selected is None:
             raise RuntimeError(f"missing producer: {name}")
-        # Anchor relative PATH entries before changing directories, while
-        # retaining the symlink spelling used by mtools' multicall binary.
-        path = Path(os.path.abspath(selected))
+        # Keep symlink/.. components and the mtools multicall command name
+        # while anchoring relative PATH entries before changing directories.
+        path = Path.cwd() / selected
         actual = sha256(path)
         if actual != expected:
             raise RuntimeError(
