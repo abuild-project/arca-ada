@@ -1,7 +1,8 @@
 # VFAT format and reference inventory
 
-Status: Phase 0 evidence recorded on 2026-11-05; compatibility decisions and
-populated-image baselines remain open. No writer or public API is introduced.
+Status: Phase 0 evidence recorded; wrapper-compatible layout selected as the
+target on 2026-11-05. Populated-image baselines and justified deviations remain
+open. No writer or public API is introduced.
 
 ## Boundary
 
@@ -173,9 +174,9 @@ No PoC source was copied into Arca in this topic.
 
 ## Decisions and next evidence
 
-The maintainer must choose the intended Arca format profile and the separate
-Abuild adapter behavior before implementation: FAT type selection near the
-9 MiB minimum, boot geometry, volume serial and timestamp policy, sizing
+The wrapper-compatible layout target is chosen below. Before implementation,
+resolve the exact Arca API and separate Abuild adapter mapping: FAT type
+selection near the 9 MiB minimum, volume serial and timestamp policy, sizing
 units, late labels and the scope of any byte-compatible subset. The present
 evidence does not justify claiming byte identity with both observed producers.
 
@@ -190,3 +191,37 @@ byte-compatible subset; its generator must refuse a different producer.
 Then define a narrow `Arca.VFAT` API and implement the native writer in
 small, independently buildable steps. Keep the Abuild adapter switch and
 product-specific policy in a separate change.
+
+## Layout direction on 2026-11-05
+
+Decision (2026-11-05): Match the established wrapper-compatible layout as
+closely as possible for valid inputs, because existing consumers have used
+that profile. A difference needs a concrete format, reader, safety or
+reproducibility reason and a regression test. The direct Trixie `mkdosfs`
+layout remains a separate comparison profile; its different defaults alone
+do not justify changing the native writer's target. Arca remains independent
+of the wrapper and receives any product policy through explicit caller input.
+
+The historical native PoC already selected this direction. Its raw tests pin
+FAT12, FAT16 and FAT32 BPB geometry, FAT size, data start, media byte, boot
+drive ID, reserved FAT entries and the compatibility partition entry. Its
+writer also models mtools short-alias allocation. Against the pinned Trixie
+`mformat`, the PoC's selected raw expectations match independently observed
+fields at 10,272 KiB (FAT12: 8 sectors per FAT, data sector 49), 200,000 KiB
+(FAT16: 196 sectors per FAT, data sector 425) and 600,000 KiB (FAT32: 1,170
+sectors per FAT, data sector 2,372). All three reference images passed
+`fsck.fat -vn`. The PoC tests assert selected fields; this comparison does
+not establish full byte parity, populated-image parity or the original
+consumer's exact mtools version. Its `Equal_Files` assertions compare listings
+or extracted payloads, not a complete native image with a reference image.
+
+Before implementing the writer, pin the actual consumer tool identity and
+compare populated reference images against the PoC's supported cases. Preserve
+the existing label order and name/alias behavior where verified. Resolve the
+volume-serial policy explicitly: the PoC's random default and the current
+Abuild `SOURCE_DATE_EPOCH` reproducibility contract cannot simply be assumed
+equivalent. A caller-supplied serial can preserve Arca's independence while
+supporting a stable Abuild build, but its default and adapter mapping need
+review. Do not change the historical FAT12-at-small-size behavior merely
+because another producer chooses FAT16; first establish a concrete reader or
+product compatibility reason.

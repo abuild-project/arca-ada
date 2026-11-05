@@ -31,17 +31,23 @@ compatibility promise is added by this topic.
 The accepted Abuild tree's focused VFAT transformation tests passed in the
 rootless Trixie container. They exercise the direct dosfstools path, not the
 maintained wrapper. The historical native PoC and later hardening are mapped
-by exact source revisions. No old implementation file was copied and no
-choice between the producer profiles is implied.
+by exact source revisions. No old implementation file was copied.
+
+Decision (2026-11-05): Target the established wrapper-compatible layout for
+valid inputs because existing consumers used it. Departures need a concrete
+format, reader, safety or reproducibility reason and a targeted test. The
+PoC's raw layout assertions for FAT12, FAT16 and FAT32 agree with selected
+fields of independently generated mtools images at three recorded sizes.
+Complete byte parity and populated-image parity remain unproven; the direct
+Trixie dosfstools profile is a separate comparison, not the native default.
 
 The README links the inventory as the next writer step; the plan and record
 indexes are sorted. The development guide now describes Abuild as an existing
 consumer while retaining the independent project boundary. The CPIO, TAR and
 CLI guides remain unchanged because there is no new library contract to
 document. The changelog has no entry because users receive no new behavior.
-A committed golden fixture,
-populated-image comparisons, Arca-specific executable VFAT checks and a
-public API require separate decisions and work. The documentation site built
+A committed golden fixture, populated-image comparisons, executable VFAT
+checks and a public API require separate decisions and work. The site built
 in the supported Arca container; relative links were checked separately.
 No Arca compiler or runtime tests were run for this documentation-only topic.
 
