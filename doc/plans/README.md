@@ -23,6 +23,6 @@ Entries are ordered by topic filename.
 | [First versioned source release](release-0-1-0.md) | Accepted in `2c57cea` (PR #21); `v0.1.0` published |
 | [Version, compatibility and release procedure](release-basics.md) | Accepted in `84f8500` (PR #15) |
 | [TAR extraction](tar-extraction.md) | Accepted in `3914462` (PR #4) |
-| [VFAT format and reference inventory](vfat-format-inventory.md) | In progress; wrapper-compatible layout target selected, populated evidence pending |
+| [VFAT format and reference inventory](vfat-format-inventory.md) | In progress; populated Trixie references recorded, actual consumer tool identity pending |
 | [Writer cleanup and compiler checks](writer-cleanup.md) | Accepted in `52ead53` (PR #6) |
 | [Writer extraction](writer-extraction.md) | CPIO, TAR, Ahven and CLI accepted; Abuild integration accepted at `1b8ac1848`; VFAT inventory in progress |

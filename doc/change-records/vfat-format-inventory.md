@@ -38,16 +38,28 @@ valid inputs because existing consumers used it. Departures need a concrete
 format, reader, safety or reproducibility reason and a targeted test. The
 PoC's raw layout assertions for FAT12, FAT16 and FAT32 agree with selected
 fields of independently generated mtools images at three recorded sizes.
-Complete byte parity and populated-image parity remain unproven; the direct
-Trixie dosfstools profile is a separate comparison, not the native default.
+Full native-to-reference image parity remains unproven; the direct Trixie
+dosfstools profile is a separate comparison, not the native default.
+
+Decision (2026-11-05): Use the pinned Trixie mtools profile provisionally for
+populated references because the actual consumer tool identity is not yet
+available. Fixed input bytes, mtimes, serial and UTC environment produced
+byte-identical FAT12, FAT16 and FAT32 images across three runs per size.
+`fsck.fat`, `mdir` and `mtype` accepted the images and recovered the selected
+payloads. An independent raw decoder checked BPB fields, equal FAT copies,
+the late label, long-name chains and a three-cluster payload; a corrupted
+second FAT failed its equality check. A different time zone changed raw
+directory timestamp bytes in this isolated mtools profile. The current Abuild
+reproducibility test and the actual consumer build are separate evidence.
+These observations do not promote the provisional outputs to golden fixtures.
 
 The README links the inventory as the next writer step; the plan and record
 indexes are sorted. The development guide now describes Abuild as an existing
 consumer while retaining the independent project boundary. The CPIO, TAR and
 CLI guides remain unchanged because there is no new library contract to
 document. The changelog has no entry because users receive no new behavior.
-A committed golden fixture, populated-image comparisons, executable VFAT
-checks and a public API require separate decisions and work. The site built
+A committed golden fixture, broader populated-image comparisons, executable
+VFAT checks and a public API require separate decisions and work. The site built
 in the supported Arca container; relative links were checked separately.
 No Arca compiler or runtime tests were run for this documentation-only topic.
 

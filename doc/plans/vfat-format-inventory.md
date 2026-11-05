@@ -1,8 +1,8 @@
 # VFAT format and reference inventory
 
-Status: Phase 0 evidence recorded; wrapper-compatible layout selected as the
-target on 2026-11-05. Populated-image baselines and justified deviations remain
-open. No writer or public API is introduced.
+Status: Phase 0 format and populated Trixie baselines recorded on 2026-11-05;
+wrapper-compatible layout is the target. The actual consumer tool identity
+and final golden-data scope remain open. No writer or public API is introduced.
 
 ## Boundary
 
@@ -180,17 +180,15 @@ selection near the 9 MiB minimum, volume serial and timestamp policy, sizing
 units, late labels and the scope of any byte-compatible subset. The present
 evidence does not justify claiming byte identity with both observed producers.
 
-Next, produce populated reference images with fixed input bytes, names,
-timestamps, locale, serial and environment. Cover directories, short and long
-names, collisions, cluster transitions, FAT copies and FAT32 metadata. Read
-each image with `mtools` and `fsck.fat`, plus an independent raw decoder whose
-field constants do not come from the new writer. Record exact producer
-commands, package identities, fixture-input hashes and output hashes. A
-committed golden fixture is appropriate only for a deliberately chosen
-byte-compatible subset; its generator must refuse a different producer.
-Then define a narrow `Arca.VFAT` API and implement the native writer in
-small, independently buildable steps. Keep the Abuild adapter switch and
-product-specific policy in a separate change.
+The populated references below establish a first subset with fixed input
+bytes, names, timestamps, locale, serial and environment. Extend it around
+name collisions, directory and cluster transitions, FAT copies and FAT32
+metadata. Keep `mtools`, `fsck.fat` and independent raw checks separate from
+the eventual writer's constants. A committed golden fixture is appropriate
+only for a deliberately chosen byte-compatible subset; its generator must
+refuse a different producer. Then define a narrow `Arca.VFAT` API and
+implement the native writer in small, independently buildable steps. Keep
+the Abuild adapter switch and product-specific policy in a separate change.
 
 ## Layout direction on 2026-11-05
 
@@ -225,3 +223,75 @@ supporting a stable Abuild build, but its default and adapter mapping need
 review. Do not change the historical FAT12-at-small-size behavior merely
 because another producer chooses FAT16; first establish a concrete reader or
 product compatibility reason.
+
+## Populated reference evidence on 2026-11-05
+
+Decision (2026-11-05): Use the pinned Trixie `mtools 4.0.48-1` profile as a
+provisional producer because the actual consumer build environment and its
+`mformat` binary identity are not yet available. This is a reproducible
+research baseline, not an accepted product golden fixture. The wrapper's
+translation is reproduced explicitly; neither its private source file nor
+Abuild sources are needed to generate these samples.
+
+Four input files were created with mtime `946684800` (2000-01-01 00:00:00
+UTC). Their bytes are defined by these contents and SHA-256 values:
+
+| Input | Bytes | SHA-256 |
+| --- | --- | --- |
+| `README.TXT` | UTF-8 `VFAT reference payload` plus LF | `a17e1739456862261be4b460e87f055544a5fe7bfc4903caa71703b98acefee8` |
+| `Long Filename Alpha.txt` | UTF-8 `alpha long-name payload` plus LF | `cb57dea126a43a6430ba97b781613050b4968f09ae5a80c94cc34d3990083220` |
+| `Long Filename Beta.txt` | UTF-8 `beta long-name payload` plus LF | `fb27281f37c22f5dc56a4fc3d73cfd411647b6402ba90879c3690afe4f15ead7` |
+| `PAYLOAD.BIN` | bytes `00` through `ff` repeated 36 times, 9,216 bytes | `328483c355456142e6d9f8c42e7afc5150f4cffdcb6408bcf0350cc34c6a26aa` |
+
+Each image was created with `LC_ALL=C`, `TZ=UTC`, `HOME=/tmp`, umask `0022`,
+`SOURCE_DATE_EPOCH=946684800` and fixed serial `0x12345678`. Relevant mtools
+configuration overrides were unset. The `mformat` commands used the wrapper
+geometry `-h 64 -s 32 -H 0`, `-C`, `-N 0x12345678` and these sizes:
+
+| FAT profile | Size in KiB | `mformat` options for size and type |
+| --- | ---: | --- |
+| FAT12 | 10,272 | `-T 20544` |
+| FAT16 | 200,000 | `-T 400000` |
+| FAT32 | 600,000 | `-F -T 1200000` |
+
+After formatting, each image received these operations in this order:
+
+```sh
+mmd -i "$image" ::/DIR
+mcopy -s -i "$image" source/README.TXT ::/README.TXT
+mcopy -s -i "$image" 'source/Long Filename Alpha.txt' \
+  '::/DIR/Long Filename Alpha.txt'
+mcopy -s -i "$image" 'source/Long Filename Beta.txt' \
+  '::/DIR/Long Filename Beta.txt'
+mcopy -s -i "$image" source/PAYLOAD.BIN ::/DIR/PAYLOAD.BIN
+fatlabel "$image" 'VFAT TEST'
+```
+
+Three UTC runs per size were byte-identical; the third followed after a time
+interval. The resulting image SHA-256 values were:
+
+| FAT profile | Populated image SHA-256 |
+| --- | --- |
+| FAT12 | `47c00d8f3801ecec9b287136420d3776facfe54538e44b9be867950be57c48be` |
+| FAT16 | `6017b89eec2ea108d37697947c46342a6a7d53615acfc6451722d1e500da18e8` |
+| FAT32 | `0870a9bfbd94f3f8a89324903e2636259c2a9ef3994e96ff2c311a0effeb769c` |
+
+`fsck.fat -vn` accepted all three. `mdir` showed the late `VFAT TEST` label,
+the two long names and short aliases `LONGFI~1.TXT` and `LONGFI~2.TXT`.
+`mtype` recovered both text files and the 9,216-byte payload byte for byte
+at every size. An independently authored raw decoder derived FAT type from
+cluster count, verified the BPB geometry and serial, compared both FAT copies,
+checked the late root label and long-name checksums/ordinals, and followed a
+three-cluster payload chain. It reported data starts at sectors 49, 425 and
+2,372, matching the PoC's selected raw layout assertions. Flipping one byte
+in a copied second FAT made that decoder fail at the FAT-copy check.
+
+A run under `TZ=America/New_York` produced different bytes, with the first
+differences in directory timestamp fields. This is an isolated direct-mtools
+observation, not a result for Abuild's source-date-tested transformation or
+the actual consumer build. The UTC profile above is the only byte-stable
+reference claimed here. All generated images and the temporary decoder stay
+outside the repository; the commands, input identities, output hashes and
+scope are recorded here for review. Before promoting a golden fixture, pin
+the actual consumer's tool identity and make the generator self-check its
+producer version, binary hash and environment.
