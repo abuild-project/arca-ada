@@ -53,6 +53,14 @@ directory timestamp bytes in this isolated mtools profile. The current Abuild
 reproducibility test and the actual consumer build are separate evidence.
 These observations do not promote the provisional outputs to golden fixtures.
 
+Decision (2026-11-05): Accept the pinned Trixie producer profile as the
+initial VFAT reference because the maintained consumer mainline uses Trixie.
+The wrapper-compatible layout remains the target. Older Debian and Red Hat
+buildenv flavors need separate evidence and are not part of this validation.
+The earlier provisional environment gate is resolved by this scope choice;
+a golden fixture still requires a guarded generator and a bounded parity
+claim against the native writer.
+
 The README links the inventory as the next writer step; the plan and record
 indexes are sorted. The development guide now describes Abuild as an existing
 consumer while retaining the independent project boundary. The CPIO, TAR and

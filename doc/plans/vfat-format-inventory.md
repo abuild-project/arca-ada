@@ -1,8 +1,9 @@
 # VFAT format and reference inventory
 
-Status: Phase 0 format and populated Trixie baselines recorded on 2026-11-05;
-wrapper-compatible layout is the target. The actual consumer tool identity
-and final golden-data scope remain open. No writer or public API is introduced.
+Status: Phase 0 format and populated baselines recorded on 2026-11-05;
+the pinned Trixie profile and wrapper-compatible layout are the reference.
+Golden-data scope and native parity remain open. No writer or public API is
+introduced.
 
 ## Boundary
 
@@ -295,3 +296,21 @@ outside the repository; the commands, input identities, output hashes and
 scope are recorded here for review. Before promoting a golden fixture, pin
 the actual consumer's tool identity and make the generator self-check its
 producer version, binary hash and environment.
+
+## Reference environment accepted on 2026-11-05
+
+Decision (2026-11-05): Use the observed Debian 13.6 Trixie/AMD64 profile,
+including `mtools 4.0.48-1` and `dosfstools 4.2-1.2` with the binary hashes
+above, as the reference for the initial native VFAT writer. The maintained
+consumer's mainline currently uses Trixie, so matching that profile is more
+relevant than reconstructing every older build environment. This supersedes
+the provisional environment choice in the preceding dated section.
+
+The historical wrapper's command translation remains the layout target.
+The current Trixie `mformat` implementation supplies the pinned producer
+behavior for that translation. Other Debian and Red Hat buildenv flavors
+are outside the initial validation scope; no behavior or byte identity is
+claimed for their tool versions. A future golden fixture still needs a
+self-checking generator and a deliberately bounded parity subset. The
+unobserved identity of an older consumer binary does not block this Trixie
+reference choice.
