@@ -9,6 +9,21 @@ GitHub reporting channel. Keep vulnerability details out of public issues.
 Use small commits that build independently. Separate behavior-preserving
 extraction from format changes and Abuild integration. Include tests that
 would detect a violation of the documented contract.
+Before first submission of a new, unpublished topic, follow
+[submission preparation](doc/development.md#submission-preparation) to fold
+local fixups into coherent commits before final test and review handoffs.
+
+Name topic branches `<prefix>/<topic>` with exactly one prefix segment.
+Codex-created branches use `codex/<topic>`; other authors choose their own
+prefixes. Continue the matching existing plan when there is one. Agent-led
+contributions follow the
+[coordinator, developer, tester and reviewer workflow](doc/development.md#agent-workflow)
+required by [AGENTS.md](AGENTS.md), including independent review and separate
+bounded local and PR correction budgets. Complete
+[PR preparation and Copilot review](doc/development.md#pull-request-preparation-and-submission)
+within the explicitly authorized stages. Preparation alone grants no
+push/create permission; already authorized submission steps need no repeated
+confirmation. Merge, release and settings changes need separate authorization.
 
 Submit new project-owned contributions under GPL-2.0-or-later. Retain
 copyright and licence notices for imported material. Code derived from Abuild

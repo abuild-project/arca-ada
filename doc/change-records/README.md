@@ -4,6 +4,7 @@ Entries are ordered by topic filename.
 
 | Record | Scope | Accepted |
 | --- | --- | --- |
+| [Agent contribution workflow](agent-workflow.md) | Native role handoffs, bounded corrections and fresh-checkout CI evidence | pending |
 | [Ahven unit suites](ahven-unit-tests.md) | Named direct contracts, shared scenarios and runner failure controls | `6f1514a` |
 | [Library API and metadata contracts](api-hardening.md) | Private TAR lifecycle, CPIO permissions, timestamp errors and installed metadata | `089b32b` |
 | [Archive creation CLI](archive-cli.md) | Filesystem inventory, metadata/link policy, atomic output and independent CLI tests | `a7c4735` |

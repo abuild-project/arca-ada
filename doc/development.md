@@ -82,6 +82,387 @@ platform/tag selections, paths with spaces, root rejection and command
 argument boundaries without a Docker engine. CI runs it after the fresh-source
 coverage check so it cannot create coverage's scratch parent in advance.
 
+## Agent workflow
+
+Agent-led topics use four distinct assignments: coordinator, developer, tester
+and reviewer. This also applies to documentation changes. Use native agents
+inside the active cloud or local task and the existing hosted CI workflow;
+no self-operated runner, new server, persistent autonomous service, additional
+model subscription or secret is required. Both locations require the same
+AMD64 Trixie Docker checks and preserve the supported-platform scope. A
+qualifying external reviewer may fill the review assignment as described
+below. Writing four role-labelled sections in one agent's response does not
+provide these separate assignments.
+
+### Roles and authority
+
+| Role | Responsibility | Candidate access |
+| --- | --- | --- |
+| Coordinator | Fix scope and acceptance criteria, assign roles, consolidate findings, retain the active phase and both correction counters and decide whether the evidence meets the criteria | Manage handoffs; delegate candidate edits to the developer |
+| Developer | Implement the scoped change, correct bundled findings and produce an immutable candidate commit | Sole editor of candidate tracked files |
+| Tester | Execute the complete local CI chain and report results, failures and evidence limits | Fresh detached worktree; generated test artifacts only |
+| Reviewer | Independently inspect the full base-to-candidate change and its contracts, tests, documentation and evidence | Read-only revision/worktree or qualifying external review of the mapped diff |
+
+The maintainer still decides scope, public API, compatibility, licensing and
+supported-platform changes. The coordinator must seek that decision before
+extending the agreed work. Acceptance means that the local evidence satisfies
+the task; it grants no external write permission. Preparing a PR does not
+authorize pushing or creating it. An explicit submission/Copilot-review task
+can cover the necessary topic push, PR creation, review request and factual
+responses; continue already authorized stages without repeated confirmation.
+Merge, tag, release, publication, settings and force-push actions require
+separate authorization.
+
+Name topic branches `<prefix>/<topic>` with exactly one prefix segment, such
+as `codex/` or `claude/`. Codex-created branches use `codex/<topic>`; other
+authors choose their own prefixes. Reuse an existing matching plan under
+[plans](plans/README.md); create a new plan only for a new topic. Do not
+start a parallel ticket system. Append durable technical decisions, with
+their reasons, to the plan's dated sections. Keep raw logs, role messages,
+candidate identities, the active phase and both counters in the task log or
+ignored `build/`. Do not create `build/` in the tester's fresh worktree before
+the coverage-first assertion. The canonical change record describes the final
+change, evidence and material limits without session or review-round history.
+
+### Native agents and review independence
+
+The coordinator launches in-task role agents using the native delegation tools
+available in the active task; no additional orchestrator software is needed.
+The role assignments are leaf tasks within this one workflow: an assigned
+developer, tester or reviewer follows its role brief and does not recursively
+start another four-role workflow. Give every role the scope, active phase
+and both correction counters. Give the tester its own fresh worktree at the
+candidate commit. Assign a separate reviewer with fresh context and an explicit
+read-only review packet. Start the reviewer without inherited developer
+dialogue and supply the packet explicitly; do not send a preferred conclusion.
+For example, in Codex use `spawn_agent` with `fork_turns="none"`. The reviewer
+reads the repository guidance, agreed scope, immutable base/candidate diff and
+test evidence and reaches its own conclusions.
+
+Native agents may share the filesystem. Separate worktrees and read-only
+orders are procedural boundaries, not technically enforced filesystem isolation.
+Do not assume a different model, hidden permissions or automatic UI startup.
+Keep candidate edits with the developer and avoid concurrent mutations of a
+shared checkout or Git state.
+
+A maintainer-supplied review by another agent or human in a separate session
+or PR can satisfy the independent-review criterion when reviewer identity,
+scope and independence from developer dialogue are established. It must cover
+immutable base/head SHAs or have a verifiable mapping to the reviewed PR diff.
+A review posted through a shared or maintainer account must name its actual
+reviewer and covered immutable revisions in the body because the account does
+not identify the reviewer.
+A different label/model or known SHAs alone do not establish independence.
+Triage its findings in the active phase budget like any other review. A review
+of an earlier head does not cover a later one. If native review is unavailable,
+use a qualifying external review; if neither route is available, report the
+unmet criterion rather than substituting self-review.
+This fills the independent workflow-review assignment; the supplementary
+Copilot stage remains separate.
+
+### Candidate handoffs and phase budgets
+
+1. The coordinator records the task, allowed files/behavior, exclusions,
+   active plan, acceptance criteria and immutable base SHA. For a new topic,
+   it initializes local corrections to zero and PR corrections to zero, with
+   the PR phase not started, and assigns the developer in the local phase.
+2. The developer produces the initial candidate commit and supplies the
+   full candidate SHA, base-to-candidate diff and handoff packet. No correction
+   round has been consumed yet.
+3. The tester validates that exact SHA in a fresh detached worktree. The
+   independent reviewer inspects that same immutable candidate against the
+   base, in its own revision/worktree or through a qualifying external review.
+   Neither role corrects a defect; each returns findings to the coordinator.
+   Gather both reports before bundling corrections when possible.
+4. The coordinator accepts only when both reports cover the same candidate
+   (or the strictly tree-identical history-only case under
+   [submission preparation](#submission-preparation)), all acceptance criteria
+   are met and no blocking finding remains. Otherwise it combines actionable
+   findings into one developer correction request.
+   A bundle of developer corrections plus its revalidation consumes one round
+   in the active phase. The first correction is round one. Run the full test
+   chain and fresh independent review for the new candidate SHA; these checks
+   do not each consume another round.
+5. Allow at most three correction rounds locally. Only after local acceptance
+   may the coordinator start the PR phase once per topic, within the authorized
+   external scope. The initial hosted-CI/Copilot assessment uses PR round zero;
+   up to three additional correction rounds are available in that phase.
+   Retain the local count. Internal tests/reviews after a PR fix belong to its
+   PR round and do not consume the local budget again.
+
+Both counters belong to the topic. Changing agents, splitting subtasks,
+renaming branches, pushing, rebasing, replacing a PR or requesting another
+review resets neither counter. Once the PR phase starts, returning to local
+testing or opening another PR for the same topic retains that phase and its
+existing counter; the transition cannot provide a second fresh PR budget.
+If valid findings remain after the active phase's third round, block that
+phase and report the findings for a maintainer decision. Do not produce a
+fourth correction or move unresolved local findings into the PR phase.
+Budget availability itself authorizes no push, PR, review request or merge.
+
+A pure infrastructure retry with no candidate change consumes no correction
+round. Record the failed command, cause or uncertainty and retry result so it
+cannot conceal a candidate defect. A change to candidate tracked files is a
+new candidate and requires evidence for that revision. Tester and reviewer
+reports remain tied to their immutable SHAs, even if a branch later moves.
+
+Every handoff packet contains:
+
+- Task, scope and exclusions, plan path, acceptance criteria, active phase,
+  both correction counters and whether the PR phase has started; full base
+  and candidate SHAs and the complete diff.
+- Tester report with exact commands and exit codes, tool versions, host and
+  container UID/GID, architecture, image identity, coverage inventory/results,
+  Ahven XML locations/results, skips and limitations. Preserve primary logs
+  and artifacts so another role can inspect the claims.
+- Reviewer report with file/line locations, concrete impact and the affected
+  acceptance criterion for each finding, or an explicit no-findings result
+  with the reviewed scope and evidence limits.
+
+The initial developer packet identifies test/review evidence as pending.
+Subsequent packets include the available reports without turning the
+developer's reasoning or conversation into the reviewer's starting context.
+
+### Submission preparation
+
+Before first submission of a new, unpublished topic, organize coherent, small,
+independently buildable commits. Fold local fixups into the relevant
+substantive commits and describe final behavior. Keep distinct changes
+separate; one indivisible documentation topic can use one commit. Rewriting
+shared, published or another contributor's history requires explicit rewrite
+permission; the workflow grants no force-push permission.
+
+Finalize history before final test and review handoffs so both roles receive
+the final base/candidate SHAs and diff. For a later pure history/message
+rewrite, preserve a recovery ref and record the base, old/new SHAs, complete
+tree IDs and mapping in the task log or ignored `build/`. Evidence from local
+checks or reviews of content may be retained only with an unchanged base,
+identical complete tree IDs and demonstrated independence of each retained
+check/review from Git metadata. Preserve the original execution SHAs; never
+claim checks ran on the new SHA or transfer hosted commit-bound statuses.
+Recheck changed metadata and rerun SHA-dependent checks. Any content change
+requires the full local CI chain and fresh independent review for the new
+candidate. Pure history cleanup consumes no correction round and resets
+neither phase counter; it must not contain hidden fixes.
+
+### Pull request preparation and submission
+
+The coordinator continues until the next regular handoff has a concrete local
+PR packet. Keep it in the task log or ignored `build/`, containing:
+
+- Target repository, base branch/SHA, head branch/final SHA and complete tree
+  ID, prepared commit sequence, scope and canonical change-record path.
+- A concrete title describing the final result in the appropriate Conventional
+  style, and a body byte-identical to the committed
+  `doc/change-records/<topic>.md`, without a chat-history summary.
+- Final local CI and independent review evidence, remaining limits, the active
+  phase, both correction counters, PR-phase start status and next authorized
+  stages. Keep raw logs, operational status and counters out of the PR prose
+  and change record.
+
+The local packet can be complete before submission. Mark hosted CI and
+Copilot review as pending until authorized creation/request and actual results.
+
+Respect the task's current boundary, which may stop before any external
+write. This is an adjustable task boundary, not a mandatory confirmation
+between every step. If submission and Copilot interaction were already
+explicitly authorized, continue those stages within scope. Preparation alone
+authorizes no push or PR; merge and other separately gated actions remain
+outside submission permission.
+
+When authorized to submit, verify the target repository, base/head and final
+SHA, and check for an existing PR before creating a duplicate. Push the topic
+branch without writing directly to the default branch. Create a PR ready for
+review when ready; use a draft only when requested or justified. Supply the
+canonical body through a structured tool argument or `--body-file`, preserving
+its exact bytes, and verify the created body matches the committed record.
+Keep the record and PR body synchronized after substantive changes. Retain
+PR/review URLs and IDs in the operational task log.
+
+Track hosted CI separately from local evidence. Before reporting readiness
+for merge, require actual successful hosted CI for the current PR head;
+results from the base or an earlier SHA do not establish it.
+
+### Copilot review and follow-up
+
+Within the authorized review stage, request actual Copilot code review after
+the PR is ready, using a supported GitHub reviewer mechanism. Check existing
+pending requests first. Do not substitute assignment to the coding agent,
+invent API/chat-command shortcuts or claim success when the tool cannot
+request review. Copilot is supplementary; it replaces neither internal fresh
+review, CI nor the maintainer's decision.
+
+Observe completion for a bounded period without request spam or a background
+service. Pending, timed-out, unavailable or stale reviews remain open status
+and must be reported, not treated as clearance. For a completed review, verify
+its associated commit and read every full review body, inline thread and PR
+conversation comment, following pagination. Summaries, emojis, "No open
+issues" and a `COMMENTED` state establish neither formal approval nor passing
+CI or independent verification of runtime evidence.
+
+Triage each finding independently against code, contracts and tests. The
+developer alone fixes valid findings in bundled requests within the PR phase's
+three-round budget, including hosted-CI and Copilot corrections. Each bundle
+and its local/internal revalidation count once in that PR budget, without
+charging the local counter again. An exhausted PR budget with a valid finding
+requires a maintainer decision; do not start an autonomous fourth PR round.
+Each changed candidate receives the full local CI chain and fresh independent
+review under the existing rules. New pushes, PRs and renewed Copilot reviews
+do not restart the phase or its budget.
+
+Within authorized interaction, reply briefly and factually: cite the fix
+commit and relevant evidence, or explain a rejected finding with its location
+and contract. Resolve a thread only after substantiated handling. Do not
+delete comments or dismiss reviews to make the PR appear clear. After relevant
+changes, wait for current-head hosted CI and request a real new Copilot review
+when the old review is stale. The readiness report identifies the latest head,
+review commit, CI results, open/resolved threads and remaining limits. A report
+that the PR is ready for merge does not authorize the merge itself.
+
+### Fresh test worktree and local CI chain
+
+Use a new detached worktree at the full candidate SHA, even when the original
+checkout looks clean: it can contain ignored objects and reports. Choose an
+unused destination under a traversable parent and create it with `umask 022`
+in a subshell. A task umask of `0077` otherwise creates `0700` directories
+that can prevent the cross-UID children from reaching the executable.
+
+```sh
+candidate_sha=FULL_CANDIDATE_SHA
+test_worktree=../arca-test
+(
+    umask 022
+    git worktree add --detach "$test_worktree" "$candidate_sha"
+)
+cd "$test_worktree"
+git rev-parse HEAD
+git status --short
+```
+
+Confirm the checked-out SHA and absence of tracked changes. Before the
+cross-UID step, inspect the worktree parent chain and executable path for
+necessary search/read/execute access by UIDs 65534 and 65533; the cross-UID
+root harness uses those unprivileged identities without supplementary groups.
+Recreate a misconfigured fresh worktree or fix only the necessary traversal
+permission. Do not broadly open permissions with `chmod -R`, change fixtures,
+skip assertions or replace the test with a single-UID run. Permission
+preparation must not weaken the existing test.
+
+Read [.github/workflows/ci.yml](../.github/workflows/ci.yml) at the candidate
+revision and execute its complete local chain in order. The following is the
+existing chain; if CI changes, use that revision's commands and record the
+difference. Python 3 and Docker are host requirements for the wrapper/shell
+checks. Run normal container commands as the non-root task user through the
+wrappers, one Make target per invocation:
+
+```sh
+docker/dev/build
+test ! -e build
+docker/dev/run arca-dev:trixie make -j8 coverage NUM_CPUS=8
+python3 tests/check-dev-wrappers.py
+python3 tests/check-dev-shell.py arca-dev:trixie
+docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
+docker run --platform linux/amd64 --rm --network none --user 0:0 \
+  --mount "type=bind,source=$PWD,target=/work,readonly" \
+  --workdir /work arca-dev:trixie \
+  python3 tests/check-staging-security.py --cli cli/bin/arca
+docker/dev/run arca-dev:trixie make -j8 docs NUM_CPUS=8
+```
+
+Retain each command's exit code; a later success does not erase an earlier
+failure. The cross-UID command is the unchanged dedicated root harness
+with no network and a read-only source mount. It starts both competing
+processes under distinct unprivileged UIDs. It is the specific root exception,
+not a substitute for rootless compilation, coverage, ordinary checks or docs.
+Do not use `--root` or privileged containers to make those normal checks pass.
+
+Record the development image ID/digest when available because its tag moves,
+Docker and compiler/build-tool versions, effective normal-test identities and
+the coverage report under `build/`. Preserve Ahven XML from
+`build/unit-results-*/*.xml`, including failure reports, as CI does. Report
+missing reports, skips and infrastructure restrictions explicitly. Local
+validation builds the documentation; GitHub artifact upload and Pages
+deployment are external workflow steps and are not local test commands.
+
+### Reusable Cloud environment requirements
+
+A task-local role setup does not install a reusable Cloud configuration.
+Inspect the active environment status before claiming one is attached. For
+example, managed Codex Cloud reports `source_config_id=null` when no source
+configuration is identified. If the current interface has no tools for writing
+configuration, prepare the requirements and use the user-facing environment
+settings or onboarding flow. Documentation or a local Docker image does not
+save or publish a reusable configuration.
+
+To prepare a reusable environment in those settings:
+
+1. Select this repository and a non-root Linux/AMD64 task user, with Git,
+   Bash, Python 3 and working Docker access for that user. Provide capacity
+   for the image, separate worktrees and the documented `-j8` checks. The
+   repository Dockerfile supplies Debian Trixie, GNAT 14, GPRbuild, Ahven,
+   readers and documentation dependencies; do not replace it with host builds.
+2. Permit the source checkout and Docker registry/Debian package access
+   needed to build the reference image, using the platform's proxy and CA
+   trust. Normal tests need no credentials, network access or Abuild checkout.
+   Keep repository access configured through settings; do not put credentials
+   into role prompts, plans or committed files.
+3. Confirm native delegation and a fresh-context or qualifying external
+   reviewer, then verify the non-root Docker socket, AMD64 architecture and
+   fresh-worktree traversal requirements. Managed Codex Cloud supports Docker;
+   every environment must provide rootless normal checks in the Trixie image.
+4. Review the proposed settings and their observed readiness through the
+   supported settings flow. Saving/publishing a reusable configuration is a
+   separate authorized settings action. A later task must select it and
+   verify its actual status and tool access before relying on it.
+
+The default agent sandbox can block the Docker socket or inherited proxy.
+Use the platform tool's supported escalation for the same required operation
+and retain the failure/escalation in the task evidence. Do not switch to a
+root test user, privileged container, host networking or weaker test as a
+workaround. If the required environment remains unavailable, report the
+specific blocker and leave validation incomplete. This workflow installs no
+background scheduler and promises no unattended work after the agent task.
+
+### Role assignment templates
+
+The coordinator fills the placeholders and supplies repository guidance with
+each assignment. These are task prompts, not executable service configuration.
+The developer branch placeholder is `PREFIX/TOPIC`; the Codex-created branch
+example is `codex/TOPIC`.
+
+```text
+Developer: implement TASK in ALLOWED_SCOPE on PREFIX/TOPIC.
+Base: BASE_SHA. Active plan: PLAN. Acceptance criteria: CRITERIA.
+Phase: PHASE. Corrections: local L/3; PR P/3. PR phase started: YES/NO.
+Read AGENTS.md and its required guides. Preserve unrelated work and existing
+topic decisions. You alone edit candidate tracked files. Return the full
+candidate SHA, complete diff, change summary and evidence limits. Correct
+only the coordinator's bundled findings; do not push or publish.
+```
+
+```text
+Tester: validate CANDIDATE_SHA against BASE_SHA for TASK/CRITERIA.
+Phase: PHASE. Corrections: local L/3; PR P/3. PR phase started: YES/NO.
+Use your own new detached worktree with umask 022 and verify its SHA.
+Read AGENTS.md and run the complete local CI chain from doc/development.md,
+checking .github/workflows/ci.yml at that revision. Preserve commands,
+exit codes, versions, identities, image identity, coverage and Ahven XML.
+Report findings, skips and limitations to the coordinator. Do not edit
+candidate tracked files, correct defects, push or publish.
+```
+
+```text
+Reviewer: independently review BASE_SHA..CANDIDATE_SHA for TASK.
+Phase: PHASE. Corrections: local L/3; PR P/3. PR phase started: YES/NO.
+Scope/exclusions: SCOPE. Plan: PLAN. Acceptance criteria: CRITERIA.
+Test report and primary evidence: EVIDENCE. Review worktree: REVIEW_WORKTREE.
+Start with fresh context and no developer dialogue. Read AGENTS.md and the
+required guides. Inspect the complete immutable diff and relevant surrounding
+code/docs yourself. This is read-only: report file/line, concrete impact and
+affected criterion for every finding, or no findings with limits. Do not
+edit candidate tracked files, correct defects, commit, push or publish.
+```
+
 ## Project boundary
 
 `arca.gpr` is a static Ada library with no Abuild or third-party project
@@ -270,12 +651,12 @@ The CLI checks its procfs descriptor path before staging allocation; a
 child-only fault injection proves that a missing path gets its own diagnostic.
 Ordinary staging permission failures retain their existing message.
 
-The dedicated `tests/check-staging-security.py` coordinator uses container
-root only to start the CLI and a competing process with separate unprivileged
-UIDs and no supplementary groups. Its native Linux temporary fixtures and
-acknowledged barriers check setup, writer opening, publication and cleanup.
-CI runs that coordinator separately after rootless build and check; neither
-production code nor the ordinary checks require root.
+The dedicated cross-UID root harness, `tests/check-staging-security.py`, uses
+container root only to start the CLI and a competing process with separate
+unprivileged UIDs and no supplementary groups. Its native Linux temporary
+fixtures and acknowledged barriers check setup, writer opening, publication
+and cleanup. CI runs that harness separately after rootless build and check;
+neither production code nor the ordinary checks require root.
 
 ## Commands
 
