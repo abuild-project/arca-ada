@@ -12,11 +12,17 @@ with [CONTRIBUTING.md](CONTRIBUTING.md); the same rules apply to them.
   belongs to one, and `SECURITY.md` before security-relevant work.
 - Preserve unrelated working-tree changes; do not overwrite another topic's
   work.
+- Use `codex/<topic>` for every topic branch. Continue the existing topic plan
+  when one already covers the work.
 - Ask the maintainer before a decision that changes scope, public API,
   compatibility, licensing or supported platforms. Record the agreed decision
   in the active plan.
-- Push, open or merge pull requests, tag, release or change repository
-  settings only when the maintainer asks for that specific action.
+- Perform external writes only within the maintainer's explicit task scope.
+  Preparing a PR grants no push/create permission. A request to submit a PR
+  with Copilot review can cover the necessary topic push, creation, review
+  request and factual responses; do not ask again for already authorized
+  steps. Merge, tag, release, publication, settings and force-push actions
+  require separate authorization.
 - If the documented build environment or a required tool is unavailable,
   say so. Do not replace the required evidence with a weaker environment.
 
@@ -48,6 +54,50 @@ with [CONTRIBUTING.md](CONTRIBUTING.md); the same rules apply to them.
 - When production bodies are added, removed or renamed, update
   `tests/coverage-sources.txt` and run the coverage target.
 
+## Agent workflow
+
+Follow the [role workflow](doc/development.md#agent-workflow) for agent-led
+changes, including documentation topics. The coordinator starts the role
+assignments once per task; delegated role agents do not recursively start
+another four-role workflow.
+
+- The coordinator owns scope, acceptance criteria, handoffs, the active phase
+  and both correction counters. The developer alone edits and commits
+  candidates. The tester and reviewer report defects without correcting
+  candidate files.
+- Give the tester a fresh detached worktree at the immutable candidate SHA
+  and require the complete local CI chain, including coverage before `build/`
+  exists, rootless checks, the unchanged cross-UID coordinator and docs.
+- Assign the reviewer a separate native agent with fresh context, no developer
+  dialogue, immutable base/candidate SHAs and a read-only review worktree.
+  Separate worktrees and instructions do not enforce filesystem isolation;
+  native agents share the filesystem and need not use different models.
+  Report missing delegation or fresh-review capability instead of claiming
+  independent review from one agent's role-labelled responses.
+- Allow at most three bundled correction rounds in the local implementation,
+  testing and internal-review phase. After local acceptance, start the PR phase
+  once per topic with up to three additional rounds for hosted CI/Copilot.
+  Initial assessments use zero; the first correction in each phase uses one.
+  Retain both counters across agents, subtasks, pushes, rebases, replacement
+  PRs and repeated reviews. Count corrections plus revalidation once in the
+  active phase. Infrastructure retries without candidate changes and pure
+  history cleanup consume no round. Valid findings after round three block
+  that phase and require a maintainer decision; unresolved local findings must
+  not be shifted to the PR phase.
+- Require both test evidence and independent review for the same candidate
+  before acceptance, except for the strictly tree-identical history-only case
+  in [submission preparation](doc/development.md#submission-preparation).
+  Keep operational logs and both counters in the task log or ignored `build/`;
+  append durable decisions to the topic plan. Keep session and review-round
+  history out of the change record.
+- Use native agents only inside the active Cloud task and existing hosted
+  GitHub Actions. This workflow creates no persistent autonomous service or
+  self-operated infrastructure and grants no external-action permission.
+- Prepare the complete local PR packet before the next regular handoff;
+  follow [PR submission and Copilot review](doc/development.md#pull-request-preparation-and-submission)
+  within the authorized stages. Copilot supplements internal review and CI;
+  read all review content and retain the existing PR-phase correction budget.
+
 ## Licensing
 
 - Project-owned maintained files use GPL-2.0-or-later. Put the SPDX identifier
@@ -64,18 +114,31 @@ with [CONTRIBUTING.md](CONTRIBUTING.md); the same rules apply to them.
 
 - Use Conventional Commit subjects of at most 50 characters and wrap bodies
   at 72 columns without dangling single-word lines. Keep commits small and
-  independently buildable.
+  independently buildable. Capitalize the description after the type prefix.
+  Describe the problem, change and reason in the commit; keep validation
+  commands, results and limitations in the change record, not the commit.
+- Before first submission of a new, unpublished topic, organize coherent
+  commits and fold local fixups into the relevant substantive commits.
+  Describe final behavior; use one commit for an indivisible documentation
+  topic. Follow the development guide's submission preparation before final
+  evidence handoffs.
+- Rewrite shared, published or another contributor's history only with
+  explicit rewrite permission. This workflow grants no force-push permission.
 - Do not put ticket numbers or issue-tracker references in commits, change
   records, plans or pull request texts.
 - When an agent co-authors a change, end the commit message and change
   record with an accurate `Co-Authored-By` trailer for the model actually
   used. Never invent an identity.
-- Every topic updates `CHANGELOG.md` and the affected user and developer
-  guides, and adds `doc/change-records/<topic>.md` in the sorted index.
+- Every topic updates the affected user and developer guides and adds
+  `doc/change-records/<topic>.md` in the sorted index.
   Derive the topic from the branch name by removing the first slash-separated
   prefix, if present, and replacing any remaining slashes with hyphens.
   The committed record is the pull request description, so it remains
   readable after a move to another forge.
+- Update `CHANGELOG.md` only for changes visible to library/CLI users or
+  integrators, including relevant consumer build and installation changes.
+  Keep purely internal changes to agent workflows, processes or validation
+  evidence in guides and change records, not the changelog.
 - Use a plan under `doc/plans/` for multi-step work. Dated sections are
   append-only; record a later deviation as a new dated entry.
 
