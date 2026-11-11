@@ -13,8 +13,10 @@ Before first submission of a new, unpublished topic, follow
 [submission preparation](doc/development.md#submission-preparation) to fold
 local fixups into coherent commits before final test and review handoffs.
 
-Use `codex/<topic>` for topic branches and continue the matching existing plan
-when there is one. Agent-led contributions follow the
+Name topic branches `<prefix>/<topic>` with exactly one prefix segment.
+Codex-created branches use `codex/<topic>`; other authors choose their own
+prefixes. Continue the matching existing plan when there is one. Agent-led
+contributions follow the
 [coordinator, developer, tester and reviewer workflow](doc/development.md#agent-workflow)
 required by [AGENTS.md](AGENTS.md), including independent review and separate
 bounded local and PR correction budgets. Complete

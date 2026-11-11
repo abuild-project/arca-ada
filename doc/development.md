@@ -86,10 +86,13 @@ coverage check so it cannot create coverage's scratch parent in advance.
 
 Agent-led topics use four distinct assignments: coordinator, developer, tester
 and reviewer. This also applies to documentation changes. Use native agents
-inside the active Cloud task and the existing hosted GitHub Actions workflow;
+inside the active cloud or local task and the existing hosted CI workflow;
 no self-operated runner, new server, persistent autonomous service, additional
-model subscription or secret is required. Writing four role-labelled sections
-in one agent's response does not provide these separate assignments.
+model subscription or secret is required. Both locations require the same
+AMD64 Trixie Docker checks and preserve the supported-platform scope. A
+qualifying external reviewer may fill the review assignment as described
+below. Writing four role-labelled sections in one agent's response does not
+provide these separate assignments.
 
 ### Roles and authority
 
@@ -98,7 +101,7 @@ in one agent's response does not provide these separate assignments.
 | Coordinator | Fix scope and acceptance criteria, assign roles, consolidate findings, retain the active phase and both correction counters and decide whether the evidence meets the criteria | Manage handoffs; delegate candidate edits to the developer |
 | Developer | Implement the scoped change, correct bundled findings and produce an immutable candidate commit | Sole editor of candidate tracked files |
 | Tester | Execute the complete local CI chain and report results, failures and evidence limits | Fresh detached worktree; generated test artifacts only |
-| Reviewer | Independently inspect the full base-to-candidate change and its contracts, tests, documentation and evidence | Separate revision/worktree under a read-only assignment |
+| Reviewer | Independently inspect the full base-to-candidate change and its contracts, tests, documentation and evidence | Read-only revision/worktree or qualifying external review of the mapped diff |
 
 The maintainer still decides scope, public API, compatibility, licensing and
 supported-platform changes. The coordinator must seek that decision before
@@ -110,37 +113,49 @@ responses; continue already authorized stages without repeated confirmation.
 Merge, tag, release, publication, settings and force-push actions require
 separate authorization.
 
-Use `codex/<topic>` for every topic branch. Reuse an existing matching plan
-under [plans](plans/README.md); create a new plan only for a new topic. Do not
+Name topic branches `<prefix>/<topic>` with exactly one prefix segment, such
+as `codex/` or `claude/`. Codex-created branches use `codex/<topic>`; other
+authors choose their own prefixes. Reuse an existing matching plan under
+[plans](plans/README.md); create a new plan only for a new topic. Do not
 start a parallel ticket system. Append durable technical decisions, with
 their reasons, to the plan's dated sections. Keep raw logs, role messages,
 candidate identities, the active phase and both counters in the task log or
-ignored `build/`. Do not create `build/` in the tester's fresh worktree before the
-coverage-first assertion. The canonical change record describes the final
+ignored `build/`. Do not create `build/` in the tester's fresh worktree before
+the coverage-first assertion. The canonical change record describes the final
 change, evidence and material limits without session or review-round history.
 
 ### Native agents and review independence
 
-The coordinator launches actual native role agents using the delegation tools
+The coordinator launches in-task role agents using the native delegation tools
 available in the active task; no additional orchestrator software is needed.
 The role assignments are leaf tasks within this one workflow: an assigned
 developer, tester or reviewer follows its role brief and does not recursively
 start another four-role workflow. Give every role the scope, active phase
 and both correction counters. Give the tester its own fresh worktree at the
 candidate commit. Assign a separate reviewer with fresh context and an explicit
-read-only review packet. When using native `spawn_agent`, start that reviewer
-with `fork_turns="none"` and supply the packet explicitly; do not inherit the
-developer dialogue or send a preferred conclusion. The reviewer reads the
-repository guidance, agreed scope, immutable base/candidate diff and test
-evidence and reaches its own conclusions.
+read-only review packet. Start the reviewer without inherited developer
+dialogue and supply the packet explicitly; do not send a preferred conclusion.
+For example, in Codex use `spawn_agent` with `fork_turns="none"`. The reviewer
+reads the repository guidance, agreed scope, immutable base/candidate diff and
+test evidence and reaches its own conclusions.
 
-Native agents share the filesystem. Separate worktrees and read-only orders
-are procedural boundaries, not technically enforced filesystem isolation.
+Native agents may share the filesystem. Separate worktrees and read-only
+orders are procedural boundaries, not technically enforced filesystem isolation.
 Do not assume a different model, hidden permissions or automatic UI startup.
 Keep candidate edits with the developer and avoid concurrent mutations of a
-shared checkout or Git state. If native delegation or a fresh independent
-review assignment is unavailable, report the missing capability and leave
-that acceptance criterion unmet; do not claim independence from a self-review.
+shared checkout or Git state.
+
+A maintainer-supplied review by another agent or human in a separate session
+or PR can satisfy the independent-review criterion when reviewer identity,
+scope and independence from developer dialogue are established. It must cover
+immutable base/head SHAs or have a verifiable mapping to the reviewed PR diff.
+A different label/model or known SHAs alone do not establish independence.
+Triage its findings in the active phase budget like any other review. A review
+of an earlier head does not cover a later one. If native review is unavailable,
+use a qualifying external review; if neither route is available, report the
+unmet criterion rather than substituting self-review.
+This fills the independent workflow-review assignment; the supplementary
+Copilot stage remains separate.
 
 ### Candidate handoffs and phase budgets
 
@@ -153,9 +168,9 @@ that acceptance criterion unmet; do not claim independence from a self-review.
    round has been consumed yet.
 3. The tester validates that exact SHA in a fresh detached worktree. The
    independent reviewer inspects that same immutable candidate against the
-   base in its own revision/worktree. Neither role corrects a defect; each
-   returns findings to the coordinator. Gather both reports before bundling
-   corrections when possible.
+   base, in its own revision/worktree or through a qualifying external review.
+   Neither role corrects a defect; each returns findings to the coordinator.
+   Gather both reports before bundling corrections when possible.
 4. The coordinator accepts only when both reports cover the same candidate
    (or the strictly tree-identical history-only case under
    [submission preparation](#submission-preparation)), all acceptance criteria
@@ -323,9 +338,9 @@ git status --short
 
 Confirm the checked-out SHA and absence of tracked changes. Before the
 cross-UID step, inspect the worktree parent chain and executable path for
-necessary search/read/execute access by UIDs 65534 and 65533; the coordinator
-uses those unprivileged identities without supplementary groups. Recreate a
-misconfigured fresh worktree or fix only the necessary directory traversal
+necessary search/read/execute access by UIDs 65534 and 65533; the cross-UID
+root harness uses those unprivileged identities without supplementary groups.
+Recreate a misconfigured fresh worktree or fix only the necessary traversal
 permission. Do not broadly open permissions with `chmod -R`, change fixtures,
 skip assertions or replace the test with a single-UID run. Permission
 preparation must not weaken the existing test.
@@ -352,7 +367,7 @@ docker/dev/run arca-dev:trixie make -j8 docs NUM_CPUS=8
 ```
 
 Retain each command's exit code; a later success does not erase an earlier
-failure. The cross-UID command is the unchanged dedicated root coordinator
+failure. The cross-UID command is the unchanged dedicated root harness
 with no network and a read-only source mount. It starts both competing
 processes under distinct unprivileged UIDs. It is the specific root exception,
 not a substitute for rootless compilation, coverage, ordinary checks or docs.
@@ -369,11 +384,12 @@ deployment are external workflow steps and are not local test commands.
 ### Reusable Cloud environment requirements
 
 A task-local role setup does not install a reusable Cloud configuration.
-Inspect the active environment status before claiming one is attached;
-`source_config_id=null` means no source configuration is identified. If the
-current interface has no configuration-write tools, prepare the requirements
-and use the user-facing environment settings/onboarding flow. Do not claim
-that documentation or a local Docker image saved or published a configuration.
+Inspect the active environment status before claiming one is attached. For
+example, managed Codex Cloud reports `source_config_id=null` when no source
+configuration is identified. If the current interface has no tools for writing
+configuration, prepare the requirements and use the user-facing environment
+settings or onboarding flow. Documentation or a local Docker image does not
+save or publish a reusable configuration.
 
 To prepare a reusable environment in those settings:
 
@@ -387,11 +403,10 @@ To prepare a reusable environment in those settings:
    trust. Normal tests need no credentials, network access or Abuild checkout.
    Keep repository access configured through settings; do not put credentials
    into role prompts, plans or committed files.
-3. Confirm native agent delegation and fresh-context review are available in
-   the active task, then verify the non-root Docker socket, AMD64 architecture
-   and fresh-worktree traversal requirements. Docker is supported in the
-   managed Cloud environment; the project still requires rootless normal
-   checks in its Trixie image.
+3. Confirm native delegation and a fresh-context or qualifying external
+   reviewer, then verify the non-root Docker socket, AMD64 architecture and
+   fresh-worktree traversal requirements. Managed Codex Cloud supports Docker;
+   every environment must provide rootless normal checks in the Trixie image.
 4. Review the proposed settings and their observed readiness through the
    supported settings flow. Saving/publishing a reusable configuration is a
    separate authorized settings action. A later task must select it and
@@ -403,15 +418,17 @@ and retain the failure/escalation in the task evidence. Do not switch to a
 root test user, privileged container, host networking or weaker test as a
 workaround. If the required environment remains unavailable, report the
 specific blocker and leave validation incomplete. This workflow installs no
-background scheduler and promises no unattended work after the Cloud task.
+background scheduler and promises no unattended work after the agent task.
 
 ### Role assignment templates
 
 The coordinator fills the placeholders and supplies repository guidance with
 each assignment. These are task prompts, not executable service configuration.
+The developer branch placeholder is `PREFIX/TOPIC`; the Codex-created branch
+example is `codex/TOPIC`.
 
 ```text
-Developer: implement TASK in ALLOWED_SCOPE on codex/TOPIC.
+Developer: implement TASK in ALLOWED_SCOPE on PREFIX/TOPIC.
 Base: BASE_SHA. Active plan: PLAN. Acceptance criteria: CRITERIA.
 Phase: PHASE. Corrections: local L/3; PR P/3. PR phase started: YES/NO.
 Read AGENTS.md and its required guides. Preserve unrelated work and existing
@@ -631,12 +648,12 @@ The CLI checks its procfs descriptor path before staging allocation; a
 child-only fault injection proves that a missing path gets its own diagnostic.
 Ordinary staging permission failures retain their existing message.
 
-The dedicated `tests/check-staging-security.py` coordinator uses container
-root only to start the CLI and a competing process with separate unprivileged
-UIDs and no supplementary groups. Its native Linux temporary fixtures and
-acknowledged barriers check setup, writer opening, publication and cleanup.
-CI runs that coordinator separately after rootless build and check; neither
-production code nor the ordinary checks require root.
+The dedicated cross-UID root harness, `tests/check-staging-security.py`, uses
+container root only to start the CLI and a competing process with separate
+unprivileged UIDs and no supplementary groups. Its native Linux temporary
+fixtures and acknowledged barriers check setup, writer opening, publication
+and cleanup. CI runs that harness separately after rootless build and check;
+neither production code nor the ordinary checks require root.
 
 ## Commands
 

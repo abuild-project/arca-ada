@@ -12,8 +12,10 @@ with [CONTRIBUTING.md](CONTRIBUTING.md); the same rules apply to them.
   belongs to one, and `SECURITY.md` before security-relevant work.
 - Preserve unrelated working-tree changes; do not overwrite another topic's
   work.
-- Use `codex/<topic>` for every topic branch. Continue the existing topic plan
-  when one already covers the work.
+- Name topic branches `<prefix>/<topic>` with exactly one prefix segment.
+  Codex-created branches use `codex/<topic>`; other authors choose their own
+  prefixes, such as `claude/`. Continue the existing topic plan when one
+  already covers the work.
 - Ask the maintainer before a decision that changes scope, public API,
   compatibility, licensing or supported platforms. Record the agreed decision
   in the active plan.
@@ -67,13 +69,16 @@ another four-role workflow.
   candidate files.
 - Give the tester a fresh detached worktree at the immutable candidate SHA
   and require the complete local CI chain, including coverage before `build/`
-  exists, rootless checks, the unchanged cross-UID coordinator and docs.
-- Assign the reviewer a separate native agent with fresh context, no developer
-  dialogue, immutable base/candidate SHAs and a read-only review worktree.
+  exists, rootless checks, the unchanged cross-UID root harness and docs.
+- Assign a separate reviewer with fresh context, no developer dialogue,
+  immutable base/candidate SHAs and read-only access to the reviewed revision.
+  A maintainer-supplied external review may satisfy the same criterion when
+  identity, scope, independence and revision mapping are established as in
+  the development guide; labels, models or known SHAs alone do not prove it.
   Separate worktrees and instructions do not enforce filesystem isolation;
-  native agents share the filesystem and need not use different models.
-  Report missing delegation or fresh-review capability instead of claiming
-  independent review from one agent's role-labelled responses.
+  native agents may share the filesystem and need not use different models.
+  If neither native nor qualifying external review is available, report the
+  unmet criterion instead of claiming independence from self-review.
 - Allow at most three bundled correction rounds in the local implementation,
   testing and internal-review phase. After local acceptance, start the PR phase
   once per topic with up to three additional rounds for hosted CI/Copilot.
@@ -90,9 +95,10 @@ another four-role workflow.
   Keep operational logs and both counters in the task log or ignored `build/`;
   append durable decisions to the topic plan. Keep session and review-round
   history out of the change record.
-- Use native agents only inside the active Cloud task and existing hosted
-  GitHub Actions. This workflow creates no persistent autonomous service or
-  self-operated infrastructure and grants no external-action permission.
+- Use native agents inside the active cloud or local agent task and existing
+  hosted GitHub Actions, with the same AMD64 Trixie Docker validation chain.
+  This workflow creates no persistent autonomous service or self-operated
+  server infrastructure and grants no external-action permission.
 - Prepare the complete local PR packet before the next regular handoff;
   follow [PR submission and Copilot review](doc/development.md#pull-request-preparation-and-submission)
   within the authorized stages. Copilot supplements internal review and CI;

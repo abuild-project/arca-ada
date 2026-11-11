@@ -37,8 +37,8 @@ Base revision: `baf77be432c9aa946215a2bec900e1a63f2188a0`.
 ## Implementation and acceptance
 
 1. Add a short normative workflow in AGENTS.md and a detailed development
-   guide covering roles, authority, immutable handoffs, fresh native review,
-   the local and PR correction budgets and role-assignment templates.
+   guide covering roles, authority, immutable handoffs and fresh independent
+   review, local and PR correction budgets and role-assignment templates.
 2. Document a new detached tester worktree created under a subshell's
    `umask 022`, necessary cross-UID traversal checks and the complete existing
    CI command sequence. Retain ordinary non-root execution; a blocked Docker
@@ -125,5 +125,38 @@ local budget again. Infrastructure retries without candidate changes and pure
 history cleanup consume no round. A valid finding after round three blocks
 that phase for a maintainer decision; unresolved local work cannot be shifted
 to the PR phase. Budget availability grants no external-action permission.
+
+## Execution and review portability decisions on 2026-11-11
+
+- Decision: allow native delegation within an active cloud or local agent
+  task because orchestration location does not alter the required AMD64
+  Trixie Docker checks or supported-platform scope. This supersedes the
+  Cloud-only wording in the 2026-11-10 decisions; no persistent service or
+  self-operated server infrastructure is introduced.
+- Decision: allow a maintainer-supplied external review from another agent or
+  human when identity, scope, independence and immutable revision/diff mapping
+  are established because a valid independent review need not share the
+  developer's execution tool. This supersedes native-only review wording;
+  known SHAs or different labels/models alone are insufficient. Earlier-head
+  reviews do not cover later heads; findings retain the active phase budget.
+- Decision: reserve coordinator for the workflow role and call the cross-UID
+  test the root harness because the two responsibilities must remain distinct.
+  Test source and invocation remain unchanged. Label Codex tool/status fields
+  as examples and retain durable outcomes instead of session state in records.
+- Decision: retain `codex/<topic>` as the project branch naming convention,
+  independent of the agent or vendor, because the prefix identifies a topic
+  workflow rather than an execution tool. The 2026-11-10 naming decision
+  remains in force.
+
+## Branch prefix decision on 2026-11-11
+
+Decision: name topic branches `<prefix>/<topic>` with exactly one prefix
+segment because different authors may use their own naming prefixes.
+Codex-created branches use `codex/<topic>`; other authors may choose prefixes
+such as `claude/`. This supersedes the global prefix requirement of 2026-11-10
+and the project-wide `codex/` clarification in the earlier 2026-11-11
+portability decisions, while retaining the Codex branch convention. Topic
+derivation still removes the first prefix segment and matching existing plans
+are reused.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
