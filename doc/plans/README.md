@@ -4,7 +4,7 @@ Entries are ordered by topic filename.
 
 | Plan | Status |
 | --- | --- |
-| [Agent contribution workflow](agent-workflow.md) | Implemented; local test and independent review evidence recorded |
+| [Agent contribution workflow](agent-workflow.md) | Implemented; validation through 2026-11-11 recorded |
 | [Ahven unit tests](ahven-unit-tests.md) | Accepted in `6f1514a` (PR #5) |
 | [Library API and metadata contracts](api-hardening.md) | Accepted in `089b32b` (PR #12) |
 | [Archive creation CLI](archive-cli.md) | Accepted in `a7c4735` (PR #7) |

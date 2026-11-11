@@ -21,8 +21,10 @@ may run in an active cloud or local task with the same AMD64 Trixie Docker
 checks. A maintainer-supplied external review may qualify when reviewer
 identity, scope, independence and revision/diff mapping are established;
 labels/models or known SHAs alone do not establish independence. The guide
-explains filesystem-isolation limits and reports a missing valid review route
-rather than treating self-review as independent evidence.
+requires reviews posted through a shared or maintainer account to name the
+reviewer and covered immutable revisions in the review body. It explains
+filesystem-isolation limits and reports a missing valid review route rather
+than treating self-review as independent evidence.
 Topic branches use `<prefix>/<topic>` with exactly one prefix segment.
 Codex-created branches use `codex/<topic>`; other authors choose their own
 prefixes. Topic derivation removes the first prefix segment and existing
@@ -105,10 +107,10 @@ under the unchanged cross-UID root harness with no network and a read-only
 source mount; no permission repair or test weakening was needed. Documentation
 stages 14 canonical pages and passes `mkdocs build --strict`.
 
-A separate native reviewer with fresh context found no actionable findings
-in the full immutable diff or the independent comparison of the tester's
-report with primary logs and artifacts. Those primary records, coverage,
-XML and cross-UID results were also inspected directly.
+Fresh independent native review of the tested candidate found no actionable
+findings in the full immutable diff. The reviewer also compared the tester's
+report with primary logs and artifacts and found no discrepancy. Coverage,
+XML and cross-UID results were inspected directly.
 
 This evidence covers the local AMD64 Trixie checks; line coverage does not
 establish full branch coverage, and ARM64 or other platforms were not tested.

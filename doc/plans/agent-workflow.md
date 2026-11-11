@@ -1,6 +1,6 @@
 # Agent contribution workflow
 
-Status: Implemented; local test and independent review evidence recorded.
+Status: Implemented; validation through 2026-11-11 recorded.
 
 Base revision: `baf77be432c9aa946215a2bec900e1a63f2188a0`.
 
@@ -158,5 +158,47 @@ and the project-wide `codex/` clarification in the earlier 2026-11-11
 portability decisions, while retaining the Codex branch convention. Topic
 derivation still removes the first prefix segment and matching existing plans
 are reused.
+
+## Review identity decision on 2026-11-11
+
+Decision: require a review posted through a shared or maintainer account to
+name its actual reviewer and immutable covered revisions in the body because
+the posting account does not identify the reviewer. The existing scope and
+independence criteria still apply; a declared identity alone establishes
+neither scope nor independence.
+
+## Validation on 2026-11-11
+
+Revision `b3d6dc4435e351d52bc42071e628733bf9d2b1c3`, with complete tree
+`e852c75fd3a82ad3416982ef0b3ffff026703ac5`, has its own fresh local
+AMD64 Debian Trixie validation. A separate tester executed the full CI chain
+in a new detached worktree at that revision: image build, coverage before
+`build/` existed, wrapper and shell checks, normal checks, unchanged cross-UID
+root harness and strict documentation build. Normal commands used UID/GID
+1000:1000; only the cross-UID harness used root, with no network and a
+read-only source mount. All top-level commands exited zero, with no unexpected
+failures or skips. Coverage was 1031/1107 lines across ten production bodies;
+six Ahven XML reports contained 38 cases and zero errors, failures or skips.
+All 54 cross-UID scenarios passed, and documentation staged 14 canonical pages.
+
+A separate native reviewer with fresh context inspected the full immutable
+base-to-revision diff and compared the tester's report with primary logs and
+artifacts, including coverage, XML and cross-UID results. That review reported
+no actionable findings or evidence discrepancies. These local results were
+collected for this exact revision, not transferred from an earlier candidate.
+
+[Hosted PR CI][hosted-pr-ci] and [push CI][hosted-push-ci] also succeeded for
+this revision. The hosted PR checkout was the synthetic merge
+`036c059946f87243620424bb005580c576a234e9`, whose complete tree equals the
+revision's tree above. Inspection of the PR job's primary log and downloaded
+Ahven artifact confirmed the coverage, cross-UID, documentation and XML
+results. These are distinct local and hosted observations; Pages deployment
+was outside validation. Later content changes still require their own full
+local chain, fresh independent review and current-head hosted CI.
+
+[hosted-pr-ci]:
+  https://github.com/abuild-project/arca-ada/actions/runs/43014658578
+[hosted-push-ci]:
+  https://github.com/abuild-project/arca-ada/actions/runs/43014649617
 
 Co-Authored-By: GPT-6 <noreply@openai.com>

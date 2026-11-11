@@ -149,6 +149,9 @@ A maintainer-supplied review by another agent or human in a separate session
 or PR can satisfy the independent-review criterion when reviewer identity,
 scope and independence from developer dialogue are established. It must cover
 immutable base/head SHAs or have a verifiable mapping to the reviewed PR diff.
+A review posted through a shared or maintainer account must name its actual
+reviewer and covered immutable revisions in the body because the account does
+not identify the reviewer.
 A different label/model or known SHAs alone do not establish independence.
 Triage its findings in the active phase budget like any other review. A review
 of an earlier head does not cover a later one. If native review is unavailable,
