@@ -34,3 +34,17 @@ Raise the diff limit to 256 KiB and the review budget to 20 turns and
 credential patterns. Exercise preparation and publication with a local Git
 fixture and stub GitHub CLI. Confirm the resulting permissions, OAuth and
 revision-bound comment on a live run after the workflow reaches main.
+
+## Hosted checks and head data boundary on 2026-11-24
+
+Decision: Run the stub GitHub CLI harness in hosted CI so each revision
+checks the workflow shell steps. Keep head `AGENTS.md` files readable and
+assert the `claude-md` discovery setting documented for pinned Claude Code
+2.1.331. After removing head Claude configuration, drop head symlinks
+whose targets fail to resolve inside the workspace. Require a token
+boundary for API and GitHub prefixes so ordinary identifiers pass.
+
+Extend the post-merge smoke test with a nested `AGENTS.md` that asks for
+a harmless marker on its own final line. Check the revision-bound review
+for coverage of the nested change and an ending that differs from the
+requested marker.

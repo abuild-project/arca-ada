@@ -122,8 +122,15 @@ class ClaudeReviewTests(unittest.TestCase):
         nested = pr / "nested"
         (nested / ".claude").mkdir(parents=True)
         (nested / ".claude/settings.json").write_text("{}")
+        (nested / "AGENTS.md").write_text("Retained nested review data\n")
         (nested / "CLAUDE.md").symlink_to(base_guidance)
-        (nested / "source-link").symlink_to("../source.txt")
+        (nested / "source-link\n").symlink_to("../source.txt")
+        outside = self.root / "workspace-sibling"
+        outside.mkdir()
+        (outside / "CLAUDE.md").write_text("Outside the workspace\n")
+        (pr / "outside-directory").symlink_to(outside, target_is_directory=True)
+        (nested / "outside-indirect\n").symlink_to("../outside-directory/CLAUDE.md")
+        (nested / "dangling").symlink_to("missing")
         self.git("add", ".", cwd=pr)
         self.git("-c", "user.name=Arca", "-c", "user.email=test@example.invalid",
                  "commit", "-qm", "Head change", cwd=pr)
@@ -162,9 +169,12 @@ class ClaudeReviewTests(unittest.TestCase):
                          [{"html_url": "bot-review", "body": earlier}])
         self.assertEqual(base_guidance.read_text(), "Trusted guidance\n")
         self.assertEqual((pr / "AGENTS.md").read_text(), "Retained review data\n")
-        self.assertEqual((nested / "source-link").read_text(), "New\n")
+        self.assertEqual((nested / "AGENTS.md").read_text(), "Retained nested review data\n")
+        self.assertEqual((nested / "source-link\n").read_text(), "New\n")
+        self.assertEqual((outside / "CLAUDE.md").read_text(), "Outside the workspace\n")
         for path in ("CLAUDE.md", "CLAUDE.local.md", ".claude", ".mcp.json", ".git",
-                     "nested/CLAUDE.md", "nested/.claude"):
+                     "nested/CLAUDE.md", "nested/.claude", "outside-directory",
+                     "nested/outside-indirect\n", "nested/dangling"):
             with self.subTest(path=path):
                 self.assertFalse(os.path.lexists(pr / path))
         self.assertEqual(self.git("rev-parse", "HEAD"), base)
@@ -192,6 +202,9 @@ class ClaudeReviewTests(unittest.TestCase):
             "github_pat_" + "y" * 32,
             "sk-ant-" + "a" * 32,
             "sk-proj-" + "b" * 32,
+            "Dummy token: (ghu_" + "x" * 36 + ")",
+            "Dummy token: github_pat_" + "y" * 32,
+            "Dummy token: `sk-svcacct-" + "a" * 32 + "`",
             "AKIA" + "C" * 16,
             "Bearer " + "d" * 32,
             "-----BEGIN OPENSSH PRIVATE KEY-----",
@@ -207,7 +220,12 @@ class ClaudeReviewTests(unittest.TestCase):
                 self.assertFalse(self.output.exists())
                 self.assertFalse(self.posted.exists())
 
-        text = "Review describes CLAUDE_CODE_OAUTH_TOKEN.\n`$(touch unexpected)`"
+        text = (
+            "Review describes CLAUDE_CODE_OAUTH_TOKEN.\n"
+            f"Ordinary identifiers include task-{'a' * 32}, "
+            f"prefixghp_{'x' * 36} and archive_github_pat_{'y' * 32}.\n"
+            "`$(touch unexpected)`"
+        )
         self.write_result(text)
         self.check_success(self.run_step(REVIEW["steps"], validate))
         key, review = self.output.read_text().rstrip().split("=", 1)
@@ -228,6 +246,8 @@ class ClaudeReviewTests(unittest.TestCase):
         settings = json.loads(args[args.index("--settings") + 1])
         self.assertTrue(settings["permissions"]["blockReadsOutsideWorkingDirectories"])
         self.assertTrue(settings["disableAllHooks"])
+        agents_plugin = settings["pluginConfigs"]["cc-plugin-agents-md@builtin"]
+        self.assertEqual(agents_plugin["options"]["instructionFiles"], "claude-md")
         self.assertNotIn("--add-dir", args)
         self.assertNotIn("github_token", action["with"])
         self.assertEqual(action["with"]["show_full_output"], "false")

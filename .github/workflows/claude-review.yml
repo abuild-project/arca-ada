@@ -10,8 +10,8 @@ permissions: {}
 
 env:
   REVIEW_CREDENTIAL_PATTERN: |-
-    gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{22,}
-    sk-(ant-|proj-|svcacct-)?[A-Za-z0-9_-]{20,}
+    (^|[^[:alnum:]_])(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{22,})
+    (^|[^[:alnum:]_])sk-(ant-|proj-|svcacct-)?[A-Za-z0-9_-]{20,}
     (AKIA|ASIA)[A-Z0-9]{16}|bearer[[:space:]]+[A-Za-z0-9_+./=-]{20,}
     -----BEGIN ([A-Z0-9]+ )*PRIVATE KEY-----
 
@@ -119,6 +119,15 @@ jobs:
           find -P pr \( -name .git -o -name .claude -o -name .mcp.json \
             -o -name .claude.json -o -name CLAUDE.md -o -name CLAUDE.local.md \) \
             -prune -exec rm -rf -- {} +
+          # Retain only links that currently resolve within the physical workspace.
+          cd -P -- .
+          find -P pr -type l -print0 | while IFS= read -r -d '' link; do
+            if IFS= read -r -d '' target < <(realpath -ez -- "$link" 2>/dev/null) &&
+              [[ "$target" == "$PWD" || "$target" == "$PWD/"* ]]; then
+              continue
+            fi
+            rm -- "$link"
+          done
 
       - name: Review the captured PR
         id: claude
