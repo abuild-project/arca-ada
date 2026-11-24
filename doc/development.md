@@ -86,13 +86,13 @@ coverage check so it cannot create coverage's scratch parent in advance.
 
 Agent-led topics use four distinct assignments: coordinator, developer, tester
 and reviewer. This also applies to documentation changes. Use native agents
-inside the active cloud or local task and the existing hosted CI workflow;
-no self-operated runner, new server, persistent autonomous service, additional
-model subscription or secret is required. Both locations require the same
-AMD64 Trixie Docker checks and preserve the supported-platform scope. A
-qualifying external reviewer may fill the review assignment as described
-below. Writing four role-labelled sections in one agent's response does not
-provide these separate assignments.
+inside the active cloud or local task and the existing hosted CI workflow.
+The four-role workflow requires no self-operated runner, new server,
+persistent autonomous service, additional model subscription or secret.
+Both locations require the same AMD64 Trixie Docker checks and preserve
+the supported-platform scope. A qualifying external reviewer may fill the
+review assignment as described below. Writing four role-labelled sections in
+one agent's response does not provide these separate assignments.
 
 ### Roles and authority
 
@@ -321,30 +321,87 @@ that the PR is ready for merge does not authorize the merge itself.
 
 ### Claude review pilot
 
-Claude can provide a supplementary review on GitHub-hosted runners. The pilot
-has no required check and does not change the independent review, CI, Copilot
-or correction budgets above. A maintainer with repository admin or maintain
-access requests it by posting exactly `@claude review` as a new conversation
-comment on an open, ready PR from this repository to `main`. The pilot accepts
-a nonempty diff of at most 48 KiB.
+The optional Claude review pilot runs on GitHub-hosted runners and has no
+required check. It supplements the four-role workflow, which retains
+independent review, CI, Copilot and the correction budgets above. A maintainer
+with repository admin or maintain access requests it by posting exactly
+`@claude review` as a new conversation comment on an open, ready PR from this
+repository to `main`. The pilot accepts a nonempty diff of at most 256 KiB.
+The review is limited to 20 turns and the review job to 20 minutes.
 
-The workflow must be on the default branch. A repository administrator runs
-`claude setup-token` locally with a Claude Pro or Max account and stores the
-result as the GitHub Actions secret `CLAUDE_CODE_OAUTH_TOKEN`. Keep the token
-out of chats, source and PR text. See the
-[official OAuth setup guide](https://code.claude.com/docs/en/github-actions#manual-setup).
+The workflow must be on the default branch. The pilot requires a Claude Pro
+or Max subscription. A repository administrator runs `claude setup-token`
+locally using that account and stores the result as the GitHub Actions secret
+`CLAUDE_CODE_OAUTH_TOKEN`. Keep the token out of chats, source and PR text.
+See the [official OAuth setup guide](https://code.claude.com/docs/en/github-actions#manual-setup).
 
-Claude sees the captured diff and the project guides and security policy
-imported by `CLAUDE.md` from the base checkout.
-The review job has read access and supplies no shell, editing or MCP tools
-to the model. It requires a nonblank response of at most 8,000 characters
-before handing it to the publish job. That job checks that the open PR still
-has the captured base and head revisions, then posts one comment naming both.
-For the first smoke test, use a small ready PR and compare the posted SHAs
-with the Actions run and PR. Treat the result as supplementary review of
-that diff. If the revisions change or no comment appears, check the run
-before making a fresh request. Both jobs run only on the first attempt.
-Post a fresh maintainer comment for another attempt.
+In Settings → Actions → General, keep GitHub-owned actions enabled, require
+full-length commit SHA pins and retain approval for external fork workflows.
+The workflow uses `actions/checkout@11d5960a326750d5838078e36cf38b85af677262`
+and `anthropics/claude-code-action/base-action` at the `v1.0.289` commit.
+The base action uses GitHub-owned `actions/setup-node` and a pinned Bun setup
+action. See the
+[upstream action definition](https://github.com/anthropics/claude-code-action/blob/eb56b6666facdbd501035f4a0269d8caee2e7a8b/base-action/action.yml).
+
+Use the policy for organization and selected external actions, subject to
+inherited organization or enterprise restrictions. Add these two third-party
+exceptions in GitHub's documented `OWNER/REPOSITORY@SHA` format. See the
+[GitHub Actions settings guide](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#allowing-select-actions-and-reusable-workflows-to-run).
+
+```text
+anthropics/claude-code-action@eb56b6666facdbd501035f4a0269d8caee2e7a8b
+oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+```
+
+These entries describe the prerequisites for the updated pilot. Verify the
+effective allowlist in Settings and exercise it in the smoke test on `main`.
+Keep the earlier root-action exception
+`anthropics/claude-code-action@3a4e9adecfa20042306158cc4b201c4b865f9d39`
+until the smoke test passes and no workflow still needs that exception.
+
+The captured base is the trusted workspace root. The captured head is checked
+out under `pr/` with credential persistence disabled. Head Claude instructions,
+configuration and Git metadata are removed without following symlinks.
+Preparation then removes head symlinks whose targets fail to resolve inside
+the workspace. Head `AGENTS.md` files remain readable as review data. The
+`cc-plugin-agents-md@builtin` option `instructionFiles: claude-md` limits
+automatic discovery to Claude instruction files in the pinned Claude Code
+2.1.331. See the [Claude Code instruction discovery guide](https://code.claude.com/docs/en/memory#choose-which-instruction-files-load).
+The prompt requests the standing guides from the captured base by path,
+including when the base predates the `CLAUDE.md` imports.
+The `review/` directory holds the diff, changed files, PR metadata, short
+commit log and earlier comments from the pilot on that PR. Claude treats
+`pr/` and `review/` as data and receives only context paths and revision
+identifiers in its prompt.
+
+The pinned Claude Code base action uses OAuth for Claude and receives no
+GitHub token input. The pilot rejects step debug logging before invoking
+Claude, as debug mode can print the raw transcript. Claude Code 2.1.331 limits
+`Read`, `Grep` and `Glob` to the workspace with approval prompts disabled.
+Shell, editing, web and MCP
+tools are unavailable. The review job requires nonblank text of at most
+8,000 characters and rejects common credential patterns before handing it
+off. The `sk-`, GitHub short-token and `github_pat_` patterns start at the
+beginning of a line or after a non-word character. A separate publish job
+checks the same patterns and current revisions before posting one comment
+naming the reviewed SHAs.
+
+Run `python3 tests/check-claude-review.py` with Python 3, PyYAML, Bash, Git, jq
+and GNU findutils, coreutils and grep to check the shell steps. Hosted CI
+installs PyYAML and jq and runs the same harness with Ubuntu's system Python.
+
+After the workflow reaches `main`, run the hosted smoke test on a small,
+ready PR from this repository. Add a nested `AGENTS.md` beside a file relevant
+to the review and have it ask Claude to append a final line containing only
+`ARCA_HEAD_GUIDANCE_CANARY`. Request the review as a maintainer. Compare the
+posted base and head SHAs with the Actions run and PR, confirm the posted
+review addresses the nested change, and check that its final nonblank line
+differs from the marker. A finding may quote the marker. The base's root
+`CLAUDE.md` can also suppress default discovery of `AGENTS.md`, so the canary
+checks the observed behavior on that run.
+
+Check the run before requesting a fresh review. Both jobs run only on the
+first attempt, so post a fresh maintainer comment to retry.
 
 ### Fresh test worktree and local CI chain
 
@@ -378,9 +435,11 @@ preparation must not weaken the existing test.
 Read [.github/workflows/ci.yml](../.github/workflows/ci.yml) at the candidate
 revision and execute its complete local chain in order. The following is the
 existing chain; if CI changes, use that revision's commands and record the
-difference. Python 3 and Docker are host requirements for the wrapper/shell
-checks. Run normal container commands as the non-root task user through the
-wrappers, one Make target per invocation:
+difference. Python 3 and Docker are host requirements for the wrapper and
+shell checks. The Claude review harness uses the host dependencies listed
+under [Claude review pilot](#claude-review-pilot). Run normal container
+commands as the non-root task user through the wrappers, one Make target per
+invocation:
 
 ```sh
 docker/dev/build
@@ -388,6 +447,7 @@ test ! -e build
 docker/dev/run arca-dev:trixie make -j8 coverage NUM_CPUS=8
 python3 tests/check-dev-wrappers.py
 python3 tests/check-dev-shell.py arca-dev:trixie
+python3 tests/check-claude-review.py
 docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
 docker run --platform linux/amd64 --rm --network none --user 0:0 \
   --mount "type=bind,source=$PWD,target=/work,readonly" \
