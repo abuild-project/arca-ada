@@ -334,7 +334,8 @@ result as the GitHub Actions secret `CLAUDE_CODE_OAUTH_TOKEN`. Keep the token
 out of chats, source and PR text. See the
 [official OAuth setup guide](https://code.claude.com/docs/en/github-actions#manual-setup).
 
-Claude sees the captured diff and the guidance from the base checkout.
+Claude sees the captured diff and the project guides and security policy
+imported by `CLAUDE.md` from the base checkout.
 The review job has read access and supplies no shell, editing or MCP tools
 to the model. It requires a nonblank response of at most 8,000 characters
 before handing it to the publish job. That job checks that the open PR still
