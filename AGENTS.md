@@ -104,6 +104,22 @@ another four-role workflow.
   within the authorized stages. Copilot supplements internal review and CI;
   read all review content and retain the existing PR-phase correction budget.
 
+## Code Review Rules
+
+The following findings are P1 (blocking).
+
+- A change record claiming validation of the PR head with evidence from
+  another revision, except under the strictly tree-identical history-only
+  case in [submission preparation](doc/development.md#submission-preparation).
+- A new or changed check that would pass the previous behavior, omits a
+  necessary lower bound, or lacks a negative control showing it fails for
+  the intended reason.
+- Contradictions among `AGENTS.md`, `CONTRIBUTING.md`, `doc/development.md`,
+  the active plan and the change record.
+- A new or changed external pin, version or claim about upstream behavior
+  whose verification is missing from the committed change record.
+- A PR body that differs from its canonical committed change record.
+
 ## Licensing
 
 - Project-owned maintained files use GPL-2.0-or-later. Put the SPDX identifier

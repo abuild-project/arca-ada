@@ -374,6 +374,15 @@ commit log and earlier comments from the pilot on that PR. Claude treats
 `pr/` and `review/` as data and receives only context paths and revision
 identifiers in its prompt.
 
+The review starts with a **Previous findings** block. It gives each prior
+finding one line and classifies its status at the captured head as
+`resolved`, `still open` or `no longer applicable`. The prompt asks for a
+`blocking` or `nit` label on every new finding. Blocking findings cite a
+named repository rule by file and section, including the
+[Code Review Rules](../AGENTS.md#code-review-rules) where applicable, or
+describe a concrete observable failure. Finding locations use actual lines
+in the captured head files under `pr/`.
+
 The pinned Claude Code base action uses OAuth for Claude and receives no
 GitHub token input. The pilot rejects step debug logging before invoking
 Claude, as debug mode can print the raw transcript. Claude Code 2.1.331 limits
@@ -387,8 +396,9 @@ checks the same patterns and current revisions before posting one comment
 naming the reviewed SHAs.
 
 Run `python3 tests/check-claude-review.py` with Python 3, PyYAML, Bash, Git, jq
-and GNU findutils, coreutils and grep to check the shell steps. Hosted CI
-installs PyYAML and jq and runs the same harness with Ubuntu's system Python.
+and GNU findutils, coreutils and grep to check the prompt and shell steps.
+Hosted CI installs PyYAML and jq and runs the same harness with Ubuntu's
+system Python.
 
 After the workflow reaches `main`, run the hosted smoke test on a small,
 ready PR from this repository. Add a nested `AGENTS.md` beside a file relevant
@@ -399,6 +409,12 @@ review addresses the nested change, and check that its final nonblank line
 differs from the marker. A finding may quote the marker. The base's root
 `CLAUDE.md` can also suppress default discovery of `AGENTS.md`, so the canary
 checks the observed behavior on that run.
+
+After the review-rules change reaches `main`, request one new `@claude review`
+on a small, ready PR from this repository to `main` that has an earlier pilot
+review and known findings. Check the opening block against the expected
+statuses, the new findings against the expected severity and citation rules,
+and the posted base and head SHAs against the Actions run and PR.
 
 Check the run before requesting a fresh review. Both jobs run only on the
 first attempt, so post a fresh maintainer comment to retry.
