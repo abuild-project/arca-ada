@@ -96,9 +96,10 @@ another workflow.
   reviews. Initial implementation of an agreed slice uses zero correction
   rounds. Count corrections plus revalidation once in the active phase.
   Infrastructure retries without candidate changes and pure history cleanup
-  consume no round. If valid findings remain after round three in the active
-  phase, pause the topic until the maintainer decides how to proceed.
-  Resolve local findings before entering the PR phase.
+  consume no round. Do not start a fourth correction round in the active
+  phase. If valid findings remain after round three, pause the topic until
+  the maintainer decides how to proceed. Do not carry unresolved local
+  findings into the PR phase.
 - Require both test evidence and independent review for the same candidate
   before accepting each PR slice, including after the topic's PR phase has
   started. The strictly tree-identical history-only exception follows

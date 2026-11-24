@@ -88,7 +88,7 @@ Agent-led topics, including documentation changes, use distinct coordinator,
 developer, tester and reviewer assignments. A topic that needs design across
 changes or repositories may also use an architect. Use native agents
 inside the active cloud or local task and the existing hosted CI workflow.
-The four-role workflow requires no self-operated runner, new server,
+The agent workflow requires no self-operated runner, new server,
 persistent autonomous service, additional model subscription or secret.
 Both locations require the same AMD64 Trixie Docker checks and preserve
 the supported-platform scope. A qualifying external reviewer may fill the
@@ -229,10 +229,11 @@ Retain both topic counters across agents, subtasks, PR slices, branch
 renames, pushes, rebases, replacement PRs and renewed reviews. Once the PR
 phase starts, local validation for later slices continues in that phase.
 Corrections plus their revalidation use the shared budget of the active
-phase and can exhaust it. If valid findings remain after its third round,
-pause the affected topic until the maintainer decides how to proceed.
-Resolve local findings before entering the PR phase. The maintainer's
-authorized task scope controls delivery actions.
+phase and can exhaust it. Do not start a fourth correction round in the
+active phase. If valid findings remain after round three, pause the affected
+topic until the maintainer decides how to proceed. Do not carry unresolved
+local findings into the PR phase. The maintainer's authorized task scope
+controls delivery actions.
 
 A pure infrastructure retry with no candidate change consumes no correction
 round. Record the failed command, cause or uncertainty and retry result so it
@@ -356,7 +357,7 @@ that the PR is ready for merge does not authorize the merge itself.
 ### Claude review pilot
 
 The optional Claude review pilot runs on GitHub-hosted runners and has no
-required check. It supplements the four-role workflow, which retains
+required check. It supplements the agent workflow, which retains
 independent review, CI, Copilot and the correction budgets above. A maintainer
 with repository admin or maintain access requests it by posting exactly
 `@claude review` as a new conversation comment on an open, ready PR from this
@@ -555,10 +556,12 @@ branch, use `codex/NAME`.
 Architect: propose a design for TASK within SCOPE and EXCLUSIONS.
 Repositories and immutable base SHAs: REPOSITORY_BASES. Active plan: PLAN.
 Acceptance criteria: CRITERIA. Read-only material: MATERIAL.
-Arca phase: PHASE. Corrections: local L/3, PR P/3. PR phase started: YES/NO.
+Arca phase: PHASE. Corrections: local L/3; PR P/3. PR phase started: YES/NO.
 Read the supplied guides, plans, sources and existing evidence. Return the
 design recommendation, decisions for the maintainer, PR slices, dependencies,
 parallel work, merge order and validation gates.
+This assignment is read-only. Do not edit candidate files, commit, push or
+publish.
 ```
 
 ```text

@@ -18,14 +18,22 @@ review at the candidate revision before submission. Initial implementations
 use zero correction rounds. Corrections use the active phase's shared
 budget. Other repositories retain their own approval and validation rules.
 
-The complete local CI chain passed at
-`fdbcd8d0f0d5bc41305c3e6fa975e371bc0866e9` from a fresh detached worktree
-using AMD64 Debian 13.8 Trixie. Coverage ran before `build/` existed and reached
-1,031 of 1,107 lines across ten bodies. Both Ahven runs passed 19 tests
-each with zero failures, errors or skips. The wrapper, shell, rootless
-installation, CLI and format checks passed. The root harness passed all 54
-scenarios using UIDs 65534 and 65533. Strict MkDocs built 14 pages. A
-separate independent review of that revision checked the full documentation
-diff and primary test evidence and reported no actionable findings.
+## Validation
+
+Validation covers the change against base commit
+`00216335a6bfad40f6ce3ba5ee0eae2f7ef63843`. The candidate's Git tree with
+this record omitted is `bffa7e3c173183826c87800fb84a933c45494e7f`.
+
+The complete local CI chain passed in a fresh detached worktree using AMD64
+Debian 13.8 Trixie. Rootless coverage ran before `build/` existed and reached
+1,031 of 1,107 lines across ten production bodies. Both Ahven runs passed 19
+tests each with zero errors, failures or skips. The 6 wrapper, 3 shell and 5
+Claude review harness checks passed on the host, and all 43 CLI tests passed
+in the container. The root harness passed all 54 cross-UID scenarios using
+UIDs 65534 and 65533. Strict MkDocs built the site from 14 canonical Markdown
+pages.
+
+Fresh independent review covered the full base-to-candidate diff and primary
+local CI evidence and reported no actionable findings.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
