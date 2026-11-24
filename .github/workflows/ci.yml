@@ -32,6 +32,11 @@ jobs:
         run: python3 tests/check-dev-wrappers.py
       - name: Check development shell and batch input
         run: python3 tests/check-dev-shell.py arca-dev:trixie
+      - name: Check the Claude review workflow
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-yaml jq
+          /usr/bin/python3 tests/check-claude-review.py
       - name: Build and check as the runner user
         run: docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
       - name: Check staging with distinct unprivileged identities
