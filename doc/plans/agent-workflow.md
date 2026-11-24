@@ -202,3 +202,31 @@ local chain, fresh independent review and current-head hosted CI.
   https://github.com/abuild-project/arca-ada/actions/runs/43014649617
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
+
+## Architecture assignment decision on 2026-11-24
+
+Decision: allow an optional read-only architect before implementation when a
+topic requires a design across multiple changes or repositories. Specify the
+requirements, open decisions, proposed design, PR dependencies and merge
+order, and validation in the active plan so the coordinator can hand each
+slice to the developer with clear acceptance criteria. The maintainer retains
+decision authority, the coordinator retains both phase budgets across PR
+splits, and the independent reviewer remains separate from the architect.
+
+Each slice has a branch-derived change record and passes local acceptance
+before submission. Planned first implementations retain the topic's current
+counters. Corrections to a later slice follow the active phase, including
+when local checks occur after the topic enters the PR phase.
+
+## Architecture handoff and repository boundaries on 2026-11-24
+
+Decision: include a reusable read-only architect brief with the active plan,
+scope, repository base revisions, material and phase counters because the
+proposal precedes candidate work. A cross-repository proposal can identify
+dependency pins and acceptance gates. Each repository retains authority
+over approvals, changes, submissions, evidence and budgets under its rules.
+
+Initial work on an agreed Arca slice costs zero correction rounds. Each
+correction bundle and revalidation uses the active phase's shared count.
+Unresolved valid findings after the third correction pause the topic for
+a maintainer disposition, including findings from later slices.

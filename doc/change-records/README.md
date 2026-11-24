@@ -7,6 +7,7 @@ Entries are ordered by topic filename.
 | [Agent contribution workflow](agent-workflow.md) | Native role handoffs, bounded corrections and fresh-checkout CI evidence | pending |
 | [Ahven unit suites](ahven-unit-tests.md) | Named direct contracts, shared scenarios and runner failure controls | `6f1514a` |
 | [Library API and metadata contracts](api-hardening.md) | Private TAR lifecycle, CPIO permissions, timestamp errors and installed metadata | `089b32b` |
+| [Optional architecture assignment](architect-role.md) | Design proposal, PR sequencing and validation for larger topics | pending |
 | [Archive creation CLI](archive-cli.md) | Filesystem inventory, metadata/link policy, atomic output and independent CLI tests | `a7c4735` |
 | [Repository bootstrap](bootstrap.md) | Independent project and development infrastructure | `e2c1bd3` |
 | [Claude review context](claude-review-context.md) | Pinned head and PR context with workspace-only reads and credential checks | pending |
@@ -27,6 +28,7 @@ Entries are ordered by topic filename.
 | [Public repository transition](publication-transition.md) | Public destination, transfer checks and remaining documentation work | `56b463a` |
 | [First versioned source release](release-0-1-0.md) | Version promotion, concise changelog and source-release guidance | `2c57cea` |
 | [Version, compatibility and release procedure](release-basics.md) | Public version metadata, compatibility/platform policy, release workflow and diagnostic source guard | `84f8500` |
+| [Code review rules and Claude pilot severity](review-rules-pilot-severity.md) | Blocking review criteria, previous finding status and head line citations | pending |
 | [Standalone TAR writer](tar-extraction.md) | Native writer extraction, ownership and independent validation | `3914462` |
 | [VFAT format and reference inventory](vfat-format-inventory.md) | Format authority, producer pins and observed compatibility baselines | pending |
 | [Writer finalization and compiler checks](writer-cleanup.md) | Best-effort discard/close, failure regressions and stronger library/test compilation | `52ead53` |

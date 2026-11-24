@@ -12,10 +12,10 @@ with [CONTRIBUTING.md](CONTRIBUTING.md); the same rules apply to them.
   belongs to one, and `SECURITY.md` before security-relevant work.
 - Preserve unrelated working-tree changes; do not overwrite another topic's
   work.
-- Name topic branches `<prefix>/<topic>` with exactly one prefix segment.
-  Codex-created branches use `codex/<topic>`; other authors choose their own
-  prefixes, such as `claude/`. Continue the existing topic plan when one
-  already covers the work.
+- Name branches `<prefix>/<name>` with exactly one prefix segment.
+  Codex-created branches use `codex/<name>`. Other authors choose their own
+  prefixes, such as `claude/`. Give each planned PR slice a distinct branch
+  name and continue the shared topic plan.
 - Ask the maintainer before a decision that changes scope, public API,
   compatibility, licensing or supported platforms. Record the agreed decision
   in the active plan.
@@ -51,8 +51,8 @@ with [CONTRIBUTING.md](CONTRIBUTING.md); the same rules apply to them.
 - Run `make -j8 <one target> NUM_CPUS=8`, one target per invocation.
 - Format tests use independent decoders and external readers. Never import
   production layout constants into a test oracle.
-- Every new check must be able to fail for the right reason. Show that it
-  rejects the old behavior or a targeted corruption.
+- Every new or changed check must be able to fail for the right reason. Show
+  that it rejects the old behavior or a targeted corruption.
 - When production bodies are added, removed or renamed, update
   `tests/coverage-sources.txt` and run the coverage target.
 
@@ -61,12 +61,21 @@ with [CONTRIBUTING.md](CONTRIBUTING.md); the same rules apply to them.
 Follow the [role workflow](doc/development.md#agent-workflow) for agent-led
 changes, including documentation topics. The coordinator starts the role
 assignments once per task; delegated role agents do not recursively start
-another four-role workflow.
+another workflow.
 
 - The coordinator owns scope, acceptance criteria, handoffs, the active phase
   and both correction counters. The developer alone edits and commits
   candidates. The tester and reviewer report defects without correcting
   candidate files.
+- For topics that need up-front design across changes or repositories, the
+  coordinator may assign a read-only architect to propose scope, design, PR
+  boundaries, dependencies, merge order and validation for the active plan.
+  Obtain required maintainer decisions before implementation. Keep the
+  independent reviewer separate from the architect.
+- Use cross-repository proposals to identify dependencies, revision pins and
+  acceptance gates. This workflow governs Arca PRs. Apply each repository's
+  own rules for approvals, changes, submission, evidence and correction
+  budgets, and obtain the required authorization there.
 - Give the tester a fresh detached worktree at the immutable candidate SHA
   and require the complete local CI chain, including coverage before `build/`
   exists, rootless checks, the unchanged cross-UID root harness and docs.
@@ -82,16 +91,19 @@ another four-role workflow.
 - Allow at most three bundled correction rounds in the local implementation,
   testing and internal-review phase. After local acceptance, start the PR phase
   once per topic with up to three additional rounds for hosted CI/Copilot.
-  Initial assessments use zero; the first correction in each phase uses one.
-  Retain both counters across agents, subtasks, pushes, rebases, replacement
-  PRs and repeated reviews. Count corrections plus revalidation once in the
-  active phase. Infrastructure retries without candidate changes and pure
-  history cleanup consume no round. Valid findings after round three block
-  that phase and require a maintainer decision; unresolved local findings must
-  not be shifted to the PR phase.
+  Start each topic with both counters at zero. Retain both counters across
+  agents, subtasks, PR slices, pushes, rebases, replacement PRs and repeated
+  reviews. Initial implementation of an agreed slice uses zero correction
+  rounds. Count corrections plus revalidation once in the active phase.
+  Infrastructure retries without candidate changes and pure history cleanup
+  consume no round. Do not start a fourth correction round in the active
+  phase. If valid findings remain after round three, pause the topic until
+  the maintainer decides how to proceed. Do not carry unresolved local
+  findings into the PR phase.
 - Require both test evidence and independent review for the same candidate
-  before acceptance, except for the strictly tree-identical history-only case
-  in [submission preparation](doc/development.md#submission-preparation).
+  before accepting each PR slice, including after the topic's PR phase has
+  started. The exceptions for history-only and change-record-only updates
+  follow [submission preparation](doc/development.md#submission-preparation).
   Keep operational logs and both counters in the task log or ignored `build/`;
   append durable decisions to the topic plan. Keep session and review-round
   history out of the change record.
@@ -103,6 +115,22 @@ another four-role workflow.
   follow [PR submission and Copilot review](doc/development.md#pull-request-preparation-and-submission)
   within the authorized stages. Copilot supplements internal review and CI;
   read all review content and retain the existing PR-phase correction budget.
+
+## Code Review Rules
+
+The following findings are P1 (blocking).
+
+- A change record claiming validation of the PR head with evidence from
+  another revision, except in the history-only and change-record-only cases
+  in [submission preparation](doc/development.md#submission-preparation).
+- A check that fails to meet the sensitivity requirement in
+  [Build and tests](#build-and-tests).
+- Contradictions among `AGENTS.md`, `CONTRIBUTING.md`, `doc/development.md`,
+  the active plan and the change record.
+- A new or changed external pin, version or claim about upstream behavior
+  whose verification is missing from the committed change record.
+- A PR body whose content differs from its canonical committed change
+  record after ignoring trailing whitespace.
 
 ## Licensing
 
@@ -135,12 +163,13 @@ another four-role workflow.
 - When an agent co-authors a change, end the commit message and change
   record with an accurate `Co-Authored-By` trailer for the model actually
   used. Never invent an identity.
-- Every topic updates the affected user and developer guides and adds
-  `doc/change-records/<topic>.md` in the sorted index.
-  Derive the topic from the branch name by removing the first slash-separated
-  prefix, if present, and replacing any remaining slashes with hyphens.
-  The committed record is the pull request description, so it remains
-  readable after a move to another forge.
+- Every topic updates the affected user and developer guides and adds a
+  change record in the sorted index. In a planned PR series, each slice has
+  its own record and shares the topic's plan and counters. Derive the
+  filename under `doc/change-records/` from the branch name by removing the
+  first slash-separated prefix, if present, replacing any remaining slashes
+  with hyphens and appending `.md`. The committed record is the pull request
+  description, so it remains readable after a move to another forge.
 - Update `CHANGELOG.md` only for changes visible to library/CLI users or
   integrators, including relevant consumer build and installation changes.
   Keep purely internal changes to agent workflows, processes or validation
