@@ -48,3 +48,13 @@ Extend the post-merge smoke test with a nested `AGENTS.md` that asks for
 a harmless marker on its own final line. Check the revision-bound review
 for coverage of the nested change and an ending that differs from the
 requested marker.
+
+## Actions policy on 2026-11-24
+
+Pin the Claude base action to the `v1.0.289` commit
+`eb56b6666facdbd501035f4a0269d8caee2e7a8b` to meet the commit-SHA policy.
+The previous pin used the annotated `v1` tag object for the same commit
+and installed Claude Code 2.1.331.
+Use commit-specific Actions exceptions for Anthropic and Bun to keep the
+optional pilot narrowly scoped. Keep the root-action exception through the
+smoke test on `main` and until no workflow needs it.

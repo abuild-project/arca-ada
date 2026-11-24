@@ -132,7 +132,7 @@ jobs:
       - name: Review the captured PR
         id: claude
         # The full action rewrites Git credentials and refreshes base guidance.
-        uses: anthropics/claude-code-action/base-action@3a4e9adecfa20042306158cc4b201c4b865f9d39
+        uses: anthropics/claude-code-action/base-action@eb56b6666facdbd501035f4a0269d8caee2e7a8b # v1.0.289
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: false

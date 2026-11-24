@@ -30,8 +30,9 @@ lists published tags and artifacts.
   GitHub Actions and private vulnerability reporting are enabled. The root
   [security policy](../SECURITY.md) describes the reporting channel.
 - Repository-level secret-scanning alerts, push protection and Dependabot
-  alerts are enabled. Actions accept only GitHub-owned actions pinned to full
-  commit SHAs; workflows from external fork contributors require approval.
+  alerts are enabled. At publication on 2026-11-03, the Actions policy allowed
+  only GitHub-owned actions pinned to full commit SHAs and required approval
+  for workflows from external fork contributors.
   The [Trixie run under these settings](https://github.com/abuild-project/arca-ada/actions/runs/41619479596)
   passed on the selected source revision.
 - The former repository URL redirects to the organization. Historical plans
@@ -51,6 +52,17 @@ lists published tags and artifacts.
   prerelease. Its checked source asset has SHA-256
   `c64644280fabf43ee863249f6732d6aef798b084b00d4d61a96df91897430b48`;
   no binaries were published.
+
+## Claude review pilot exception
+
+The optional pilot introduced on 2026-11-24 requires commit-pinned
+exceptions for the Anthropic action and its Bun setup dependency. The
+full-length commit SHA rule and external fork approval are part of the
+[pilot's Actions prerequisites](development.md#claude-review-pilot).
+The original pilot completed both jobs with the root action on
+`6e5b06ec4d8ebada1d02a50f2367c2a01257336d`. Confirm the updated allowlist
+and base action in a separate smoke test on `main`.
+[Original pilot run](https://github.com/abuild-project/arca-ada/actions/runs/45437966424).
 
 ## Continuing work
 
