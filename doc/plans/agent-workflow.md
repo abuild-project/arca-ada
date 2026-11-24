@@ -217,3 +217,16 @@ Each slice has a branch-derived change record and passes local acceptance
 before submission. Planned first implementations retain the topic's current
 counters. Corrections to a later slice follow the active phase, including
 when local checks occur after the topic enters the PR phase.
+
+## Architecture handoff and repository boundaries on 2026-11-24
+
+Decision: include a reusable read-only architect brief with the active plan,
+scope, repository base revisions, material and phase counters because the
+proposal precedes candidate work. A cross-repository proposal can identify
+dependency pins and acceptance gates. Each repository retains authority
+over approvals, changes, submissions, evidence and budgets under its rules.
+
+Initial work on an agreed Arca slice costs zero correction rounds. Each
+correction bundle and revalidation uses the active phase's shared count.
+Unresolved valid findings after the third correction pause the topic for
+a maintainer disposition, including findings from later slices.

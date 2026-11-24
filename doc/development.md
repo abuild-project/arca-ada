@@ -92,7 +92,8 @@ no self-operated runner, new server, persistent autonomous service, additional
 model subscription or secret is required. Both locations require the same
 AMD64 Trixie Docker checks and preserve the supported-platform scope. A
 qualifying external reviewer may fill the review assignment as described
-below. Assign the roles to separate participants.
+below. Assign the roles to separate participants. Sections labelled by role
+in a single agent's response count as the output of one participant.
 
 ### Roles and authority
 
@@ -139,10 +140,17 @@ correction counters. The proposal covers:
 - Acceptance criteria and validation for each PR and for the combined result,
   including downstream consumer checks when the topic affects them.
 
+For work across repositories, the architect can propose dependency order,
+revisions to pin and acceptance gates. This workflow governs Arca PRs.
+Each repository owns its approvals, PRs, evidence and correction budget
+under its own rules. Obtain authorization under those rules before changes
+or submissions in another repository.
+
 Assign an independent reviewer who did not design the change. Each planned
-PR slice has a distinct branch name and its own change record in the sorted
-index. Derive the record path from the branch as specified in AGENTS.md.
-The topic's plan and correction counters are shared across its slices.
+Arca PR slice has a distinct branch name and its own change record in the
+sorted index. Derive the record path from the branch as specified in
+AGENTS.md. The Arca topic's plan and correction counters are shared across
+its slices.
 
 ### Native agents and review independence
 
@@ -154,7 +162,7 @@ Give every role the scope, active phase and both correction counters. Give
 the tester its own fresh worktree at the candidate commit. Assign a separate
 reviewer with fresh context and an explicit read-only review packet. Start
 the reviewer without inherited developer dialogue and supply the packet
-explicitly. Let the reviewer reach an independent conclusion.
+explicitly. Keep preferred conclusions out of the packet and instructions.
 For example, in Codex use `spawn_agent` with `fork_turns="none"`. The reviewer
 reads the repository guidance, agreed scope, immutable base/candidate diff and
 test evidence and reaches its own conclusions.
@@ -191,8 +199,8 @@ Copilot stage remains separate.
    the developer, who records durable decisions in the plan.
 2. The developer produces an initial candidate commit for each agreed slice
    and supplies the full candidate SHA, base-to-candidate diff and handoff
-   packet. The initial implementation and assessment retain the topic's
-   current correction counters.
+   packet. The initial implementation and assessment use zero correction
+   rounds and retain the topic's current counters.
 3. Before submitting any slice, run the complete local CI chain on its exact
    candidate SHA in a fresh detached tester worktree. The independent reviewer
    inspects that same immutable candidate against the base, in its own
@@ -216,15 +224,14 @@ Copilot stage remains separate.
    Retain the local count. Internal tests/reviews after a PR fix belong to its
    PR round and do not consume the local budget again.
 
-Both counters belong to the topic. Changing agents, splitting subtasks or
-PRs, renaming branches, pushing, rebasing, replacing a PR or requesting
-another review resets neither counter. Once the PR phase starts, local
-validation for later slices continues in that phase. Bundled corrections
-from those checks use the existing PR counter.
-If valid findings remain after the active phase's third round, block that
-phase and report the findings for a maintainer decision. Do not produce a
-fourth correction or move unresolved local findings into the PR phase.
-Budget availability itself authorizes no push, PR, review request or merge.
+Retain both topic counters across agents, subtasks, PR slices, branch
+renames, pushes, rebases, replacement PRs and renewed reviews. Once the PR
+phase starts, local validation for later slices continues in that phase.
+Corrections plus their revalidation use the shared budget of the active
+phase and can exhaust it. If valid findings remain after its third round,
+pause the affected topic until the maintainer decides how to proceed.
+Resolve local findings before entering the PR phase. The maintainer's
+authorized task scope controls delivery actions.
 
 A pure infrastructure retry with no candidate change consumes no correction
 round. Record the failed command, cause or uncertainty and retry result so it
@@ -482,6 +489,16 @@ The coordinator fills the placeholders and supplies repository guidance with
 each assignment. These are task prompts, not executable service configuration.
 The developer branch placeholder is `PREFIX/NAME`. For a Codex-created
 branch, use `codex/NAME`.
+
+```text
+Architect: propose a design for TASK within SCOPE and EXCLUSIONS.
+Repositories and immutable base SHAs: REPOSITORY_BASES. Active plan: PLAN.
+Acceptance criteria: CRITERIA. Read-only material: MATERIAL.
+Arca phase: PHASE. Corrections: local L/3, PR P/3. PR phase started: YES/NO.
+Read the supplied guides, plans, sources and existing evidence. Return the
+design recommendation, decisions for the maintainer, PR slices, dependencies,
+parallel work, merge order and validation gates.
+```
 
 ```text
 Developer: implement TASK in ALLOWED_SCOPE on PREFIX/NAME.

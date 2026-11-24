@@ -72,6 +72,10 @@ another workflow.
   boundaries, dependencies, merge order and validation for the active plan.
   Obtain required maintainer decisions before implementation. Keep the
   independent reviewer separate from the architect.
+- Use cross-repository proposals to identify dependencies, revision pins and
+  acceptance gates. This workflow governs Arca PRs. Apply each repository's
+  own rules for approvals, changes, submission, evidence and correction
+  budgets, and obtain the required authorization there.
 - Give the tester a fresh detached worktree at the immutable candidate SHA
   and require the complete local CI chain, including coverage before `build/`
   exists, rootless checks, the unchanged cross-UID root harness and docs.
@@ -89,11 +93,12 @@ another workflow.
   once per topic with up to three additional rounds for hosted CI/Copilot.
   Start each topic with both counters at zero. Retain both counters across
   agents, subtasks, PR slices, pushes, rebases, replacement PRs and repeated
-  reviews. Count corrections plus revalidation once in the active phase.
+  reviews. Initial implementation of an agreed slice uses zero correction
+  rounds. Count corrections plus revalidation once in the active phase.
   Infrastructure retries without candidate changes and pure history cleanup
-  consume no round. Valid findings after round three block that phase and
-  require a maintainer decision; unresolved local findings must not be
-  shifted to the PR phase.
+  consume no round. If valid findings remain after round three in the active
+  phase, pause the topic until the maintainer decides how to proceed.
+  Resolve local findings before entering the PR phase.
 - Require both test evidence and independent review for the same candidate
   before accepting each PR slice, including after the topic's PR phase has
   started. The strictly tree-identical history-only exception follows

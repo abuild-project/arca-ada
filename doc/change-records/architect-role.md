@@ -13,12 +13,19 @@ counters across PR splits, and the independent reviewer is separate from
 the architect.
 
 Each slice uses its branch-derived change record and shares the topic's plan
-and counters. Every slice receives complete local CI and independent review
-at the candidate revision before submission. For slices validated during
-the PR phase, resulting corrections use the current PR budget.
+and counters. Every Arca slice receives complete local CI and independent
+review at the candidate revision before submission. Initial implementations
+use zero correction rounds. Corrections use the active phase's shared
+budget. Other repositories retain their own approval and validation rules.
 
-The local diff check confirms the patch is limited to workflow
-documentation. The existing local CI and independent review requirements
-apply to this documentation change.
+The complete local CI chain passed at
+`fdbcd8d0f0d5bc41305c3e6fa975e371bc0866e9` from a fresh detached worktree
+using AMD64 Debian 13.8 Trixie. Coverage ran before `build/` existed and reached
+1,031 of 1,107 lines across ten bodies. Both Ahven runs passed 19 tests
+each with zero failures, errors or skips. The wrapper, shell, rootless
+installation, CLI and format checks passed. The root harness passed all 54
+scenarios using UIDs 65534 and 65533. Strict MkDocs built 14 pages. A
+separate independent review of that revision checked the full documentation
+diff and primary test evidence and reported no actionable findings.
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
