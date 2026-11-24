@@ -84,21 +84,22 @@ coverage check so it cannot create coverage's scratch parent in advance.
 
 ## Agent workflow
 
-Agent-led topics use four distinct assignments: coordinator, developer, tester
-and reviewer. This also applies to documentation changes. Use native agents
+Agent-led topics, including documentation changes, use distinct coordinator,
+developer, tester and reviewer assignments. A topic that needs design across
+changes or repositories may also use an architect. Use native agents
 inside the active cloud or local task and the existing hosted CI workflow;
 no self-operated runner, new server, persistent autonomous service, additional
 model subscription or secret is required. Both locations require the same
 AMD64 Trixie Docker checks and preserve the supported-platform scope. A
 qualifying external reviewer may fill the review assignment as described
-below. Writing four role-labelled sections in one agent's response does not
-provide these separate assignments.
+below. Assign the roles to separate participants.
 
 ### Roles and authority
 
 | Role | Responsibility | Candidate access |
 | --- | --- | --- |
 | Coordinator | Fix scope and acceptance criteria, assign roles, consolidate findings, retain the active phase and both correction counters and decide whether the evidence meets the criteria | Manage handoffs; delegate candidate edits to the developer |
+| Architect (optional) | Analyze requirements and propose a design, reviewable PRs and their validation sequence before implementation | Read-only source, plans and evidence; return a proposal to the coordinator |
 | Developer | Implement the scoped change, correct bundled findings and produce an immutable candidate commit | Sole editor of candidate tracked files |
 | Tester | Execute the complete local CI chain and report results, failures and evidence limits | Fresh detached worktree; generated test artifacts only |
 | Reviewer | Independently inspect the full base-to-candidate change and its contracts, tests, documentation and evidence | Read-only revision/worktree or qualifying external review of the mapped diff |
@@ -113,8 +114,8 @@ responses; continue already authorized stages without repeated confirmation.
 Merge, tag, release, publication, settings and force-push actions require
 separate authorization.
 
-Name topic branches `<prefix>/<topic>` with exactly one prefix segment, such
-as `codex/` or `claude/`. Codex-created branches use `codex/<topic>`; other
+Name branches `<prefix>/<name>` with exactly one prefix segment, such as
+`codex/` or `claude/`. Codex-created branches use `codex/<name>`. Other
 authors choose their own prefixes. Reuse an existing matching plan under
 [plans](plans/README.md); create a new plan only for a new topic. Do not
 start a parallel ticket system. Append durable technical decisions, with
@@ -124,17 +125,36 @@ ignored `build/`. Do not create `build/` in the tester's fresh worktree before
 the coverage-first assertion. The canonical change record describes the final
 change, evidence and material limits without session or review-round history.
 
+### Architecture assignment
+
+Give the architect the task, scope and exclusions, immutable base revisions,
+active plan, acceptance criteria, available evidence, active phase and both
+correction counters. The proposal covers:
+
+- Required behavior, constraints and open decisions, with alternatives where
+  they affect the outcome and a reason for the recommended design.
+- Independently reviewable PRs with their scope, dependencies, work that can
+  proceed in parallel and merge order. Each accepted revision must build and
+  pass its checks.
+- Acceptance criteria and validation for each PR and for the combined result,
+  including downstream consumer checks when the topic affects them.
+
+Assign an independent reviewer who did not design the change. Each planned
+PR slice has a distinct branch name and its own change record in the sorted
+index. Derive the record path from the branch as specified in AGENTS.md.
+The topic's plan and correction counters are shared across its slices.
+
 ### Native agents and review independence
 
 The coordinator launches in-task role agents using the native delegation tools
 available in the active task; no additional orchestrator software is needed.
-The role assignments are leaf tasks within this one workflow: an assigned
-developer, tester or reviewer follows its role brief and does not recursively
-start another four-role workflow. Give every role the scope, active phase
-and both correction counters. Give the tester its own fresh worktree at the
-candidate commit. Assign a separate reviewer with fresh context and an explicit
-read-only review packet. Start the reviewer without inherited developer
-dialogue and supply the packet explicitly; do not send a preferred conclusion.
+The role assignments are leaf tasks within this one workflow: each assigned
+agent follows its role brief and does not recursively start another workflow.
+Give every role the scope, active phase and both correction counters. Give
+the tester its own fresh worktree at the candidate commit. Assign a separate
+reviewer with fresh context and an explicit read-only review packet. Start
+the reviewer without inherited developer dialogue and supply the packet
+explicitly. Let the reviewer reach an independent conclusion.
 For example, in Codex use `spawn_agent` with `fork_turns="none"`. The reviewer
 reads the repository guidance, agreed scope, immutable base/candidate diff and
 test evidence and reaches its own conclusions.
@@ -165,15 +185,21 @@ Copilot stage remains separate.
 1. The coordinator records the task, allowed files/behavior, exclusions,
    active plan, acceptance criteria and immutable base SHA. For a new topic,
    it initializes local corrections to zero and PR corrections to zero, with
-   the PR phase not started, and assigns the developer in the local phase.
-2. The developer produces the initial candidate commit and supplies the
-   full candidate SHA, base-to-candidate diff and handoff packet. No correction
-   round has been consumed yet.
-3. The tester validates that exact SHA in a fresh detached worktree. The
-   independent reviewer inspects that same immutable candidate against the
-   base, in its own revision/worktree or through a qualifying external review.
-   Neither role corrects a defect; each returns findings to the coordinator.
-   Gather both reports before bundling corrections when possible.
+   the PR phase not started. When the topic uses an architect, the coordinator
+   obtains the proposal and resolves questions with the maintainer where
+   approval is required. The coordinator hands the agreed plan and scope to
+   the developer, who records durable decisions in the plan.
+2. The developer produces an initial candidate commit for each agreed slice
+   and supplies the full candidate SHA, base-to-candidate diff and handoff
+   packet. The initial implementation and assessment retain the topic's
+   current correction counters.
+3. Before submitting any slice, run the complete local CI chain on its exact
+   candidate SHA in a fresh detached tester worktree. The independent reviewer
+   inspects that same immutable candidate against the base, in its own
+   revision/worktree or through a qualifying external review. Each role
+   returns findings to the coordinator. Gather both reports before bundling
+   corrections when possible. Apply these checks to later slices even after
+   the topic enters the PR phase.
 4. The coordinator accepts only when both reports cover the same candidate
    (or the strictly tree-identical history-only case under
    [submission preparation](#submission-preparation)), all acceptance criteria
@@ -190,11 +216,11 @@ Copilot stage remains separate.
    Retain the local count. Internal tests/reviews after a PR fix belong to its
    PR round and do not consume the local budget again.
 
-Both counters belong to the topic. Changing agents, splitting subtasks,
-renaming branches, pushing, rebasing, replacing a PR or requesting another
-review resets neither counter. Once the PR phase starts, returning to local
-testing or opening another PR for the same topic retains that phase and its
-existing counter; the transition cannot provide a second fresh PR budget.
+Both counters belong to the topic. Changing agents, splitting subtasks or
+PRs, renaming branches, pushing, rebasing, replacing a PR or requesting
+another review resets neither counter. Once the PR phase starts, local
+validation for later slices continues in that phase. Bundled corrections
+from those checks use the existing PR counter.
 If valid findings remain after the active phase's third round, block that
 phase and report the findings for a maintainer decision. Do not produce a
 fourth correction or move unresolved local findings into the PR phase.
@@ -206,7 +232,7 @@ cannot conceal a candidate defect. A change to candidate tracked files is a
 new candidate and requires evidence for that revision. Tester and reviewer
 reports remain tied to their immutable SHAs, even if a branch later moves.
 
-Every handoff packet contains:
+Each candidate handoff packet contains:
 
 - Task, scope and exclusions, plan path, acceptance criteria, active phase,
   both correction counters and whether the PR phase has started; full base
@@ -253,8 +279,8 @@ PR packet. Keep it in the task log or ignored `build/`, containing:
 - Target repository, base branch/SHA, head branch/final SHA and complete tree
   ID, prepared commit sequence, scope and canonical change-record path.
 - A concrete title describing the final result in the appropriate Conventional
-  style, and a body byte-identical to the committed
-  `doc/change-records/<topic>.md`, without a chat-history summary.
+  style, and a body byte-identical to the committed record at the canonical
+  path in the packet.
 - Final local CI and independent review evidence, remaining limits, the active
   phase, both correction counters, PR-phase start status and next authorized
   stages. Keep raw logs, operational status and counters out of the PR prose
@@ -427,11 +453,11 @@ background scheduler and promises no unattended work after the agent task.
 
 The coordinator fills the placeholders and supplies repository guidance with
 each assignment. These are task prompts, not executable service configuration.
-The developer branch placeholder is `PREFIX/TOPIC`; the Codex-created branch
-example is `codex/TOPIC`.
+The developer branch placeholder is `PREFIX/NAME`. For a Codex-created
+branch, use `codex/NAME`.
 
 ```text
-Developer: implement TASK in ALLOWED_SCOPE on PREFIX/TOPIC.
+Developer: implement TASK in ALLOWED_SCOPE on PREFIX/NAME.
 Base: BASE_SHA. Active plan: PLAN. Acceptance criteria: CRITERIA.
 Phase: PHASE. Corrections: local L/3; PR P/3. PR phase started: YES/NO.
 Read AGENTS.md and its required guides. Preserve unrelated work and existing

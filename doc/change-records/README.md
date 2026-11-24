@@ -7,6 +7,7 @@ Entries are ordered by topic filename.
 | [Agent contribution workflow](agent-workflow.md) | Native role handoffs, bounded corrections and fresh-checkout CI evidence | pending |
 | [Ahven unit suites](ahven-unit-tests.md) | Named direct contracts, shared scenarios and runner failure controls | `6f1514a` |
 | [Library API and metadata contracts](api-hardening.md) | Private TAR lifecycle, CPIO permissions, timestamp errors and installed metadata | `089b32b` |
+| [Optional architecture assignment](architect-role.md) | Design proposal, PR sequencing and validation for larger topics | pending |
 | [Archive creation CLI](archive-cli.md) | Filesystem inventory, metadata/link policy, atomic output and independent CLI tests | `a7c4735` |
 | [Repository bootstrap](bootstrap.md) | Independent project and development infrastructure | `e2c1bd3` |
 | [CLI diagnostics, arguments and cancellation](cli-polish.md) | Complete readable errors, output syntax, target constants, SIGHUP and help | `953a257` |
