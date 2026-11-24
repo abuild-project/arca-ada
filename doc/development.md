@@ -319,6 +319,31 @@ when the old review is stale. The readiness report identifies the latest head,
 review commit, CI results, open/resolved threads and remaining limits. A report
 that the PR is ready for merge does not authorize the merge itself.
 
+### Claude review pilot
+
+Claude can provide a supplementary review on GitHub-hosted runners. The pilot
+has no required check and does not change the independent review, CI, Copilot
+or correction budgets above. A maintainer with repository admin or maintain
+access requests it by posting exactly `@claude review` as a new conversation
+comment on an open, ready PR from this repository to `main`. The pilot accepts
+a nonempty diff of at most 48 KiB.
+
+The workflow must be on the default branch. A repository administrator runs
+`claude setup-token` locally with a Claude Pro or Max account and stores the
+result as the GitHub Actions secret `CLAUDE_CODE_OAUTH_TOKEN`. Keep the token
+out of chats, source and PR text. See the
+[official OAuth setup guide](https://code.claude.com/docs/en/github-actions#manual-setup).
+
+Claude sees the captured diff and the guidance from the base checkout.
+The review job has read access and supplies no shell, editing or MCP tools
+to the model. A separate publish job checks that the open PR still has the
+captured base and head revisions, then posts one comment that names both.
+For the first smoke test, use a small ready PR and compare the posted SHAs
+with the Actions run and PR. Treat the result as supplementary review of
+that diff. If the revisions change or no comment appears, check the run
+before making a fresh request. Both jobs run only on the first attempt.
+Post a fresh maintainer comment for another attempt.
+
 ### Fresh test worktree and local CI chain
 
 Use a new detached worktree at the full candidate SHA, even when the original
