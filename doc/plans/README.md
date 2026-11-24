@@ -9,6 +9,7 @@ Entries are ordered by topic filename.
 | [Library API and metadata contracts](api-hardening.md) | Accepted in `089b32b` (PR #12) |
 | [Archive creation CLI](archive-cli.md) | Accepted in `a7c4735` (PR #7) |
 | [Repository bootstrap](bootstrap.md) | Accepted in `e2c1bd3` (PR #1) |
+| [Claude review pilot](claude-review-pilot.md) | Live smoke test pending |
 | [CLI diagnostics, arguments and cancellation](cli-polish.md) | Accepted in `953a257` (PR #14) |
 | [CLI output transaction identity](cli-staging-fix.md) | Accepted in `d715d62` (PR #16) |
 | [Repository-wide Ada coding style](coding-style.md) | Accepted in `03a2a07` (PR #8) |

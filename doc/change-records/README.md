@@ -9,6 +9,7 @@ Entries are ordered by topic filename.
 | [Library API and metadata contracts](api-hardening.md) | Private TAR lifecycle, CPIO permissions, timestamp errors and installed metadata | `089b32b` |
 | [Archive creation CLI](archive-cli.md) | Filesystem inventory, metadata/link policy, atomic output and independent CLI tests | `a7c4735` |
 | [Repository bootstrap](bootstrap.md) | Independent project and development infrastructure | `e2c1bd3` |
+| [Claude review pilot](claude-review-pilot.md) | Maintainer-triggered supplementary GitHub review with captured revisions | pending |
 | [CLI diagnostics, arguments and cancellation](cli-polish.md) | Complete readable errors, output syntax, target constants, SIGHUP and help | `953a257` |
 | [CLI output transaction identity](cli-staging-fix.md) | Retained filesystem identities, bounded cleanup and cross-UID controls | `d715d62` |
 | [Repository-wide Ada coding style](coding-style.md) | Agent-discoverable rules, source modernization and compiler gates with sensitivity controls | `03a2a07` |
