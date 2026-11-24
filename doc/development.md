@@ -182,10 +182,11 @@ A review posted through a shared or maintainer account must name its actual
 reviewer and covered immutable revisions in the body because the account does
 not identify the reviewer.
 A different label/model or known SHAs alone do not establish independence.
-Triage its findings in the active phase budget like any other review. A review
-of an earlier head does not cover a later one. If native review is unavailable,
-use a qualifying external review; if neither route is available, report the
-unmet criterion rather than substituting self-review.
+Triage its findings in the active phase budget like any other review. Earlier
+review evidence carries forward only under
+[submission preparation](#submission-preparation). If native review is
+unavailable, use a qualifying external review; if neither route is available,
+report the unmet criterion rather than substituting self-review.
 This fills the independent workflow-review assignment; the supplementary
 Copilot stage remains separate.
 
@@ -202,22 +203,22 @@ Copilot stage remains separate.
    and supplies the full candidate SHA, base-to-candidate diff and handoff
    packet. The initial implementation and assessment use zero correction
    rounds and retain the topic's current counters.
-3. Before submitting any slice, run the complete local CI chain on its exact
-   candidate SHA in a fresh detached tester worktree. The independent reviewer
-   inspects that same immutable candidate against the base, in its own
-   revision/worktree or through a qualifying external review. Each role
-   returns findings to the coordinator. Gather both reports before bundling
-   corrections when possible. Apply these checks to later slices even after
-   the topic enters the PR phase.
+3. Apply the evidence rules in [submission preparation](#submission-preparation)
+   to each slice, including after the topic enters the PR phase. Run the
+   complete local CI chain on the exact candidate SHA in a fresh detached
+   tester worktree. The independent reviewer inspects that same immutable
+   candidate against the base, in its own revision/worktree or through a
+   qualifying external review. Each role returns findings to the coordinator.
+   Gather both reports before bundling corrections when possible.
 4. The coordinator accepts only when both reports cover the same candidate
-   (or the strictly tree-identical history-only case under
+   (or their evidence meets one of the exceptions under
    [submission preparation](#submission-preparation)), all acceptance criteria
    are met and no blocking finding remains. Otherwise it combines actionable
    findings into one developer correction request.
    A bundle of developer corrections plus its revalidation consumes one round
-   in the active phase. The first correction is round one. Run the full test
-   chain and fresh independent review for the new candidate SHA; these checks
-   do not each consume another round.
+   in the active phase. The first correction is round one. Follow
+   [submission preparation](#submission-preparation) for the evidence the
+   new candidate requires. Its checks do not each consume another round.
 5. Allow at most three correction rounds locally. Only after local acceptance
    may the coordinator start the PR phase once per topic, within the authorized
    external scope. The initial hosted-CI/Copilot assessment uses PR round zero;
@@ -237,9 +238,10 @@ controls delivery actions.
 
 A pure infrastructure retry with no candidate change consumes no correction
 round. Record the failed command, cause or uncertainty and retry result so it
-cannot conceal a candidate defect. A change to candidate tracked files is a
-new candidate and requires evidence for that revision. Tester and reviewer
-reports remain tied to their immutable SHAs, even if a branch later moves.
+cannot conceal a candidate defect. A change to candidate tracked files creates
+a new candidate. Follow [submission preparation](#submission-preparation) to
+determine when earlier evidence may be retained. Tester and reviewer reports
+remain tied to their immutable SHAs, even if a branch later moves.
 
 Each candidate handoff packet contains:
 
@@ -268,17 +270,30 @@ shared, published or another contributor's history requires explicit rewrite
 permission; the workflow grants no force-push permission.
 
 Finalize history before final test and review handoffs so both roles receive
-the final base/candidate SHAs and diff. For a later pure history/message
-rewrite, preserve a recovery ref and record the base, old/new SHAs, complete
-tree IDs and mapping in the task log or ignored `build/`. Evidence from local
-checks or reviews of content may be retained only with an unchanged base,
-identical complete tree IDs and demonstrated independence of each retained
-check/review from Git metadata. Preserve the original execution SHAs; never
-claim checks ran on the new SHA or transfer hosted commit-bound statuses.
-Recheck changed metadata and rerun SHA-dependent checks. Any content change
-requires the full local CI chain and fresh independent review for the new
-candidate. Pure history cleanup consumes no correction round and resets
-neither phase counter; it must not contain hidden fixes.
+the final base/candidate SHAs and diff. Require the full local CI chain and
+fresh independent review for the exact candidate, with two exceptions for
+retaining local evidence after validation.
+
+- For a pure history or commit-message rewrite, require an unchanged base
+  SHA, identical complete Git tree IDs and demonstrated independence of each
+  retained check and review from Git metadata. Preserve a recovery ref and
+  record the base, old and new SHAs, complete tree IDs and mapping in the
+  task log or ignored `build/`. Recheck changed metadata and rerun
+  SHA-dependent checks. Pure history cleanup consumes no correction round
+  and resets neither phase counter.
+- For a post-validation update solely to the content of the topic's
+  canonical change record, require the same immutable base SHA. Compare the
+  exact Git trees of the tested revision and the new candidate after omitting
+  only that record from each. Require identical resulting tree IDs and show
+  that the full diff between those revisions changes only that record.
+  Review the updated record against the primary test and review evidence and
+  run any checks affected by the update. Keep the base, tested and new SHAs,
+  resulting tree IDs and full diff in the task log or ignored `build/`.
+
+For either exception, retain the original execution and review SHAs in the
+operational evidence. Attribute each result to its actual revision. Hosted
+commit-bound statuses still apply only to the exact PR head that received
+them.
 
 ### Pull request preparation and submission
 
@@ -288,8 +303,8 @@ PR packet. Keep it in the task log or ignored `build/`, containing:
 - Target repository, base branch/SHA, head branch/final SHA and complete tree
   ID, prepared commit sequence, scope and canonical change-record path.
 - A concrete title describing the final result in the appropriate Conventional
-  style, and a body byte-identical to the committed record at the canonical
-  path in the packet.
+  style, and the body sourced from the committed record at the canonical path
+  in the packet.
 - Final local CI and independent review evidence, remaining limits, the active
   phase, both correction counters, PR-phase start status and next authorized
   stages. Keep raw logs, operational status and counters out of the PR prose
@@ -310,7 +325,8 @@ SHA, and check for an existing PR before creating a duplicate. Push the topic
 branch without writing directly to the default branch. Create a PR ready for
 review when ready; use a draft only when requested or justified. Supply the
 canonical body through a structured tool argument or `--body-file`, preserving
-its exact bytes, and verify the created body matches the committed record.
+its exact bytes. Verify that the posted body matches the committed record
+after ignoring trailing whitespace.
 Keep the record and PR body synchronized after substantive changes. Retain
 PR/review URLs and IDs in the operational task log.
 
@@ -342,8 +358,9 @@ and its local/internal revalidation count once in that PR budget, without
 charging the local counter again. An exhausted PR budget with a valid finding
 requires a maintainer decision; do not start an autonomous fourth PR round.
 Each changed candidate receives the full local CI chain and fresh independent
-review under the existing rules. New pushes, PRs and renewed Copilot reviews
-do not restart the phase or its budget.
+review unless it meets an exception in
+[submission preparation](#submission-preparation). New pushes, PRs and
+renewed Copilot reviews do not restart the phase or its budget.
 
 Within authorized interaction, reply briefly and factually: cite the fix
 commit and relevant evidence, or explain a rejected finding with its location
