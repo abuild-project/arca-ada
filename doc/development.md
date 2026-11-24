@@ -326,7 +326,8 @@ has no required check and does not change the independent review, CI, Copilot
 or correction budgets above. A maintainer with repository admin or maintain
 access requests it by posting exactly `@claude review` as a new conversation
 comment on an open, ready PR from this repository to `main`. The pilot accepts
-a nonempty diff of at most 48 KiB.
+a nonempty diff of at most 256 KiB. The review is limited to 20 turns and the
+review job to 20 minutes.
 
 The workflow must be on the default branch. A repository administrator runs
 `claude setup-token` locally with a Claude Pro or Max account and stores the
@@ -334,17 +335,33 @@ result as the GitHub Actions secret `CLAUDE_CODE_OAUTH_TOKEN`. Keep the token
 out of chats, source and PR text. See the
 [official OAuth setup guide](https://code.claude.com/docs/en/github-actions#manual-setup).
 
-Claude sees the captured diff and the project guides and security policy
-imported by `CLAUDE.md` from the base checkout.
-The review job has read access and supplies no shell, editing or MCP tools
-to the model. It requires a nonblank response of at most 8,000 characters
-before handing it to the publish job. That job checks that the open PR still
-has the captured base and head revisions, then posts one comment naming both.
-For the first smoke test, use a small ready PR and compare the posted SHAs
-with the Actions run and PR. Treat the result as supplementary review of
-that diff. If the revisions change or no comment appears, check the run
-before making a fresh request. Both jobs run only on the first attempt.
-Post a fresh maintainer comment for another attempt.
+The captured base is the trusted workspace root. The captured head is checked
+out under `pr/` with credential persistence disabled. Head Claude instructions,
+configuration and Git metadata are removed without following symlinks.
+The prompt requests the standing guides from the captured base by path.
+This also works when the base predates the `CLAUDE.md` imports.
+The `review/` directory holds the diff, changed files, PR metadata, short
+commit log and earlier comments from the pilot on that PR. Claude treats
+`pr/` and `review/` as data and receives only context paths and revision
+identifiers in its prompt.
+
+The pinned Claude Code base action uses OAuth for Claude and receives no
+GitHub token input. The pilot rejects step debug logging before invoking
+Claude, as debug mode can print the raw transcript. Claude Code 2.1.331 limits
+`Read`, `Grep` and `Glob` to the workspace with approval prompts disabled.
+Shell, editing, web and MCP
+tools are unavailable. The review job requires nonblank text of at most
+8,000 characters and rejects common credential patterns before handing it
+off. A separate publish job checks the same patterns and current revisions
+before posting one comment naming the reviewed SHAs.
+
+Run `python3 tests/check-claude-review.py` with Python 3, PyYAML, Bash, Git
+and jq to check the local controls. For the hosted smoke test, use a small
+ready PR and compare the posted SHAs with the Actions run and PR. If the
+repository allowlist restricts individual Actions paths, it may need the
+exact pinned `anthropics/claude-code-action/base-action` reference from
+the workflow. Check the run before requesting a fresh review. Both jobs
+run only on the first attempt, so post a fresh maintainer comment to retry.
 
 ### Fresh test worktree and local CI chain
 
