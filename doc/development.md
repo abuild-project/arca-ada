@@ -336,8 +336,9 @@ out of chats, source and PR text. See the
 
 Claude sees the captured diff and the guidance from the base checkout.
 The review job has read access and supplies no shell, editing or MCP tools
-to the model. A separate publish job checks that the open PR still has the
-captured base and head revisions, then posts one comment that names both.
+to the model. It requires a nonblank response of at most 8,000 characters
+before handing it to the publish job. That job checks that the open PR still
+has the captured base and head revisions, then posts one comment naming both.
 For the first smoke test, use a small ready PR and compare the posted SHAs
 with the Actions run and PR. Treat the result as supplementary review of
 that diff. If the revisions change or no comment appears, check the run

@@ -10,16 +10,19 @@ of a run, so a fresh maintainer comment is needed for another review.
 The review job captures the base and head revisions and their diff with a
 read-only GitHub token. It checks out the trusted base for project guidance
 and gives the diff to Claude as data with shell, editing and MCP tools
-disabled. A separate job checks the revisions before publishing one comment
-with the reviewed SHAs. The result supplements independent review and CI.
+disabled. The review job requires nonblank text of at most 8,000 characters
+before handing it off. A separate job checks the revisions
+before publishing one comment with the reviewed SHAs. The result
+supplements independent review and CI.
 
 ## Validation
 
-Local checks parse the workflow and exercise both shell steps with a stub
+Local checks parse the workflow and exercise its shell steps with a stub
 GitHub CLI. They verify the exact trigger, role and PR state, reject forks
-and stale base or head revisions, and confirm that review text is passed
-as comment data. Mocked workflow conditions allow both jobs on the first
-attempt and skip both on reruns. The plan and record indexes remain sorted.
+and stale revisions, and check the handoff at 8,000 and 8,001 characters.
+Blank and non-string responses fail before publishing. Valid review text
+is passed as comment data. Mocked workflow conditions allow both jobs on
+the first attempt and skip both on reruns. The indexes remain sorted.
 
 The live review requires the workflow on the default branch, a repository
 OAuth secret and a maintainer request on a ready PR. Check the run and

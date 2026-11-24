@@ -31,7 +31,7 @@ jobs:
     outputs:
       base: ${{ steps.target.outputs.base }}
       head: ${{ steps.target.outputs.head }}
-      review: ${{ steps.claude.outputs.structured_output }}
+      review: ${{ steps.result.outputs.review }}
     steps:
       - name: Capture the authorized review target
         id: target
@@ -89,6 +89,7 @@ jobs:
             no actionable issue is visible. This limited review supplies no
             independent test evidence or approval. Follow SECURITY.md for
             sensitive findings and omit vulnerability details from public text.
+            Return nonblank review text of at most 8000 characters.
 
             Base: ${{ steps.target.outputs.base }}
             Head: ${{ steps.target.outputs.head }}
@@ -98,8 +99,21 @@ jobs:
           claude_args: >-
             --tools= --strict-mcp-config --mcp-config '{"mcpServers":{}}'
             --disallowedTools "mcp__*" --permission-mode dontAsk --max-turns 2
-            --json-schema '{"type":"object","properties":{"review":{"type":"string"}},
+            --json-schema '{"type":"object","properties":{"review":{"type":"string",
+            "description":"Nonblank review text of at most 8000 characters"}},
             "required":["review"],"additionalProperties":false}'
+
+      - name: Validate the generated review
+        id: result
+        env:
+          RESPONSE: ${{ steps.claude.outputs.structured_output }}
+        run: |
+          if ! review=$(jq -ce '.review | strings |
+            select(test("[^[:space:]]") and length <= 8000)' <<< "$RESPONSE"); then
+            echo "Claude must return nonblank review text of at most 8000 characters" >&2
+            exit 1
+          fi
+          printf 'review=%s\n' "$review" >> "$GITHUB_OUTPUT"
 
   publish:
     needs: review
@@ -128,9 +142,9 @@ jobs:
             echo "The review target changed. Request a fresh review" >&2
             exit 1
           fi
-          review=$(jq -er '.review | strings | select(test("[^[:space:]]") and length <= 8000)' \
-            <<< "$REVIEW")
+          comment_file="$RUNNER_TEMP/claude-review.md"
           {
             printf '### Claude review pilot\n\nBase `%s` · Head `%s`\n\n' "$BASE_SHA" "$HEAD_SHA"
-            printf '%s\n' "$review"
-          } | gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -
+            jq -er 'strings' <<< "$REVIEW"
+          } > "$comment_file"
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$comment_file"
