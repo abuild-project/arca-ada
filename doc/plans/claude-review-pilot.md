@@ -58,3 +58,19 @@ and installed Claude Code 2.1.331.
 Use commit-specific Actions exceptions for Anthropic and Bun to keep the
 optional pilot narrowly scoped. Keep the root-action exception through the
 smoke test on `main` and until no workflow needs it.
+
+## Review rules and finding status on 2026-11-24
+
+Decision: Define P1 findings in `AGENTS.md` and have the Claude pilot
+reassess earlier findings before reporting new ones, because maintainers
+need to see what still blocks the captured head and why. Require new
+blocking findings to cite a named repository rule or show an observable
+failure, and use line numbers from the captured head. Keep the prompt
+within the existing trust boundary and limits.
+
+Use the local harness to check the prompt and confirm that the added
+assertions reject the previous prompt. After merge to `main`, request one
+new `@claude review` on a small, ready PR from this repository to `main`
+with an earlier pilot review and known findings. Check the first block's
+statuses against the earlier findings, verify the new findings' severity
+labels and citations, and match the posted base and head to the run and PR.

@@ -51,8 +51,8 @@ with [CONTRIBUTING.md](CONTRIBUTING.md); the same rules apply to them.
 - Run `make -j8 <one target> NUM_CPUS=8`, one target per invocation.
 - Format tests use independent decoders and external readers. Never import
   production layout constants into a test oracle.
-- Every new check must be able to fail for the right reason. Show that it
-  rejects the old behavior or a targeted corruption.
+- Every new or changed check must be able to fail for the right reason. Show
+  that it rejects the old behavior or a targeted corruption.
 - When production bodies are added, removed or renamed, update
   `tests/coverage-sources.txt` and run the coverage target.
 
@@ -102,8 +102,8 @@ another workflow.
   findings into the PR phase.
 - Require both test evidence and independent review for the same candidate
   before accepting each PR slice, including after the topic's PR phase has
-  started. The strictly tree-identical history-only exception follows
-  [submission preparation](doc/development.md#submission-preparation).
+  started. The exceptions for history-only and change-record-only updates
+  follow [submission preparation](doc/development.md#submission-preparation).
   Keep operational logs and both counters in the task log or ignored `build/`;
   append durable decisions to the topic plan. Keep session and review-round
   history out of the change record.
@@ -115,6 +115,22 @@ another workflow.
   follow [PR submission and Copilot review](doc/development.md#pull-request-preparation-and-submission)
   within the authorized stages. Copilot supplements internal review and CI;
   read all review content and retain the existing PR-phase correction budget.
+
+## Code Review Rules
+
+The following findings are P1 (blocking).
+
+- A change record claiming validation of the PR head with evidence from
+  another revision, except in the history-only and change-record-only cases
+  in [submission preparation](doc/development.md#submission-preparation).
+- A check that fails to meet the sensitivity requirement in
+  [Build and tests](#build-and-tests).
+- Contradictions among `AGENTS.md`, `CONTRIBUTING.md`, `doc/development.md`,
+  the active plan and the change record.
+- A new or changed external pin, version or claim about upstream behavior
+  whose verification is missing from the committed change record.
+- A PR body whose content differs from its canonical committed change
+  record after ignoring trailing whitespace.
 
 ## Licensing
 

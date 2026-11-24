@@ -28,6 +28,7 @@ Entries are ordered by topic filename.
 | [Public repository transition](publication-transition.md) | Public destination, transfer checks and remaining documentation work | `56b463a` |
 | [First versioned source release](release-0-1-0.md) | Version promotion, concise changelog and source-release guidance | `2c57cea` |
 | [Version, compatibility and release procedure](release-basics.md) | Public version metadata, compatibility/platform policy, release workflow and diagnostic source guard | `84f8500` |
+| [Code review rules and Claude pilot severity](review-rules-pilot-severity.md) | Blocking review criteria, previous finding status and head line citations | pending |
 | [Standalone TAR writer](tar-extraction.md) | Native writer extraction, ownership and independent validation | `3914462` |
 | [VFAT format and reference inventory](vfat-format-inventory.md) | Format authority, producer pins and observed compatibility baselines | pending |
 | [Writer finalization and compiler checks](writer-cleanup.md) | Best-effort discard/close, failure regressions and stronger library/test compilation | `52ead53` |

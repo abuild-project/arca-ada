@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-"""Exercise Claude review context and publication without hosted credentials."""
+"""Check the Claude review prompt, context and publication without OAuth."""
 
 import json
 import os
@@ -21,6 +21,7 @@ WORKFLOW = load(
 )
 REVIEW = WORKFLOW["jobs"]["review"]
 PUBLISH = WORKFLOW["jobs"]["publish"]
+CLAUDE = next(step["with"] for step in REVIEW["steps"] if step.get("id") == "claude")
 REPOSITORY = "example/arca"
 
 GH_STUB = '''#!/usr/bin/env python3
@@ -237,8 +238,7 @@ class ClaudeReviewTests(unittest.TestCase):
         self.assertFalse((self.workspace / "unexpected").exists())
 
     def test_read_only_tool_configuration(self):
-        action = next(step for step in REVIEW["steps"] if step.get("id") == "claude")
-        args = shlex.split(action["with"]["claude_args"])
+        args = shlex.split(CLAUDE["claude_args"])
         self.assertEqual(args[args.index("--tools") + 1], "Read,Grep,Glob")
         self.assertEqual(args[args.index("--permission-mode") + 1], "dontAsk")
         self.assertIn("--strict-mcp-config", args)
@@ -249,12 +249,11 @@ class ClaudeReviewTests(unittest.TestCase):
         agents_plugin = settings["pluginConfigs"]["cc-plugin-agents-md@builtin"]
         self.assertEqual(agents_plugin["options"]["instructionFiles"], "claude-md")
         self.assertNotIn("--add-dir", args)
-        self.assertNotIn("github_token", action["with"])
-        self.assertEqual(action["with"]["show_full_output"], "false")
+        self.assertNotIn("github_token", CLAUDE)
+        self.assertEqual(CLAUDE["show_full_output"], "false")
 
     def test_prompt_reads_guidance_from_the_captured_base(self):
-        action = next(step for step in REVIEW["steps"] if step.get("id") == "claude")
-        prompt = action["with"]["prompt"]
+        prompt = CLAUDE["prompt"]
         guidance = prompt[:prompt.index("./review/pr.diff")]
         for path in (
             "AGENTS.md", "SECURITY.md", "README.md", "doc/development.md",
@@ -263,6 +262,37 @@ class ClaudeReviewTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIn(f"./{path}", guidance)
         self.assertNotIn("./pr/", guidance)
+
+    def test_prompt_reconciles_previous_findings_first(self):
+        prompt = " ".join(CLAUDE["prompt"].split())
+        for requirement in (
+            "Start the review text with a `### Previous findings` block.",
+            "For each prior finding in ./review/previous-reviews.json",
+            "one line with a short identifier and exactly one status based on "
+            "the captured head",
+            "`resolved`, `still open`, or `no longer applicable`",
+            "If there are none, write `No previous findings.`",
+        ):
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, prompt)
+
+    def test_prompt_labels_and_limits_new_findings(self):
+        prompt = " ".join(CLAUDE["prompt"].split())
+        for requirement in (
+            "Label every new finding `blocking` or `nit`.",
+            "Use `blocking` only for a violation of a named repository rule, "
+            "citing its file and section",
+            "(including `Code Review Rules` in ./AGENTS.md where applicable), "
+            "or a concrete observable failure.",
+        ):
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, prompt)
+
+    def test_prompt_cites_head_file_line_numbers(self):
+        prompt = " ".join(CLAUDE["prompt"].split())
+        self.assertIn(
+            "cite actual head file line numbers from ./pr, never diff offsets", prompt,
+        )
 
     def test_debug_logging_stops_before_context_capture(self):
         target = json.dumps(self.target("a" * 40, "b" * 40))
