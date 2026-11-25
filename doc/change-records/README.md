@@ -13,6 +13,7 @@ Entries are ordered by topic filename.
 | [Claude review blocking severity](claude-blocking-severity.md) | Mandatory severity labels and placement for every new pilot finding | pending |
 | [Claude review context](claude-review-context.md) | Pinned head and PR context with workspace-only reads and credential checks | pending |
 | [Claude review pilot](claude-review-pilot.md) | Maintainer-triggered supplementary GitHub review with captured revisions | pending |
+| [Claude review smoke fixture](claude-review-smoke-2.md) | Markdown fixture for the hosted review pilot | pending |
 | [CLI diagnostics, arguments and cancellation](cli-polish.md) | Complete readable errors, output syntax, target constants, SIGHUP and help | `953a257` |
 | [CLI output transaction identity](cli-staging-fix.md) | Retained filesystem identities, bounded cleanup and cross-UID controls | `d715d62` |
 | [Repository-wide Ada coding style](coding-style.md) | Agent-discoverable rules, source modernization and compiler gates with sensitivity controls | `03a2a07` |
