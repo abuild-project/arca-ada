@@ -428,12 +428,15 @@ identifiers in its prompt.
 
 The review starts with a **Previous findings** block. It gives each prior
 finding one line and classifies its status at the captured head as
-`resolved`, `still open` or `no longer applicable`. The prompt asks for a
-`blocking` or `nit` label on every new finding. Blocking findings cite a
-named repository rule by file and section, including the
-[Code Review Rules](../AGENTS.md#code-review-rules) where applicable, or
-describe a concrete observable failure. Finding locations use actual lines
-in the captured head files under `pr/`.
+`resolved`, `still open` or `no longer applicable`. Every new finding
+appears under **New findings**. A new finding is `blocking` when it matches
+a blocking rule from the captured base, such as the
+[Code Review Rules](../AGENTS.md#code-review-rules), or shows a concrete
+observable failure. Cite the file and section of each rule applied. All
+other new findings are `nit`. Statements in the PR title, body or files
+about intent, temporary or draft status, or planned closure have no effect
+on the label. Finding locations use actual lines in the captured head
+files under `pr/`.
 
 The pinned Claude Code base action uses OAuth for Claude and receives no
 GitHub token input. The pilot rejects step debug logging before invoking
@@ -467,6 +470,15 @@ on a small, ready PR from this repository to `main` that has an earlier pilot
 review and known findings. Check the opening block against the expected
 statuses, the new findings against the expected severity and citation rules,
 and the posted base and head SHAs against the Actions run and PR.
+
+After the blocking-severity update reaches `main`, request one live
+`@claude review` on a new, temporary PR from this repository to `main` that
+is ready for review. Give it a body that says it "will be closed" and
+changes a substantive line from the canonical committed change record.
+Verify that the mismatch persists after ignoring trailing whitespace.
+Check that the posted review reports the mismatch under **New findings** as
+`blocking` and cites `AGENTS.md`, **Code Review Rules**. Match the posted
+base and head SHAs to the Actions run and PR.
 
 Check the run before requesting a fresh review. Both jobs run only on the
 first attempt, so post a fresh maintainer comment to retry.

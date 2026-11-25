@@ -74,3 +74,19 @@ new `@claude review` on a small, ready PR from this repository to `main`
 with an earlier pilot review and known findings. Check the first block's
 statuses against the earlier findings, verify the new findings' severity
 labels and citations, and match the posted base and head to the run and PR.
+
+## Blocking criteria and PR intent on 2026-11-25
+
+Decision: Require the pilot to label each new finding `blocking` when it
+matches a blocking rule in the captured base or shows a concrete observable
+failure. Cite the file and section of any rule applied and label all other
+new findings `nit`. Put every new finding under **New findings**, because
+claims about intent, temporary or draft status, or planned closure have no
+effect on the severity of a finding at the captured revision.
+
+Use the local harness to check the prompt against the previous workflow.
+After merge to `main`, follow the
+[blocking-severity smoke test](../development.md#claude-review-pilot) once
+on a new temporary PR. Confirm the body mismatch appears as `blocking`
+under **New findings**, cites **Code Review Rules** in `AGENTS.md` and
+applies to the same base and head as the run and PR.
