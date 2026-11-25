@@ -15,9 +15,19 @@ identifies any missing evidence.
 
 ## Validation
 
-All nine tests in `python3 tests/check-claude-review.py` passed locally.
-The full local CI chain and independent review are pending for this
-revision.
+The complete local CI chain passed from a fresh detached checkout of
+`bc30de23691eda6419aaeab4be010160b26d40c2` in the AMD64 Debian Trixie
+reference environment. Independent review of the same revision against
+base `18587c2857dab9572f0a53a623824cc8fa22dfff` reported no actionable
+findings. With this record omitted, the validated Git tree is
+`98b4283df119fbd3e694ee8de59a5646c3ffb017`.
+
+Standalone coverage ran before `build/` existed and covered 1,031 of 1,107
+executable lines across 10 production bodies. The normal and coverage Ahven
+runs each passed 19 tests with zero failures, errors or skips. The wrapper,
+shell/batch and Claude review harnesses passed 6, 3 and 9 tests respectively.
+The normal checks passed, including all 43 CLI tests. All 54 cross-UID
+staging checks and the strict MkDocs build of 14 canonical pages passed.
 
 In isolated fixtures, the harness from
 `826f6129a500624490588ab1a624eae55a6f0a7c` failed six severity assertions
@@ -27,8 +37,8 @@ workflow from `826f6129a500624490588ab1a624eae55a6f0a7c`. The other tests
 in each fixture passed. The workflow diff is confined to prompt text.
 
 The harness checks the prompt and uses a stub GitHub CLI for workflow
-steps. The post-merge [smoke test](../development.md#claude-review-pilot)
-checks the live review's severity, placement, citation, final line and
-revisions.
+steps. The post-merge smoke test will check the live review's severity,
+placement, citation, final line and revisions. See the
+[Claude review pilot guide](../development.md#claude-review-pilot).
 
 Co-Authored-By: GPT-6 <noreply@openai.com>
