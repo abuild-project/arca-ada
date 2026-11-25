@@ -263,6 +263,27 @@ class ClaudeReviewTests(unittest.TestCase):
                 self.assertIn(f"./{path}", guidance)
         self.assertNotIn("./pr/", guidance)
 
+    def test_prompt_checks_every_review_rule_before_writing_findings(self):
+        prompt = " ".join(CLAUDE["prompt"].split())
+        start = prompt.index("Start the review text")
+        self.assertIn(
+            "Before writing findings, deliberately check every rule in the "
+            "`Code Review Rules` section of trusted ./AGENTS.md against the PR.",
+            prompt[:start],
+        )
+        self.assertIn(
+            "Read `body` and `head_branch` in ./review/pr.json. Compare the body "
+            "with the canonical record in ./pr/doc/change-records/, using the "
+            "branch mapping in ./AGENTS.md.",
+            prompt[:start],
+        )
+        self.assertIn(
+            "Normalize CRLF to LF and ignore only whitespace at the end of each "
+            "whole text. Report each rule violation as a finding and omit passing "
+            "rules from the output.",
+            prompt[:start],
+        )
+
     def test_prompt_reconciles_previous_findings_first(self):
         prompt = " ".join(CLAUDE["prompt"].split())
         for requirement in (

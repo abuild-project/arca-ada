@@ -446,6 +446,12 @@ commit log and earlier comments from the pilot on that PR. Claude treats
 `pr/` and `review/` as data and receives only context paths and revision
 identifiers in its prompt.
 
+Before writing findings, the pilot checks every rule in the captured base's
+[Code Review Rules](../AGENTS.md#code-review-rules). It compares the body in
+`review/pr.json` with the canonical record in the captured head under `pr/`,
+using the same branch mapping and normalization as the PR change record
+check. The review reports violations and omits passing rules.
+
 The review starts with a **Previous findings** block. It gives each prior
 finding one line and classifies its status at the captured head as
 `resolved`, `still open` or `no longer applicable`. Every new finding
@@ -493,15 +499,17 @@ review and known findings. Check the opening block against the expected
 statuses, the new findings against the expected severity and citation rules,
 and the posted base and head SHAs against the Actions run and PR.
 
-After the blocking-severity update reaches `main`, request one live
-`@claude review` on a new, temporary PR from this repository to `main` that
-is ready for review. Give it a body that says it "will be closed" and
-changes a substantive line from the canonical committed change record.
-Verify that the mismatch persists after ignoring trailing whitespace.
-Check that the posted review reports the mismatch under **New findings** as
-`blocking` and cites `AGENTS.md`, **Code Review Rules**. Check that the final
-line states that a blocking finding remains. Match the posted base and head
-SHAs to the Actions run and PR.
+After the PR record check and review-rule pass reach `main`, use one new
+temporary, ready PR from this repository to `main`. Give it a body that
+says it "will be closed" and changes a substantive line from the canonical
+committed change record. Verify that the mismatch survives normalization.
+Check that **Match the canonical change record** fails at the PR head and
+shows the expected path and diff. As a maintainer, request the PR's first
+pilot review with `@claude review`. Verify that it reports the mismatch
+under **New findings** as `blocking`, cites `AGENTS.md`, **Code Review
+Rules**, and ends by stating that a blocking finding remains. Match the
+posted base and head SHAs to the Actions run and PR. Close the temporary
+PR unmerged after recording both results.
 
 Check the run before requesting a fresh review. Both jobs run only on the
 first attempt, so post a fresh maintainer comment to retry.
