@@ -90,3 +90,15 @@ After merge to `main`, follow the
 on a new temporary PR. Confirm the body mismatch appears as `blocking`
 under **New findings**, cites **Code Review Rules** in `AGENTS.md` and
 applies to the same base and head as the run and PR.
+
+## Validation evidence and review conclusion on 2026-11-25
+
+Require the canonical change record to name gaps in the required local CI
+chain or independent review so maintainers can see which evidence is still
+needed. Treat any undisclosed gap as blocking.
+
+End each pilot review with one line stating whether any blocking finding
+remains at the captured head. Count earlier blocking findings that are
+still open as well as new blocking findings, since an earlier finding can
+still block a PR with no new findings. In the post-merge smoke test, check
+that the final line reports a remaining blocking finding.

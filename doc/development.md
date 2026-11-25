@@ -126,6 +126,8 @@ candidate identities, the active phase and both counters in the task log or
 ignored `build/`. Do not create `build/` in the tester's fresh worktree before
 the coverage-first assertion. The canonical change record describes the final
 change, evidence and material limits without session or review-round history.
+The record names any gaps in the required local CI chain or independent
+review.
 
 ### Architecture assignment
 
@@ -436,7 +438,9 @@ observable failure. Cite the file and section of each rule applied. All
 other new findings are `nit`. Statements in the PR title, body or files
 about intent, temporary or draft status, or planned closure have no effect
 on the label. Finding locations use actual lines in the captured head
-files under `pr/`.
+files under `pr/`. The review ends with one line stating whether any blocking
+finding remains at the captured head. It counts new blocking findings and
+earlier blocking findings still open, even when there are no new findings.
 
 The pinned Claude Code base action uses OAuth for Claude and receives no
 GitHub token input. The pilot rejects step debug logging before invoking
@@ -477,8 +481,9 @@ is ready for review. Give it a body that says it "will be closed" and
 changes a substantive line from the canonical committed change record.
 Verify that the mismatch persists after ignoring trailing whitespace.
 Check that the posted review reports the mismatch under **New findings** as
-`blocking` and cites `AGENTS.md`, **Code Review Rules**. Match the posted
-base and head SHAs to the Actions run and PR.
+`blocking` and cites `AGENTS.md`, **Code Review Rules**. Check that the final
+line states that a blocking finding remains. Match the posted base and head
+SHAs to the Actions run and PR.
 
 Check the run before requesting a fresh review. Both jobs run only on the
 first attempt, so post a fresh maintainer comment to retry.

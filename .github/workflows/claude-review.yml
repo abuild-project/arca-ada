@@ -164,7 +164,10 @@ jobs:
             or draft status, or planned closure cannot change a finding's label.
             For finding locations, cite actual
             head file line numbers from ./pr, never diff offsets.
-            Say when no new actionable issue is visible. This limited review
+            End the review text with one line stating whether any blocking
+            finding remains at the captured head. Count all new `blocking`
+            findings and any earlier blocking findings marked `still open`,
+            even when there are no new findings. This limited review
             supplies no independent test evidence or approval. Follow
             SECURITY.md for sensitive findings and omit vulnerability details
             from public text.

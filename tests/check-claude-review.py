@@ -300,6 +300,16 @@ class ClaudeReviewTests(unittest.TestCase):
             "cite actual head file line numbers from ./pr, never diff offsets", prompt,
         )
 
+    def test_prompt_concludes_with_blocking_status_at_captured_head(self):
+        prompt = " ".join(CLAUDE["prompt"].split())
+        self.assertIn(
+            "End the review text with one line stating whether any blocking "
+            "finding remains at the captured head. Count all new `blocking` "
+            "findings and any earlier blocking findings marked `still open`, "
+            "even when there are no new findings.",
+            prompt,
+        )
+
     def test_debug_logging_stops_before_context_capture(self):
         target = json.dumps(self.target("a" * 40, "b" * 40))
         for key, value in (("RUNNER_DEBUG", "1"), ("ACTIONS_STEP_DEBUG", "true")):
