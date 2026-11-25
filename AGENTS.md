@@ -123,6 +123,9 @@ The following findings are P1 (blocking).
 - A change record claiming validation of the PR head with evidence from
   another revision, except in the history-only and change-record-only cases
   in [submission preparation](doc/development.md#submission-preparation).
+- A change record that fails to disclose missing evidence for the complete
+  local CI chain or independent review required by the
+  [agent workflow](#agent-workflow).
 - A check that fails to meet the sensitivity requirement in
   [Build and tests](#build-and-tests).
 - Contradictions among `AGENTS.md`, `CONTRIBUTING.md`, `doc/development.md`,
