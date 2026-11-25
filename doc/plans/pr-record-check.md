@@ -32,3 +32,18 @@ findings** as `blocking`, citing `AGENTS.md`, **Code Review Rules**, with a
 final line reporting the remaining blocker. Record both outcomes and the
 reviewed revisions, then close the temporary PR unmerged. Follow the
 [hosted smoke procedure](../development.md#claude-review-pilot).
+
+## PR body freshness on 2026-11-25
+
+Bind publication to the reviewed body because a PR body edit can leave the
+base and head SHAs unchanged. Hash the body from the same snapshot that
+supplies `review/pr.json`. Treat a null body as empty, normalize CRLF,
+strip whitespace only at the end of the whole text and hash the UTF-8
+bytes with SHA-256. Reuse the workflow's hash code in the publish job to
+check the fresh API response without a checkout. Require a fresh review
+when the body changes substantively or the target cannot be verified.
+
+Exercise the publish step with a stubbed GitHub CLI. Check unchanged and
+normalization-equivalent bodies, a substantive edit with the same base and
+head, and missing body or digest inputs. Run the body-edit assertion against
+the preceding workflow to show that it previously posted the stale review.

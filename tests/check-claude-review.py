@@ -3,9 +3,11 @@
 
 """Check the Claude review prompt, context and publication without OAuth."""
 
+from hashlib import sha256
 import json
 import os
 from pathlib import Path
+from runpy import run_path
 import shlex
 import subprocess
 import tempfile
@@ -23,6 +25,9 @@ REVIEW = WORKFLOW["jobs"]["review"]
 PUBLISH = WORKFLOW["jobs"]["publish"]
 CLAUDE = next(step["with"] for step in REVIEW["steps"] if step.get("id") == "claude")
 REPOSITORY = "example/arca"
+BASE_SHA = "a" * 40
+HEAD_SHA = "b" * 40
+normalize_record = run_path(str(ROOT / "scripts/check-pr-record.py"))["normalize"]
 
 GH_STUB = '''#!/usr/bin/env python3
 import json
@@ -47,6 +52,11 @@ else:
 '''
 
 
+def checker_body_sha256(body):
+    """Hash the body using the canonical record checker's normalization."""
+    return sha256(normalize_record(body or "").encode("utf-8")).hexdigest()
+
+
 class ClaudeReviewTests(unittest.TestCase):
     def setUp(self):
         scratch = tempfile.TemporaryDirectory(prefix="arca-claude-review-")
@@ -69,7 +79,7 @@ class ClaudeReviewTests(unittest.TestCase):
             RUNNER_TEMP=str(self.root), PR_NUMBER="26", POSTED=str(self.posted),
             EXECUTION_FILE=str(self.execution),
             RUNNER_DEBUG="", ACTIONS_STEP_DEBUG="",
-            REVIEW_CREDENTIAL_PATTERN=WORKFLOW["env"]["REVIEW_CREDENTIAL_PATTERN"],
+            **WORKFLOW["env"],
         )
 
     def run_step(self, steps, name, **env):
@@ -92,7 +102,8 @@ class ClaudeReviewTests(unittest.TestCase):
     def target(self, base, head, head_repo=REPOSITORY):
         return {
             "state": "open", "draft": False, "title": "Title $(touch unexpected)",
-            "body": "Body\n`$(touch unwanted)`", "base": {"ref": "main", "sha": base},
+            "body": "Body résumé\r\n`$(touch unwanted)`\u2003\n",
+            "base": {"ref": "main", "sha": base},
             "head": {"repo": {"full_name": head_repo}, "sha": head, "ref": "codex/example"},
         }
 
@@ -144,7 +155,13 @@ class ClaudeReviewTests(unittest.TestCase):
         self.assertNotEqual(rejected.returncode, 0)
         self.assertFalse(self.output.exists())
         self.check_success(self.run_step(steps, capture, TARGET=json.dumps(target)))
-        self.assertEqual(self.output.read_text(), f"base={base}\nhead={head}\n")
+        body_sha256 = checker_body_sha256(target["body"])
+        self.assertEqual(
+            self.output.read_text(), f"base={base}\nhead={head}\nbody_sha256={body_sha256}\n",
+        )
+        self.assertEqual(REVIEW["outputs"]["body_sha256"], "${{ steps.target.outputs.body_sha256 }}")
+        self.assertEqual(PUBLISH["steps"][0]["env"]["BODY_SHA256"],
+                         "${{ needs.review.outputs.body_sha256 }}")
 
         earlier = "### Claude review pilot\n\nA previous review."
         comments = [
@@ -188,16 +205,18 @@ class ClaudeReviewTests(unittest.TestCase):
              "structured_output": {"review": text}},
         ]))
 
-    def publish(self, review, *, stale=False):
-        base, head = "a" * 40, "b" * 40
-        target = self.target(base, "c" * 40 if stale else head)
+    def publish(self, review, target, body_sha256):
+        """Feed publication a fresh API response and the reviewed body digest."""
         return self.run_step(
             PUBLISH["steps"], "Post the review against the verified revisions",
-            REVIEW=review, BASE_SHA=base, HEAD_SHA=head, TARGET=json.dumps(target),
+            REVIEW=review, BASE_SHA=BASE_SHA, HEAD_SHA=HEAD_SHA,
+            BODY_SHA256=body_sha256, TARGET=json.dumps(target),
         )
 
     def test_credential_guard_and_revision_checked_publication(self):
         validate = "Validate the generated review"
+        target = self.target(BASE_SHA, HEAD_SHA)
+        body_sha256 = checker_body_sha256(target["body"])
         for credential in (
             "ghp_" + "x" * 36,
             "github_pat_" + "y" * 32,
@@ -213,7 +232,7 @@ class ClaudeReviewTests(unittest.TestCase):
             with self.subTest(prefix=credential[:4]):
                 self.write_result(credential)
                 generation = self.run_step(REVIEW["steps"], validate)
-                publication = self.publish(json.dumps(credential))
+                publication = self.publish(json.dumps(credential), target, body_sha256)
                 for run in (generation, publication):
                     self.assertNotEqual(run.returncode, 0)
                     self.assertIn("credential check", run.stderr)
@@ -231,11 +250,50 @@ class ClaudeReviewTests(unittest.TestCase):
         self.check_success(self.run_step(REVIEW["steps"], validate))
         key, review = self.output.read_text().rstrip().split("=", 1)
         self.assertEqual((key, json.loads(review)), ("review", text))
-        self.assertNotEqual(self.publish(review, stale=True).returncode, 0)
+        stale_target = self.target(BASE_SHA, "c" * 40)
+        self.assertNotEqual(self.publish(review, stale_target, body_sha256).returncode, 0)
         self.assertFalse(self.posted.exists())
-        self.check_success(self.publish(review))
+        self.check_success(self.publish(review, target, body_sha256))
         self.assertTrue(self.posted.read_text().endswith(text + "\n"))
         self.assertFalse((self.workspace / "unexpected").exists())
+
+    def test_publication_accepts_unchanged_or_equivalent_bodies(self):
+        """Preserve checker equivalence for CRLF, Unicode whitespace and null."""
+        original = "First line \r\nRésumé\u2003\r\n"
+        for captured, fresh in (
+            (original, original),
+            (original, "First line \nRésumé"),
+            (None, "\t\u2003\r\n"),
+            ("\t\u2003\r\n", None),
+        ):
+            with self.subTest(captured=captured, fresh=fresh):
+                target = self.target(BASE_SHA, HEAD_SHA) | {"body": fresh}
+                result = self.publish(json.dumps("Review text"), target,
+                                      checker_body_sha256(captured))
+                self.check_success(result)
+                self.assertTrue(self.posted.read_text().endswith("Review text\n"))
+                self.posted.unlink()
+
+    def test_publication_rejects_a_substantive_body_edit(self):
+        """Reject a body-only edit with the same eligible PR and revisions."""
+        target = self.target(BASE_SHA, HEAD_SHA)
+        body_sha256 = checker_body_sha256(target["body"])
+        target["body"] += "\nNew detail"
+        result = self.publish(json.dumps("Review text"), target, body_sha256)
+        self.assertFalse(self.posted.exists(), "Published a review after the PR body changed")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Request a fresh review", result.stderr)
+
+    def test_publication_requires_body_and_digest(self):
+        """Treat absent inputs differently from a valid empty PR body."""
+        target = self.target(BASE_SHA, HEAD_SHA) | {"body": None}
+        missing_body = {key: value for key, value in target.items() if key != "body"}
+        for fresh, body_sha256 in ((target, ""), (missing_body, checker_body_sha256(None))):
+            with self.subTest(fresh=fresh, body_sha256=body_sha256):
+                result = self.publish(json.dumps("Review text"), fresh, body_sha256)
+                self.assertFalse(self.posted.exists())
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("Request a fresh review", result.stderr)
 
     def test_read_only_tool_configuration(self):
         args = shlex.split(CLAUDE["claude_args"])

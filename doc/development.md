@@ -474,9 +474,14 @@ Shell, editing, web and MCP
 tools are unavailable. The review job requires nonblank text of at most
 8,000 characters and rejects common credential patterns before handing it
 off. The `sk-`, GitHub short-token and `github_pat_` patterns start at the
-beginning of a line or after a non-word character. A separate publish job
-checks the same patterns and current revisions before posting one comment
-naming the reviewed SHAs.
+beginning of a line or after a non-word character. The review job records
+a SHA-256 digest of the normalized UTF-8 body from the same snapshot as
+`review/pr.json`. A separate publish job checks the same credential patterns
+and fetches the current PR. It requires the eligible PR state, matching
+base and head revisions, and a matching normalized body before posting
+one comment naming the reviewed SHAs. A substantive body edit invalidates
+the review even when both revisions stay the same. Request a fresh review
+if the publish job reports that it could not verify the target.
 
 Run `python3 tests/check-claude-review.py` with Python 3, PyYAML, Bash, Git, jq
 and GNU findutils, coreutils and grep to check the prompt and shell steps.
