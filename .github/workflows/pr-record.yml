@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+name: PR change record
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-record-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  match:
+    name: Match the canonical change record
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Test the record checker
+        run: python3 tests/check-pr-record.py
+      - name: Compare the PR body with the committed record
+        run: python3 scripts/check-pr-record.py

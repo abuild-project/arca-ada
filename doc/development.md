@@ -328,13 +328,31 @@ branch without writing directly to the default branch. Create a PR ready for
 review when ready; use a draft only when requested or justified. Supply the
 canonical body through a structured tool argument or `--body-file`, preserving
 its exact bytes. Verify that the posted body matches the committed record
-after ignoring trailing whitespace.
+after converting CRLF to LF and ignoring whitespace at the end of the text.
 Keep the record and PR body synchronized after substantive changes. Retain
 PR/review URLs and IDs in the operational task log.
 
 Track hosted CI separately from local evidence. Before reporting readiness
 for merge, require actual successful hosted CI for the current PR head;
 results from the base or an earlier SHA do not establish it.
+
+### PR change record check
+
+The [PR change record workflow](../.github/workflows/pr-record.yml) checks
+every PR when opened, edited, synchronized, reopened or marked ready for
+review. The rule applies to automation and human contributors alike.
+The check reads the PR body and head branch from the GitHub event file and
+the canonical record from the checked-out PR head. It removes the first
+slash-separated branch prefix, if present, and replaces any remaining
+slashes with hyphens to find `doc/change-records/<topic>.md`.
+
+The check converts CRLF to LF and strips whitespace at the end of each
+whole text. Leading whitespace and whitespace within the text must match.
+A missing or symlinked record fails with its expected path. A body mismatch
+also shows a short unified diff. Run `python3 tests/check-pr-record.py`
+locally to exercise the check with standard-library fixtures.
+Configuring **Match the canonical change record** as a GitHub required
+check is a separate repository settings action.
 
 ### Copilot review and follow-up
 
@@ -518,10 +536,11 @@ skip assertions or replace the test with a single-UID run. Permission
 preparation must not weaken the existing test.
 
 Read [.github/workflows/ci.yml](../.github/workflows/ci.yml) at the candidate
-revision and execute its complete local chain in order. The following is the
-existing chain; if CI changes, use that revision's commands and record the
-difference. Python 3 and Docker are host requirements for the wrapper and
-shell checks. The Claude review harness uses the host dependencies listed
+revision and execute its complete local chain in order, including the
+fixture tests from the separate PR change record workflow. If CI changes,
+use that revision's commands and record the difference. Python 3 and Docker
+are host requirements for the wrapper and shell checks. The Claude review
+harness uses the host dependencies listed
 under [Claude review pilot](#claude-review-pilot). Run normal container
 commands as the non-root task user through the wrappers, one Make target per
 invocation:
@@ -533,6 +552,7 @@ docker/dev/run arca-dev:trixie make -j8 coverage NUM_CPUS=8
 python3 tests/check-dev-wrappers.py
 python3 tests/check-dev-shell.py arca-dev:trixie
 python3 tests/check-claude-review.py
+python3 tests/check-pr-record.py
 docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
 docker run --platform linux/amd64 --rm --network none --user 0:0 \
   --mount "type=bind,source=$PWD,target=/work,readonly" \

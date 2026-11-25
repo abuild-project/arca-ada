@@ -18,6 +18,9 @@ Codex-created branches use `codex/<name>`. Other authors choose their own
 prefixes. Continue the matching existing plan when there is one. Each slice
 of a planned PR series has its own branch and branch-derived change record.
 The slices share the topic plan and correction budgets.
+Use the committed record as the PR body. The
+[PR change record check](doc/development.md#pr-change-record-check) verifies
+that they match on every PR.
 Agent-led contributions follow the
 [role workflow](doc/development.md#agent-workflow)
 required by [AGENTS.md](AGENTS.md), including independent review and separate
