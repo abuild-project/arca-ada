@@ -19,11 +19,31 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Check out the PR base revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+      - name: Check out the PR head revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          path: head
           persist-credentials: false
-      - name: Test the record checker
-        run: python3 tests/check-pr-record.py
       - name: Compare the PR body with the committed record
-        run: python3 scripts/check-pr-record.py
+        working-directory: head
+        shell: bash
+        run: |
+          checker=../base/scripts/check-pr-record.py
+          checker_source=Base
+          if [[ ! -L ../base/scripts && ! -L "$checker" && ! -e "$checker" ]]; then
+            echo 'Base revision has no PR record checker. Running the head checker for this introducing PR.'
+            checker=scripts/check-pr-record.py
+            checker_source=Head
+          fi
+          if [[ -L "${checker%/*}" || -L "$checker" || ! -f "$checker" || ! -r "$checker" ]]; then
+            echo "$checker_source PR record checker must be a readable regular file without symlinks." >&2
+            exit 1
+          fi
+          python3 -I "$checker"

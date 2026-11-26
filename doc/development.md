@@ -341,16 +341,27 @@ results from the base or an earlier SHA do not establish it.
 The [PR change record workflow](../.github/workflows/pr-record.yml) checks
 every PR when opened, edited, synchronized, reopened or marked ready for
 review. The rule applies to automation and human contributors alike.
-The check reads the PR body and head branch from the GitHub event file and
-the canonical record from the checked-out PR head. It removes the first
+The workflow checks out the exact PR base and head into separate directories,
+with credential persistence disabled. It runs the base revision's checker
+using `python3 -I` from the head checkout. When the base has no checker, the
+workflow logs that it is using the head checker for the introducing PR.
+An unusable checker or a failure while running it fails the job.
+
+The checker reads the PR body and head branch from the GitHub event file and
+the canonical record from the head checkout. It removes the first
 slash-separated branch prefix, if present, and replaces any remaining
 slashes with hyphens to find `doc/change-records/<topic>.md`.
+It rejects the case-sensitive topics `CLAUDE` and `CLAUDE.local` before
+checking the record because the Claude review pilot removes files named
+`CLAUDE.md` and `CLAUDE.local.md`.
 
 The check converts CRLF to LF and strips whitespace at the end of each
 whole text. Leading whitespace and whitespace within the text must match.
 A missing or symlinked record fails with its expected path. A body mismatch
-also shows a short unified diff. Run `python3 tests/check-pr-record.py`
-locally to exercise the check with standard-library fixtures.
+also shows a short unified diff. Run `python3 tests/check-pr-record.py` with
+Python 3, PyYAML and Bash to exercise the checker and workflow selection with
+local fixtures. The build CI workflow runs this harness alongside the Claude
+review harness.
 Configuring **Match the canonical change record** as a GitHub required
 check is a separate repository settings action.
 
@@ -549,9 +560,8 @@ skip assertions or replace the test with a single-UID run. Permission
 preparation must not weaken the existing test.
 
 Read [.github/workflows/ci.yml](../.github/workflows/ci.yml) at the candidate
-revision and execute its complete local chain in order, including the
-fixture tests from the separate PR change record workflow. If CI changes,
-use that revision's commands and record the difference. Python 3 and Docker
+revision and execute its complete local chain in order. If CI changes, use
+that revision's commands and record the difference. Python 3 and Docker
 are host requirements for the wrapper and shell checks. The Claude review
 harness uses the host dependencies listed
 under [Claude review pilot](#claude-review-pilot). Run normal container

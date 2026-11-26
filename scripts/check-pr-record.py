@@ -43,6 +43,11 @@ def main():
     topic = head_ref.split("/", 1)[-1].replace("/", "-")
     records = Path("doc/change-records")
     record = records / f"{topic}.md"
+    if topic in ("CLAUDE", "CLAUDE.local"):
+        raise SystemExit(
+            f"{record}: reserved change record topic because the Claude review pilot "
+            f"removes files named {record.name}"
+        )
     if any(path.is_symlink() for path in (records.parent, records, record)):
         raise SystemExit(f"{record}: change record paths must not contain symlinks")
     if not record.is_file():
