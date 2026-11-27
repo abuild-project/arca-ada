@@ -328,13 +328,42 @@ branch without writing directly to the default branch. Create a PR ready for
 review when ready; use a draft only when requested or justified. Supply the
 canonical body through a structured tool argument or `--body-file`, preserving
 its exact bytes. Verify that the posted body matches the committed record
-after ignoring trailing whitespace.
+after converting CRLF to LF and ignoring whitespace at the end of the text.
 Keep the record and PR body synchronized after substantive changes. Retain
 PR/review URLs and IDs in the operational task log.
 
 Track hosted CI separately from local evidence. Before reporting readiness
 for merge, require actual successful hosted CI for the current PR head;
 results from the base or an earlier SHA do not establish it.
+
+### PR change record check
+
+The [PR change record workflow](../.github/workflows/pr-record.yml) checks
+every PR when opened, edited, synchronized, reopened or marked ready for
+review. The rule applies to automation and human contributors alike.
+The workflow checks out the exact PR base and head into separate directories,
+with credential persistence disabled. It runs the base revision's checker
+using `python3 -I` from the head checkout. When the base has no checker, the
+workflow logs that it is using the head checker for the introducing PR.
+An unusable checker or a failure while running it fails the job.
+
+The checker reads the PR body and head branch from the GitHub event file and
+the canonical record from the head checkout. It removes the first
+slash-separated branch prefix, if present, and replaces any remaining
+slashes with hyphens to find `doc/change-records/<topic>.md`.
+It rejects the case-sensitive topics `CLAUDE` and `CLAUDE.local` before
+checking the record because the Claude review pilot removes files named
+`CLAUDE.md` and `CLAUDE.local.md`.
+
+The check converts CRLF to LF and strips whitespace at the end of each
+whole text. Leading whitespace and whitespace within the text must match.
+A missing or symlinked record fails with its expected path. A body mismatch
+also shows a short unified diff. Run `python3 tests/check-pr-record.py` with
+Python 3, PyYAML and Bash to exercise the checker and workflow selection with
+local fixtures. The build CI workflow runs this harness alongside the Claude
+review harness.
+Configuring **Match the canonical change record** as a GitHub required
+check is a separate repository settings action.
 
 ### Copilot review and follow-up
 
@@ -428,6 +457,12 @@ commit log and earlier comments from the pilot on that PR. Claude treats
 `pr/` and `review/` as data and receives only context paths and revision
 identifiers in its prompt.
 
+Before writing findings, the pilot checks every rule in the captured base's
+[Code Review Rules](../AGENTS.md#code-review-rules). It compares the body in
+`review/pr.json` with the canonical record in the captured head under `pr/`,
+using the same branch mapping and normalization as the PR change record
+check. The review reports violations and omits passing rules.
+
 The review starts with a **Previous findings** block. It gives each prior
 finding one line and classifies its status at the captured head as
 `resolved`, `still open` or `no longer applicable`. Every new finding
@@ -450,9 +485,14 @@ Shell, editing, web and MCP
 tools are unavailable. The review job requires nonblank text of at most
 8,000 characters and rejects common credential patterns before handing it
 off. The `sk-`, GitHub short-token and `github_pat_` patterns start at the
-beginning of a line or after a non-word character. A separate publish job
-checks the same patterns and current revisions before posting one comment
-naming the reviewed SHAs.
+beginning of a line or after a non-word character. The review job records
+a SHA-256 digest of the normalized UTF-8 body from the same snapshot as
+`review/pr.json`. A separate publish job checks the same credential patterns
+and fetches the current PR. It requires the eligible PR state, matching
+base and head revisions, and a matching normalized body before posting
+one comment naming the reviewed SHAs. A substantive body edit invalidates
+the review even when both revisions stay the same. Request a fresh review
+if the publish job reports that it could not verify the target.
 
 Run `python3 tests/check-claude-review.py` with Python 3, PyYAML, Bash, Git, jq
 and GNU findutils, coreutils and grep to check the prompt and shell steps.
@@ -475,15 +515,17 @@ review and known findings. Check the opening block against the expected
 statuses, the new findings against the expected severity and citation rules,
 and the posted base and head SHAs against the Actions run and PR.
 
-After the blocking-severity update reaches `main`, request one live
-`@claude review` on a new, temporary PR from this repository to `main` that
-is ready for review. Give it a body that says it "will be closed" and
-changes a substantive line from the canonical committed change record.
-Verify that the mismatch persists after ignoring trailing whitespace.
-Check that the posted review reports the mismatch under **New findings** as
-`blocking` and cites `AGENTS.md`, **Code Review Rules**. Check that the final
-line states that a blocking finding remains. Match the posted base and head
-SHAs to the Actions run and PR.
+After the PR record check and review-rule pass reach `main`, use one new
+temporary, ready PR from this repository to `main`. Give it a body that
+says it "will be closed" and changes a substantive line from the canonical
+committed change record. Verify that the mismatch survives normalization.
+Check that **Match the canonical change record** fails at the PR head and
+shows the expected path and diff. As a maintainer, request the PR's first
+pilot review with `@claude review`. Verify that it reports the mismatch
+under **New findings** as `blocking`, cites `AGENTS.md`, **Code Review
+Rules**, and ends by stating that a blocking finding remains. Match the
+posted base and head SHAs to the Actions run and PR. Close the temporary
+PR unmerged after recording both results.
 
 Check the run before requesting a fresh review. Both jobs run only on the
 first attempt, so post a fresh maintainer comment to retry.
@@ -518,10 +560,10 @@ skip assertions or replace the test with a single-UID run. Permission
 preparation must not weaken the existing test.
 
 Read [.github/workflows/ci.yml](../.github/workflows/ci.yml) at the candidate
-revision and execute its complete local chain in order. The following is the
-existing chain; if CI changes, use that revision's commands and record the
-difference. Python 3 and Docker are host requirements for the wrapper and
-shell checks. The Claude review harness uses the host dependencies listed
+revision and execute its complete local chain in order. If CI changes, use
+that revision's commands and record the difference. Python 3 and Docker
+are host requirements for the wrapper and shell checks. The Claude review
+harness uses the host dependencies listed
 under [Claude review pilot](#claude-review-pilot). Run normal container
 commands as the non-root task user through the wrappers, one Make target per
 invocation:
@@ -533,6 +575,7 @@ docker/dev/run arca-dev:trixie make -j8 coverage NUM_CPUS=8
 python3 tests/check-dev-wrappers.py
 python3 tests/check-dev-shell.py arca-dev:trixie
 python3 tests/check-claude-review.py
+python3 tests/check-pr-record.py
 docker/dev/run arca-dev:trixie make -j8 check NUM_CPUS=8
 docker run --platform linux/amd64 --rm --network none --user 0:0 \
   --mount "type=bind,source=$PWD,target=/work,readonly" \

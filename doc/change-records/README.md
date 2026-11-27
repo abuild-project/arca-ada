@@ -24,6 +24,7 @@ Entries are ordered by topic filename.
 | [Consumer build profiles and installation](packaging.md) | Consumer compiler policy, Ahven-free cleanup and named uninstallable manifests | `d3f0574` |
 | [Navigable documentation site](pages-docs.md) | Searchable maintained guides and guarded GitHub Pages deployment | `4c594da` |
 | [Published documentation status](pages-publication-status.md) | Live Pages, exact-revision CI, profile link and code highlighting | `b14373e` |
+| [Canonical PR record check](pr-record-check.md) | Automated PR body comparison and explicit Claude review-rule pass | pending |
 | [Publication status after CLI staging acceptance](publication-after-staging.md) | Accepted fix status, exact-revision CI evidence and remaining source-link gate | `e3892da` |
 | [Publication preparation](publication-prep.md) | Security reporting, publication audit and explicit owner gates | `b5c0f11` |
 | [Public repository transition](publication-transition.md) | Public destination, transfer checks and remaining documentation work | `56b463a` |

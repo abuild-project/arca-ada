@@ -173,6 +173,8 @@ The following findings are P1 (blocking).
   first slash-separated prefix, if present, replacing any remaining slashes
   with hyphens and appending `.md`. The committed record is the pull request
   description, so it remains readable after a move to another forge.
+  The topics `CLAUDE` and `CLAUDE.local` are reserved because the Claude review
+  pilot removes files named `CLAUDE.md` and `CLAUDE.local.md`.
 - Update `CHANGELOG.md` only for changes visible to library/CLI users or
   integrators, including relevant consumer build and installation changes.
   Keep purely internal changes to agent workflows, processes or validation
