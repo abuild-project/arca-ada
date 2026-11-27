@@ -25,6 +25,7 @@ Entries are ordered by topic filename.
 | [Navigable documentation site](pages-docs.md) | Searchable maintained guides and guarded GitHub Pages deployment | `4c594da` |
 | [Published documentation status](pages-publication-status.md) | Live Pages, exact-revision CI, profile link and code highlighting | `b14373e` |
 | [Canonical PR record check](pr-record-check.md) | Automated PR body comparison and explicit Claude review-rule pass | pending |
+| [PR record live smoke test](pr-record-live-smoke.md) | Hosted record job and first Claude pilot review for a temporary PR | temporary, excluded from merge |
 | [Publication status after CLI staging acceptance](publication-after-staging.md) | Accepted fix status, exact-revision CI evidence and remaining source-link gate | `e3892da` |
 | [Publication preparation](publication-prep.md) | Security reporting, publication audit and explicit owner gates | `b5c0f11` |
 | [Public repository transition](publication-transition.md) | Public destination, transfer checks and remaining documentation work | `56b463a` |
